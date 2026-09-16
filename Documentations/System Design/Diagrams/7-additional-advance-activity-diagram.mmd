@@ -1,0 +1,37 @@
+flowchart TD
+
+    Start([Start])
+
+    A["Employee determines original funds are insufficient"]
+    B["Create additional advance request"]
+    C["Enter amount and reason"]
+    D["Submit request"]
+
+    E["Super Admin reviews"]
+    F{"Approve?"}
+
+    G["Reject request"]
+    H["Record rejection reason"]
+
+    I["Approve additional advance"]
+    J["Record additional funds issued"]
+
+    K["Link additional advance to original advance"]
+
+    End([End])
+
+    Start --> A
+    A --> B
+    B --> C
+    C --> D
+    D --> E
+    E --> F
+
+    F -- No --> G
+    G --> H
+    H --> End
+
+    F -- Yes --> I
+    I --> J
+    J --> K
+    K --> End

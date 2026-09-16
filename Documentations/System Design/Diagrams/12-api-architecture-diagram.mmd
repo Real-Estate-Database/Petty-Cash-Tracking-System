@@ -1,0 +1,100 @@
+flowchart TB
+
+    subgraph Clients["Clients"]
+
+        Maui["MAUI Blazor Hybrid"]
+        Web["Blazor Web Client"]
+    end
+
+    subgraph API["ASP.NET Core Web API"]
+
+        Gateway["HTTPS API Gateway"]
+
+        AuthAPI["Authentication Endpoints"]
+
+        UserAPI["User Management Endpoints"]
+
+        AdvanceAPI["Advance Endpoints"]
+
+        ExpenseAPI["Expense Endpoints"]
+
+        ReceiptAPI["Receipt Endpoints"]
+
+        ReimbursementAPI["Reimbursement Endpoints"]
+
+        ReconciliationAPI["Reconciliation Endpoints"]
+
+        ReportAPI["Reporting Endpoints"]
+
+        AuditAPI["Audit Endpoints"]
+    end
+
+    subgraph Application["Application Layer"]
+
+        AuthService["Authentication Service"]
+
+        UserService["User Management Service"]
+
+        AdvanceService["Advance Service"]
+
+        ExpenseService["Expense Service"]
+
+        ReimbursementService["Reimbursement Service"]
+
+        ReconciliationService["Reconciliation Service"]
+
+        ReportingService["Reporting Service"]
+
+        AuditService["Audit Service"]
+
+        NotificationService["Notification Service"]
+    end
+
+    Data["EF Core / Data Access"]
+
+    DB[("SQL Server")]
+
+    FileStore["Receipt File Storage"]
+
+    NotificationProvider["Email / Notification Provider"]
+
+    Maui -->|"HTTPS / JSON"| Gateway
+    Web -->|"HTTPS / JSON"| Gateway
+
+    Gateway --> AuthAPI
+    Gateway --> UserAPI
+    Gateway --> AdvanceAPI
+    Gateway --> ExpenseAPI
+    Gateway --> ReceiptAPI
+    Gateway --> ReimbursementAPI
+    Gateway --> ReconciliationAPI
+    Gateway --> ReportAPI
+    Gateway --> AuditAPI
+
+    AuthAPI --> AuthService
+    UserAPI --> UserService
+    AdvanceAPI --> AdvanceService
+    ExpenseAPI --> ExpenseService
+    ReceiptAPI --> ExpenseService
+    ReimbursementAPI --> ReimbursementService
+    ReconciliationAPI --> ReconciliationService
+    ReportAPI --> ReportingService
+    AuditAPI --> AuditService
+
+    AuthService --> Data
+    UserService --> Data
+    AdvanceService --> Data
+    ExpenseService --> Data
+    ReimbursementService --> Data
+    ReconciliationService --> Data
+    ReportingService --> Data
+    AuditService --> Data
+
+    AdvanceService -->|"Approval / issuance alerts"| NotificationService
+    ExpenseService -->|"Review decision alerts"| NotificationService
+    ReimbursementService -->|"Payment / decision alerts"| NotificationService
+
+    NotificationService -->|"SMTP / External API"| NotificationProvider
+    ExpenseService -->|"Receipt files"| FileStore
+
+    Data --> DB

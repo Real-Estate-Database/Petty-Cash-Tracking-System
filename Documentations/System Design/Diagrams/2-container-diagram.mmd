@@ -1,0 +1,33 @@
+flowchart TB
+
+    Employee["Employee"]
+    SuperAdmin["Super Admin"]
+
+    subgraph System["Expense Management System"]
+
+        Web["Blazor Web Application"]
+
+        Maui[".NET MAUI Blazor Hybrid Application"]
+
+        API["ASP.NET Core Web API"]
+
+        Database[("SQL Server Database")]
+
+        FileStorage["Receipt / Document Storage"]
+
+    end
+
+    Notification["Email / Notification Provider"]
+
+    Employee --> Web
+    Employee --> Maui
+
+    SuperAdmin --> Web
+    SuperAdmin --> Maui
+
+    Web -->|"HTTPS / JSON"| API
+    Maui -->|"HTTPS / JSON"| API
+
+    API --> Database
+    API --> FileStorage
+    API -->|"Sends notifications"| Notification

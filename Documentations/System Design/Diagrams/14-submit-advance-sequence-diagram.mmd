@@ -1,0 +1,22 @@
+sequenceDiagram
+
+    actor Employee
+    participant Client as MAUI / Web Client
+    participant API as Advance API
+    participant Service as Advance Service
+    participant DB as SQL Server
+    participant Audit as Audit Service
+    participant Notify as Notification Service
+
+    Employee->>Client: Enter advance request
+    Client->>API: POST /advances
+    API->>API: Authenticate & authorize
+    API->>Service: Submit advance request
+    Service->>Service: Validate business rules
+    Service->>DB: Save AdvanceRequest
+    DB-->>Service: Saved
+    Service->>Audit: Record creation event
+    Service->>Notify: Notify Super Admin
+    Service-->>API: Advance created
+    API-->>Client: Success + Pending status
+    Client-->>Employee: Display request status

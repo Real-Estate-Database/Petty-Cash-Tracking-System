@@ -1,0 +1,21 @@
+stateDiagram-v2
+
+    [*] --> Draft
+
+    Draft --> Pending: Submit
+
+    Pending --> Approved: Approve
+    Pending --> Rejected: Reject
+    Pending --> Cancelled: Employee cancels
+
+    Approved --> FundsIssued: Funds issued
+
+    FundsIssued --> InProgress: Expense activity begins
+
+    InProgress --> ReconciliationPending: Spending completed
+
+    ReconciliationPending --> Reconciled: Reconciliation completed
+
+    Reconciled --> Closed: Finalize
+
+    Closed --> [*]

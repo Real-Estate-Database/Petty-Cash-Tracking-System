@@ -1,0 +1,21 @@
+## Visual Studio / IDE temporary files & locks
+.vs/
+*.user
+*.userosscache
+*.sln.docstates
+*.suo
+*.userprefs
+
+## Build outputs
+[Bb]in/
+[Oo]bj/
+out/
+[Dd]ebug/
+[Rr]elease/
+
+## Antigravity / AI local scratch
+.antigravity/
+
+## OS generated files
+.DS_Store
+Thumbs.db

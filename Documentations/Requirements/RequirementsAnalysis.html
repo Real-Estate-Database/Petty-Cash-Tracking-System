@@ -1,0 +1,2116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Petty Cash & Expense Management System - Stage 2: Comprehensive Requirements Analysis Specification">
+  <title>Requirements Analysis | Petty Cash & Expense Management System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --font-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --font-heading: 'Outfit', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+
+      /* Light Theme (Default) */
+      --bg-body: #f8fafc;
+      --bg-surface: #ffffff;
+      --bg-surface-alt: #f1f5f9;
+      --bg-card: #ffffff;
+      --border-color: #e2e8f0;
+      --border-subtle: #edf2f7;
+
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --text-dim: #94a3b8;
+
+      --primary: #2563eb;
+      --primary-light: #eff6ff;
+      --primary-hover: #1d4ed8;
+      --primary-border: #bfdbfe;
+
+      --accent-indigo: #4f46e5;
+      --accent-indigo-light: #eef2ff;
+      --accent-emerald: #059669;
+      --accent-emerald-light: #ecfdf5;
+      --accent-amber: #d97706;
+      --accent-amber-light: #fffbeb;
+      --accent-rose: #e11d48;
+      --accent-rose-light: #fff1f2;
+      --accent-purple: #7c3aed;
+      --accent-purple-light: #f5f3ff;
+      --accent-cyan: #0891b2;
+      --accent-cyan-light: #ecfeff;
+
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
+      --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 16px;
+      --radius-full: 9999px;
+
+      --sidebar-width: 300px;
+      --header-height: 68px;
+    }
+
+    /* Dark Theme */
+    [data-theme="dark"] {
+      --bg-body: #0b0f19;
+      --bg-surface: #111827;
+      --bg-surface-alt: #1f2937;
+      --bg-card: #141d2e;
+      --border-color: #243047;
+      --border-subtle: #1e293b;
+
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+
+      --primary: #3b82f6;
+      --primary-light: rgba(59, 130, 246, 0.12);
+      --primary-hover: #60a5fa;
+      --primary-border: #1e3a8a;
+
+      --accent-indigo: #6366f1;
+      --accent-indigo-light: rgba(99, 102, 241, 0.12);
+      --accent-emerald: #10b981;
+      --accent-emerald-light: rgba(16, 185, 129, 0.12);
+      --accent-amber: #f59e0b;
+      --accent-amber-light: rgba(245, 158, 11, 0.12);
+      --accent-rose: #f43f5e;
+      --accent-rose-light: rgba(244, 63, 94, 0.12);
+      --accent-purple: #8b5cf6;
+      --accent-purple-light: rgba(139, 92, 246, 0.12);
+      --accent-cyan: #06b6d4;
+      --accent-cyan-light: rgba(6, 182, 212, 0.12);
+
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.35);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4);
+      --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      font-size: 16px;
+    }
+
+    body {
+      font-family: var(--font-body);
+      background-color: var(--bg-body);
+      color: var(--text-main);
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      transition: background-color 0.25s ease, color 0.25s ease;
+    }
+
+    /* Top Progress Bar */
+    #reading-progress {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--primary), var(--accent-indigo), var(--accent-cyan));
+      width: 0%;
+      z-index: 1000;
+      transition: width 0.1s ease-out;
+    }
+
+    /* Header Nav */
+    .top-nav {
+      position: sticky;
+      top: 0;
+      height: var(--header-height);
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-color);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2rem;
+      transition: background-color 0.25s ease, border-color 0.25s ease;
+    }
+
+    [data-theme="dark"] .top-nav {
+      background: rgba(17, 24, 39, 0.85);
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+      color: var(--text-main);
+    }
+
+    .brand-icon {
+      width: 38px;
+      height: 38px;
+      background: linear-gradient(135deg, var(--accent-indigo), var(--primary));
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-weight: 700;
+      font-size: 1.15rem;
+      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+    }
+
+    .brand-text h1 {
+      font-family: var(--font-heading);
+      font-size: 1.15rem;
+      font-weight: 700;
+      line-height: 1.2;
+      color: var(--text-main);
+    }
+
+    .brand-text span {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+    }
+
+    .nav-link-doc {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.45rem 0.85rem;
+      border-radius: var(--radius-md);
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-decoration: none;
+      color: var(--text-muted);
+      border: 1px solid var(--border-color);
+      background: var(--bg-surface);
+      transition: all 0.2s ease;
+    }
+
+    .nav-link-doc:hover {
+      color: var(--primary);
+      border-color: var(--primary);
+      transform: translateY(-1px);
+    }
+
+    .badge-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.35rem 0.85rem;
+      border-radius: var(--radius-full);
+      font-size: 0.75rem;
+      font-weight: 600;
+      background-color: var(--accent-emerald-light);
+      color: var(--accent-emerald);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .btn-toggle-theme, .btn-action {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 0.5rem 0.9rem;
+      border-radius: var(--radius-md);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: all 0.2s ease;
+    }
+
+    .btn-toggle-theme:hover, .btn-action:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      transform: translateY(-1px);
+    }
+
+    /* Layout */
+    .app-container {
+      display: flex;
+      max-width: 1560px;
+      margin: 0 auto;
+      padding: 1.5rem 1.5rem 4rem;
+      gap: 2rem;
+    }
+
+    /* Sticky Sidebar Navigation */
+    .sidebar {
+      width: var(--sidebar-width);
+      flex-shrink: 0;
+      position: sticky;
+      top: calc(var(--header-height) + 1.5rem);
+      height: calc(100vh - var(--header-height) - 3rem);
+      overflow-y: auto;
+      padding: 1.25rem 1rem;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .sidebar::-webkit-scrollbar {
+      width: 5px;
+    }
+    .sidebar::-webkit-scrollbar-thumb {
+      background-color: var(--border-color);
+      border-radius: 4px;
+    }
+
+    .toc-title {
+      font-family: var(--font-heading);
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin-bottom: 0.85rem;
+      padding-left: 0.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .toc-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+
+    .toc-link {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.48rem 0.75rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.84rem;
+      font-weight: 500;
+      border-radius: var(--radius-sm);
+      transition: all 0.15s ease;
+      line-height: 1.3;
+    }
+
+    .toc-link:hover {
+      color: var(--primary);
+      background-color: var(--primary-light);
+    }
+
+    .toc-link.active {
+      color: var(--primary);
+      background-color: var(--primary-light);
+      font-weight: 600;
+      border-left: 3px solid var(--primary);
+      padding-left: calc(0.75rem - 3px);
+    }
+
+    .toc-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 1.35rem;
+      height: 1.35rem;
+      background: var(--bg-surface-alt);
+      color: var(--text-muted);
+      border-radius: 4px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      font-family: var(--font-mono);
+      flex-shrink: 0;
+    }
+
+    .toc-link.active .toc-num {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    /* Main Content Area */
+    .main-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    /* Hero Section */
+    .hero-banner {
+      background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #172554 100%);
+      color: #ffffff;
+      border-radius: var(--radius-lg);
+      padding: 3rem 2.5rem;
+      margin-bottom: 2.5rem;
+      position: relative;
+      overflow: hidden;
+      box-shadow: var(--shadow-xl);
+    }
+
+    .hero-banner::before {
+      content: "";
+      position: absolute;
+      top: -30%;
+      right: -10%;
+      width: 480px;
+      height: 480px;
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.3) 0%, rgba(37, 99, 235, 0.15) 50%, transparent 80%);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .hero-tagline {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(8px);
+      padding: 0.35rem 0.9rem;
+      border-radius: var(--radius-full);
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 1.25rem;
+      color: #a5b4fc;
+    }
+
+    .hero-title {
+      font-family: var(--font-heading);
+      font-size: 2.75rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      margin-bottom: 1rem;
+      background: linear-gradient(to right, #ffffff, #c7d2fe);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-desc {
+      font-size: 1.12rem;
+      color: #cbd5e1;
+      max-width: 820px;
+      line-height: 1.6;
+      margin-bottom: 2rem;
+    }
+
+    .hero-meta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.25rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.15);
+      padding-top: 1.5rem;
+    }
+
+    .hero-meta-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .hero-meta-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #94a3b8;
+    }
+
+    .hero-meta-value {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #f8fafc;
+    }
+
+    /* Section Component */
+    .doc-section {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 2.25rem 2.25rem;
+      margin-bottom: 2rem;
+      box-shadow: var(--shadow-sm);
+      scroll-margin-top: calc(var(--header-height) + 1.5rem);
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .doc-section:hover {
+      border-color: rgba(79, 70, 229, 0.3);
+      box-shadow: var(--shadow-md);
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.75rem;
+      padding-bottom: 1.25rem;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .section-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 2.75rem;
+      height: 2.75rem;
+      padding: 0 0.5rem;
+      background: linear-gradient(135deg, var(--accent-indigo-light), var(--primary-light));
+      border: 1px solid var(--primary-border);
+      color: var(--accent-indigo);
+      border-radius: var(--radius-md);
+      font-family: var(--font-heading);
+      font-weight: 700;
+      font-size: 1.15rem;
+      flex-shrink: 0;
+    }
+
+    .section-title-wrap h2 {
+      font-family: var(--font-heading);
+      font-size: 1.65rem;
+      font-weight: 700;
+      color: var(--text-main);
+      letter-spacing: -0.01em;
+      line-height: 1.25;
+    }
+
+    .section-title-wrap p {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-top: 0.2rem;
+    }
+
+    h3 {
+      font-family: var(--font-heading);
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin: 1.5rem 0 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    h4 {
+      font-family: var(--font-heading);
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--text-main);
+      margin: 1.25rem 0 0.5rem;
+    }
+
+    p {
+      margin-bottom: 1rem;
+      color: var(--text-main);
+    }
+
+    /* Cards Grid */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+      gap: 1.25rem;
+      margin: 1.5rem 0;
+    }
+
+    .info-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 1.25rem;
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .info-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+      border-color: var(--primary-border);
+    }
+
+    .info-card-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .card-icon-box {
+      width: 38px;
+      height: 38px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.15rem;
+      flex-shrink: 0;
+    }
+
+    .card-icon-blue { background: var(--primary-light); color: var(--primary); }
+    .card-icon-emerald { background: var(--accent-emerald-light); color: var(--accent-emerald); }
+    .card-icon-amber { background: var(--accent-amber-light); color: var(--accent-amber); }
+    .card-icon-rose { background: var(--accent-rose-light); color: var(--accent-rose); }
+    .card-icon-purple { background: var(--accent-purple-light); color: var(--accent-purple); }
+    .card-icon-cyan { background: var(--accent-cyan-light); color: var(--accent-cyan); }
+
+    .info-card-title {
+      font-family: var(--font-heading);
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .info-card-body {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      line-height: 1.55;
+    }
+
+    /* Process Flowcharts (ASCII & Visual) */
+    .flow-diagram-container {
+      background: var(--bg-surface-alt);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 1.5rem;
+      margin: 1.25rem 0;
+      overflow-x: auto;
+    }
+
+    .diagram-interactive {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+      margin: 1rem auto;
+      max-width: 650px;
+    }
+
+    .flow-step-pill {
+      background: var(--bg-surface);
+      border: 1.5px solid var(--border-color);
+      padding: 0.65rem 1.25rem;
+      border-radius: var(--radius-full);
+      font-weight: 600;
+      font-size: 0.92rem;
+      color: var(--text-main);
+      box-shadow: var(--shadow-sm);
+      text-align: center;
+      min-width: 240px;
+    }
+
+    .flow-step-pill.primary {
+      background: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+    }
+
+    .flow-step-pill.accent {
+      background: var(--accent-indigo-light);
+      border-color: var(--accent-indigo);
+      color: var(--accent-indigo);
+    }
+
+    .flow-step-pill.success {
+      background: var(--accent-emerald-light);
+      border-color: var(--accent-emerald);
+      color: var(--accent-emerald);
+    }
+
+    .flow-step-pill.danger {
+      background: var(--accent-rose-light);
+      border-color: var(--accent-rose);
+      color: var(--accent-rose);
+    }
+
+    .flow-branch {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      width: 100%;
+    }
+
+    .flow-branch-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.6rem;
+      flex: 1;
+      max-width: 280px;
+    }
+
+    .flow-down-arrow {
+      color: var(--text-dim);
+      font-weight: 700;
+      font-size: 1.25rem;
+    }
+
+    /* The Black Book Table Style */
+    .black-book-card {
+      background: linear-gradient(145deg, #1e293b, #0f172a);
+      color: #f8fafc;
+      border: 2px solid #334155;
+      border-radius: var(--radius-md);
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      box-shadow: var(--shadow-md);
+    }
+
+    .black-book-title {
+      font-family: var(--font-heading);
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #fbbf24;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .black-book-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: var(--font-mono);
+      font-size: 0.88rem;
+    }
+
+    .black-book-table th {
+      background: #334155;
+      color: #94a3b8;
+      padding: 0.6rem 0.85rem;
+      text-align: left;
+      border: 1px solid #475569;
+    }
+
+    .black-book-table td {
+      padding: 0.65rem 0.85rem;
+      border: 1px solid #334155;
+      color: #e2e8f0;
+    }
+
+    /* Comparison Box */
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin: 1.5rem 0;
+    }
+
+    @media (max-width: 768px) {
+      .comparison-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Business Rules Table & Items */
+    .rule-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-left: 4px solid var(--accent-indigo);
+      border-radius: 0 var(--radius-md) var(--radius-md) 0;
+      padding: 1.15rem 1.35rem;
+      margin-bottom: 1rem;
+      transition: all 0.2s ease;
+    }
+
+    .rule-item:hover {
+      transform: translateX(3px);
+      box-shadow: var(--shadow-sm);
+      border-color: var(--primary-border);
+      border-left-color: var(--primary);
+    }
+
+    .rule-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.4rem;
+    }
+
+    .rule-code {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: 0.85rem;
+      background: var(--accent-indigo-light);
+      color: var(--accent-indigo);
+      padding: 0.2rem 0.6rem;
+      border-radius: var(--radius-sm);
+    }
+
+    .rule-title {
+      font-family: var(--font-heading);
+      font-weight: 700;
+      font-size: 1.05rem;
+      color: var(--text-main);
+    }
+
+    .rule-desc {
+      font-size: 0.92rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    /* Functional Requirements Cards */
+    .fr-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.2s ease;
+    }
+
+    .fr-card:hover {
+      border-color: var(--primary-border);
+      box-shadow: var(--shadow-md);
+    }
+
+    .fr-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 0.85rem;
+      margin-bottom: 1rem;
+    }
+
+    .fr-badge-id {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: 0.85rem;
+      padding: 0.25rem 0.65rem;
+      background: var(--primary-light);
+      color: var(--primary);
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--primary-border);
+    }
+
+    .fr-title {
+      font-family: var(--font-heading);
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    /* Scenario Boxes for Reconciliation */
+    .scenario-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin: 1.5rem 0;
+    }
+
+    @media (max-width: 768px) {
+      .scenario-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .scenario-card {
+      background: var(--bg-surface-alt);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 1.5rem;
+    }
+
+    .scenario-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+
+    .scenario-math-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      padding: 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+      margin: 1rem 0;
+      line-height: 1.7;
+    }
+
+    .scenario-math-row {
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .scenario-math-divider {
+      border-top: 1px dashed var(--border-color);
+      margin: 0.4rem 0;
+    }
+
+    .scenario-math-result {
+      display: flex;
+      justify-content: space-between;
+      font-weight: 700;
+      font-size: 0.98rem;
+    }
+
+    .scenario-outcome {
+      padding: 0.75rem 1rem;
+      border-radius: var(--radius-sm);
+      font-weight: 600;
+      font-size: 0.92rem;
+      margin-top: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .outcome-surplus {
+      background: var(--accent-emerald-light);
+      color: var(--accent-emerald);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .outcome-shortfall {
+      background: var(--accent-amber-light);
+      color: var(--accent-amber);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    /* Q&A Decision Grid */
+    .decision-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+      gap: 1.25rem;
+      margin: 1.5rem 0;
+    }
+
+    .decision-card {
+      background: var(--bg-surface-alt);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .decision-topic {
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--primary);
+      margin-bottom: 0.4rem;
+    }
+
+    .decision-question {
+      font-family: var(--font-heading);
+      font-size: 0.98rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 0.65rem;
+    }
+
+    .decision-answer-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.35rem 0.75rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.85rem;
+      font-weight: 700;
+    }
+
+    .decision-yes {
+      background: var(--accent-emerald-light);
+      color: var(--accent-emerald);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+    }
+
+    .decision-no {
+      background: var(--accent-rose-light);
+      color: var(--accent-rose);
+      border: 1px solid rgba(244, 63, 94, 0.25);
+    }
+
+    .decision-rule {
+      background: var(--accent-indigo-light);
+      color: var(--accent-indigo);
+      border: 1px solid rgba(99, 102, 241, 0.25);
+    }
+
+    .decision-note {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 0.5rem;
+      line-height: 1.45;
+    }
+
+    /* Lists */
+    ul, ol {
+      padding-left: 1.5rem;
+      margin-bottom: 1.25rem;
+    }
+
+    li {
+      margin-bottom: 0.45rem;
+      color: var(--text-main);
+    }
+
+    .feature-list {
+      list-style: none;
+      padding-left: 0;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 0.6rem;
+      margin: 1rem 0 1.5rem;
+    }
+
+    .feature-list li {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.65rem 0.85rem;
+      background: var(--bg-surface-alt);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      font-size: 0.88rem;
+      font-weight: 500;
+      margin-bottom: 0;
+    }
+
+    .check-icon {
+      color: var(--accent-emerald);
+      font-weight: 800;
+      font-size: 1rem;
+    }
+
+    .alert-box {
+      border-radius: var(--radius-md);
+      padding: 1.25rem 1.5rem;
+      margin: 1.5rem 0;
+      display: flex;
+      gap: 1rem;
+      align-items: flex-start;
+      border: 1px solid;
+    }
+
+    .alert-box.alert-info {
+      background: var(--accent-indigo-light);
+      border-color: rgba(99, 102, 241, 0.35);
+      color: var(--text-main);
+    }
+
+    .alert-box.alert-warning {
+      background: var(--accent-amber-light);
+      border-color: rgba(245, 158, 11, 0.35);
+      color: var(--text-main);
+    }
+
+    .alert-icon {
+      font-size: 1.35rem;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .alert-content h4 {
+      margin-top: 0;
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+    }
+
+    .status-badge {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 0.2rem 0.6rem;
+      border-radius: var(--radius-sm);
+      margin-right: 0.4rem;
+    }
+
+    .status-pending { background: var(--accent-amber-light); color: var(--accent-amber); border: 1px solid rgba(245, 158, 11, 0.3); }
+    .status-approved { background: var(--accent-emerald-light); color: var(--accent-emerald); border: 1px solid rgba(16, 185, 129, 0.3); }
+    .status-rejected { background: var(--accent-rose-light); color: var(--accent-rose); border: 1px solid rgba(244, 63, 94, 0.3); }
+    .status-paid { background: var(--primary-light); color: var(--primary); border: 1px solid var(--primary-border); }
+
+    /* Footer */
+    .doc-footer {
+      text-align: center;
+      padding: 2.5rem 0 1rem;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border-color);
+      margin-top: 3rem;
+    }
+
+    /* Print Styles */
+    @media print {
+      .top-nav, .sidebar, #reading-progress, .btn-toggle-theme {
+        display: none !important;
+      }
+      .app-container {
+        display: block;
+        padding: 0;
+      }
+      .doc-section {
+        box-shadow: none !important;
+        border: 1px solid #ccc !important;
+        break-inside: avoid;
+        margin-bottom: 1.5rem;
+      }
+      body {
+        background: #fff !important;
+        color: #000 !important;
+      }
+    }
+
+    @media (max-width: 1024px) {
+      .sidebar {
+        display: none;
+      }
+      .app-container {
+        padding: 1.25rem 1rem;
+      }
+      .hero-title {
+        font-size: 2.15rem;
+      }
+      .hero-banner {
+        padding: 2rem 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Reading Progress Indicator -->
+  <div id="reading-progress"></div>
+
+  <!-- Header Navigation Bar -->
+  <nav class="top-nav">
+    <a href="#overview" class="nav-brand">
+      <div class="brand-icon">Z</div>
+      <div class="brand-text">
+        <h1>PettyCash Manager</h1>
+        <span>Engineering Documentation</span>
+      </div>
+    </a>
+
+    <div class="nav-actions">
+      <a href="ProjectPlanning.html" class="nav-link-doc" title="View Stage 1 Documentation">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+        <span>Stage 1: Planning</span>
+      </a>
+      <span class="badge-pill">
+        <svg width="8" height="8" viewBox="0 0 8 8" fill="currentColor"><circle cx="4" cy="4" r="4"/></svg>
+        Stage 2: Requirements
+      </span>
+      <button class="btn-action" onclick="window.print()" title="Print Documentation">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+        <span>Print</span>
+      </button>
+      <button class="btn-toggle-theme" id="themeToggleBtn" title="Toggle Light/Dark Theme">
+        <span id="themeIcon">🌙</span>
+        <span id="themeLabel">Dark</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Main Container with Sidebar + Content -->
+  <div class="app-container">
+
+    <!-- Sticky Table of Contents Sidebar -->
+    <aside class="sidebar" aria-label="Table of Contents">
+      <div class="toc-title">
+        <span>Requirements Spec</span>
+        <span style="font-size: 0.7rem; font-family: var(--font-mono);">Stage 02</span>
+      </div>
+      <ul class="toc-list" id="tocList">
+        <li><a href="#section-1" class="toc-link"><span class="toc-num">01</span><span>The AS-IS Process</span></a></li>
+        <li><a href="#section-2" class="toc-link"><span class="toc-num">02</span><span>The TO-BE Process</span></a></li>
+        <li><a href="#section-3" class="toc-link"><span class="toc-num">03</span><span>Core Financial Concepts</span></a></li>
+        <li><a href="#section-4" class="toc-link"><span class="toc-num">04</span><span>Business Rules (BR)</span></a></li>
+        <li><a href="#section-5" class="toc-link"><span class="toc-num">05</span><span>Functional Requirements</span></a></li>
+        <li><a href="#section-6" class="toc-link"><span class="toc-num">06</span><span>Reconciliation Models</span></a></li>
+        <li><a href="#section-7" class="toc-link"><span class="toc-num">07</span><span>Reporting &amp; Audit</span></a></li>
+        <li><a href="#section-8" class="toc-link"><span class="toc-num">08</span><span>Policy Decisions &amp; Rules</span></a></li>
+        <li><a href="#section-9" class="toc-link"><span class="toc-num">09</span><span>Non-Functional Reqs</span></a></li>
+      </ul>
+    </aside>
+
+    <!-- Main Content Stream -->
+    <main class="main-content">
+
+      <!-- Hero Banner -->
+      <section class="hero-banner" id="overview">
+        <div class="hero-tagline">
+          <span>Enterprise Architecture &bull; SDLC Stage 2</span>
+        </div>
+        <h1 class="hero-title">Software Requirements Specification</h1>
+        <p class="hero-desc">
+          Formal functional breakdown, AS-IS vs. TO-BE operational process workflows, core business rules, reconciliation formulas, and non-functional constraints for engineering execution.
+        </p>
+
+        <div class="hero-meta-grid">
+          <div class="hero-meta-item">
+            <span class="hero-meta-label">Document Stage</span>
+            <span class="hero-meta-value">Stage 2: Requirements Analysis</span>
+          </div>
+          <div class="hero-meta-item">
+            <span class="hero-meta-label">Core Question</span>
+            <span class="hero-meta-value">What exactly must the system accomplish?</span>
+          </div>
+          <div class="hero-meta-item">
+            <span class="hero-meta-label">Target Stack</span>
+            <span class="hero-meta-value">.NET MAUI Blazor Hybrid + ASP.NET Core APIs</span>
+          </div>
+          <div class="hero-meta-item">
+            <span class="hero-meta-label">Next Phase</span>
+            <span class="hero-meta-value">Stage 3: Architecture &amp; DB Design</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 1: The AS-IS Process -->
+      <section class="doc-section" id="section-1">
+        <div class="section-header">
+          <div class="section-badge">01</div>
+          <div class="section-title-wrap">
+            <h2>1. The AS-IS Process (Current Baseline)</h2>
+            <p>How expense disbursement and record-keeping currently function in the organization</p>
+          </div>
+        </div>
+
+        <p>
+          Before defining software requirements, we map the current manual procedure and analyze its concrete vulnerabilities.
+        </p>
+
+        <!-- Visual Flowchart for AS-IS -->
+        <div class="flow-diagram-container">
+          <h4 style="margin-top: 0; margin-bottom: 1rem; color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;">Current Manual Flowchart</h4>
+          <div class="diagram-interactive">
+            <div class="flow-step-pill">Employee needs money for company expense</div>
+            <div class="flow-down-arrow">&darr;</div>
+            <div class="flow-step-pill">Employee requests money from Boss</div>
+            <div class="flow-down-arrow">&darr;</div>
+            <div class="flow-step-pill accent">Boss reviews request</div>
+            <div class="flow-branch">
+              <div class="flow-branch-col">
+                <div style="font-size: 0.75rem; font-weight: 700; color: var(--accent-rose); text-transform: uppercase;">Reject</div>
+                <div class="flow-down-arrow">&darr;</div>
+                <div class="flow-step-pill danger">Record Reason (Oral / Scrap)</div>
+              </div>
+              <div class="flow-branch-col">
+                <div style="font-size: 0.75rem; font-weight: 700; color: var(--accent-emerald); text-transform: uppercase;">Approve</div>
+                <div class="flow-down-arrow">&darr;</div>
+                <div class="flow-step-pill success">Physical Cash Issued</div>
+                <div class="flow-down-arrow">&darr;</div>
+                <div class="flow-step-pill">Employee performs company expense</div>
+                <div class="flow-down-arrow">&darr;</div>
+                <div class="flow-step-pill">Employee returns to office</div>
+                <div class="flow-down-arrow">&darr;</div>
+                <div class="flow-step-pill primary">Expense / balance recorded in "The Black Book"</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- The Black Book Visual Card -->
+        <div class="black-book-card">
+          <div class="black-book-title">
+            <span>📓</span>
+            <span>The Black Book Artifact (Current Storage Format)</span>
+          </div>
+          <p style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 0.85rem;">
+            The physical ledger currently captures only five handwritten fields without attachments or cross-validation:
+          </p>
+          <div style="overflow-x: auto;">
+            <table class="black-book-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Destination</th>
+                  <th>Reason</th>
+                  <th style="text-align: right;">Amount</th>
+                  <th style="text-align: right;">Balance</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>12/09/2026</td>
+                  <td>Mbarara</td>
+                  <td>Fuel &amp; Client meeting</td>
+                  <td style="text-align: right;">UGX 500,000</td>
+                  <td style="text-align: right;">UGX 80,000</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <h3>Current-State Characteristics &amp; Bottlenecks</h3>
+        <ul class="feature-list">
+          <li><span class="check-icon" style="color: var(--accent-rose);">&bull;</span> Expense management is <strong>entirely manual</strong>.</li>
+          <li><span class="check-icon" style="color: var(--accent-rose);">&bull;</span> Expense requests are handled verbally or informally.</li>
+          <li><span class="check-icon" style="color: var(--accent-rose);">&bull;</span> Approval is performed directly by the boss.</li>
+          <li><span class="check-icon" style="color: var(--accent-rose);">&bull;</span> Money is issued in cash after approval.</li>
+          <li><span class="check-icon" style="color: var(--accent-rose);">&bull;</span> Expenses are recorded manually on paper logs.</li>
+          <li><span class="check-icon" style="color: var(--accent-rose);">&bull;</span> The record contains extremely limited contextual info.</li>
+          <li><span class="check-icon" style="color: var(--accent-rose);">&bull;</span> Receipts are currently optional / frequently lost.</li>
+          <li><span class="check-icon" style="color: var(--accent-rose);">&bull;</span> Additional funds can be requested when cash runs low.</li>
+          <li><span class="check-icon" style="color: var(--accent-rose);">&bull;</span> Employees use personal money when advances fall short.</li>
+          <li><span class="check-icon" style="color: var(--accent-rose);">&bull;</span> Employees subsequently file for reimbursement manually.</li>
+          <li><span class="check-icon" style="color: var(--accent-rose);">&bull;</span> Balance reconciliation is done manually on scrap paper.</li>
+          <li><span class="check-icon" style="color: var(--accent-rose);">&bull;</span> Reports require tedious consolidation of handwritten notes.</li>
+          <li><span class="check-icon" style="color: var(--accent-rose);">&bull;</span> Complete absence of a centralized digital audit trail.</li>
+        </ul>
+      </section>
+
+      <!-- Section 2: The TO-BE Process -->
+      <section class="doc-section" id="section-2">
+        <div class="section-header">
+          <div class="section-badge">02</div>
+          <div class="section-title-wrap">
+            <h2>2. The TO-BE Process (Target Workflow)</h2>
+            <p>The structured, automated, and traceable future state of corporate expense operations</p>
+          </div>
+        </div>
+
+        <div class="flow-diagram-container">
+          <h4 style="margin-top: 0; margin-bottom: 1rem; color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;">Target Automated Workflow</h4>
+          <div class="diagram-interactive">
+            <div class="flow-step-pill primary">1. Employee submits digital expense request</div>
+            <div class="flow-down-arrow">&darr;</div>
+            <div class="flow-step-pill accent">2. Boss reviews request in system</div>
+            <div class="flow-branch">
+              <div class="flow-branch-col">
+                <div style="font-size: 0.75rem; font-weight: 700; color: var(--accent-rose); text-transform: uppercase;">Reject</div>
+                <div class="flow-down-arrow">&darr;</div>
+                <div class="flow-step-pill danger">Mandatory Rejection Reason Logged</div>
+              </div>
+              <div class="flow-branch-col">
+                <div style="font-size: 0.75rem; font-weight: 700; color: var(--accent-emerald); text-transform: uppercase;">Approve</div>
+                <div class="flow-down-arrow">&darr;</div>
+                <div class="flow-step-pill success">3. Money Issued &amp; Custody Logged</div>
+                <div class="flow-down-arrow">&darr;</div>
+                <div class="flow-step-pill">4. Employee spends during activity</div>
+                <div class="flow-down-arrow">&darr;</div>
+                <div class="flow-step-pill">5. Employee records line-item expenses</div>
+                <div class="flow-down-arrow">&darr;</div>
+                <div class="flow-step-pill">6. Receipt photo attached (optional/recommended)</div>
+                <div class="flow-down-arrow">&darr;</div>
+                <div class="flow-step-pill accent">7. Boss reviews submitted expenses</div>
+                <div class="flow-down-arrow">&darr;</div>
+                <div class="flow-step-pill success">8. Automated Reconciliation (Surplus / Shortfall)</div>
+                <div class="flow-down-arrow">&darr;</div>
+                <div class="flow-step-pill primary">9. Instant Executive &amp; Tax Reports</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 3: Core Financial Concepts -->
+      <section class="doc-section" id="section-3">
+        <div class="section-header">
+          <div class="section-badge">03</div>
+          <div class="section-title-wrap">
+            <h2>3. Five Core Financial Concepts</h2>
+            <p>The domain model pillars governing all system transactions and accounting rules</p>
+          </div>
+        </div>
+
+        <div class="cards-grid">
+          <!-- A. Expense Request / Advance -->
+          <div class="info-card">
+            <div class="info-card-header">
+              <div class="card-icon-box card-icon-blue">A</div>
+              <div class="info-card-title">Expense Request / Advance</div>
+            </div>
+            <div class="info-card-body">
+              <p>The upfront company fund allocation requested prior to an operational task.</p>
+              <div style="background: var(--bg-surface-alt); padding: 0.75rem; border-radius: var(--radius-sm); border-left: 3px solid var(--primary); font-style: italic; color: var(--text-main);">
+                “I need UGX 200,000 from the company for travel.”
+              </div>
+            </div>
+          </div>
+
+          <!-- B. Actual Expense -->
+          <div class="info-card">
+            <div class="info-card-header">
+              <div class="card-icon-box card-icon-emerald">B</div>
+              <div class="info-card-title">Actual Expense</div>
+            </div>
+            <div class="info-card-body">
+              <p>The Total cost incurred during the task against the issued advance.</p>
+              <div style="background: var(--bg-surface-alt); padding: 0.75rem; border-radius: var(--radius-sm); border-left: 3px solid var(--accent-emerald); font-style: italic; color: var(--text-main);">
+                “I actually spent UGX 150,000 on fuel and food.”
+              </div>
+            </div>
+          </div>
+
+          <!-- C. Additional Advance -->
+          <div class="info-card">
+            <div class="info-card-header">
+              <div class="card-icon-box card-icon-amber">C</div>
+              <div class="info-card-title">Additional Advance</div>
+            </div>
+            <div class="info-card-body">
+              <p>Supplementary company funds requested when unforeseen field costs arise.</p>
+              <div style="background: var(--bg-surface-alt); padding: 0.75rem; border-radius: var(--radius-sm); border-left: 3px solid var(--accent-amber); font-style: italic; color: var(--text-main);">
+                “The original UGX 200,000 isn't enough. I need another UGX 50,000.”
+              </div>
+            </div>
+          </div>
+
+          <!-- D. Reimbursement -->
+          <div class="info-card">
+            <div class="info-card-header">
+              <div class="card-icon-box card-icon-rose">D</div>
+              <div class="info-card-title">Employee Reimbursement</div>
+            </div>
+            <div class="info-card-body">
+              <p>Personal funds spent on behalf of the company due to insufficient cash advances.</p>
+              <div style="background: var(--bg-surface-alt); padding: 0.75rem; border-radius: var(--radius-sm); border-left: 3px solid var(--accent-rose); font-style: italic; color: var(--text-main);">
+                “I spent UGX 30,000 of my own money. The company owes me UGX 30,000.”
+              </div>
+            </div>
+          </div>
+
+          <!-- E. Reconciliation -->
+          <div class="info-card" style="grid-column: 1 / -1;">
+            <div class="info-card-header">
+              <div class="card-icon-box card-icon-purple">E</div>
+              <div class="info-card-title">Reconciliation &amp; Settlement</div>
+            </div>
+            <div class="info-card-body">
+              <p>The mathematical settlement determining the final financial outcome of an advance:</p>
+              <div style="background: var(--bg-surface-alt); padding: 0.75rem 1rem; border-radius: var(--radius-sm); border-left: 3px solid var(--accent-purple); font-style: italic; color: var(--text-main);">
+                “Let's determine exactly what happened to the money: Surplus returned to company, or Shortfall reimbursed to employee.”
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 4: Business Rules -->
+      <section class="doc-section" id="section-4">
+        <div class="section-header">
+          <div class="section-badge">04</div>
+          <div class="section-title-wrap">
+            <h2>4. Core Business Rules (BR-001 &ndash; BR-008)</h2>
+            <p>Inviolable business logic and operational constraints enforced by the system</p>
+          </div>
+        </div>
+
+        <div class="rule-item">
+          <div class="rule-header">
+            <span class="rule-title">Advance Authorization Requirement</span>
+            <span class="rule-code">BR-001</span>
+          </div>
+          <div class="rule-desc">
+            An expense request <strong>must be approved</strong> by the designated approver before company funds can be physically or electronically issued.
+          </div>
+        </div>
+
+        <div class="rule-item">
+          <div class="rule-header">
+            <span class="rule-title">Mandatory Rejection Justification</span>
+            <span class="rule-code">BR-002</span>
+          </div>
+          <div class="rule-desc">
+            Any rejected request or expense line item <strong>must contain an explicit reason</strong> entered by the approver for auditing and employee feedback.
+          </div>
+        </div>
+
+        <div class="rule-item">
+          <div class="rule-header">
+            <span class="rule-title">Traceable Expense Association</span>
+            <span class="rule-code">BR-003</span>
+          </div>
+          <div class="rule-desc">
+            An employee must be able to record actual expenses against an approved advance, maintaining strict relational binding between disbursement and spending.
+          </div>
+        </div>
+
+        <div class="rule-item">
+          <div class="rule-header">
+            <span class="rule-title">Flexible Receipt Attachment Policy</span>
+            <span class="rule-code">BR-004</span>
+          </div>
+          <div class="rule-desc">
+            Receipts are <strong>optional</strong> for small incidental company expenses (e.g., boda-boda, parking, tolls), but strongly recommended when formal vouchers exist.
+          </div>
+        </div>
+
+        <div class="rule-item">
+          <div class="rule-header">
+            <span class="rule-title">Supplemental Advance Authorization</span>
+            <span class="rule-code">BR-005</span>
+          </div>
+          <div class="rule-desc">
+            An employee may request additional funds when the original advance is insufficient; this supplemental request requires independent review and approval.
+          </div>
+        </div>
+
+        <div class="rule-item">
+          <div class="rule-header">
+            <span class="rule-title">Permitted Personal Out-of-Pocket Expenditure</span>
+            <span class="rule-code">BR-006</span>
+          </div>
+          <div class="rule-desc">
+            An employee may legitimately use personal funds when company cash is insufficient or unavailable during field operations.
+          </div>
+        </div>
+
+        <div class="rule-item">
+          <div class="rule-header">
+            <span class="rule-title">Reimbursement Eligibility &amp; Claim</span>
+            <span class="rule-code">BR-007</span>
+          </div>
+          <div class="rule-desc">
+            Personal expenditure incurred on behalf of the company may be submitted for formal reimbursement subject to management review and sign-off.
+          </div>
+        </div>
+
+        <div class="rule-item">
+          <div class="rule-header">
+            <span class="rule-title">Deterministic Reconciliation Outcome</span>
+            <span class="rule-code">BR-008</span>
+          </div>
+          <div class="rule-desc">
+            The system must deterministically calculate the final financial balance of an advance (Total Issued &minus; Total Spent) with zero unallocated floating funds.
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 5: Functional Requirements -->
+      <section class="doc-section" id="section-5">
+        <div class="section-header">
+          <div class="section-badge">05</div>
+          <div class="section-title-wrap">
+            <h2>5. Functional Requirements (FR-01 &ndash; FR-08)</h2>
+            <p>Detailed specifications of what the software application must execute</p>
+          </div>
+        </div>
+
+        <!-- FR-01 -->
+        <div class="fr-card">
+          <div class="fr-card-header">
+            <div class="fr-title">FR-01 — User Authentication &amp; Access Control</div>
+            <span class="fr-badge-id">FR-01</span>
+          </div>
+          <p>The system shall:</p>
+          <ul>
+            <li>Allow authorized users to log in securely with email/password .</li>
+            <li>Identify and track the authenticated user across all sessions.</li>
+            <li>Enforce Role-Based Access Control (RBAC) restricting employees to their own claims and approvers to managerial functions.</li>
+            <li>Allow system administrators to provision, edit, and deactivate user accounts.</li>
+          </ul>
+        </div>
+
+        <!-- FR-02 -->
+        <div class="fr-card">
+          <div class="fr-card-header">
+            <div class="fr-title">FR-02 — Expense Request / Advance Workflow</div>
+            <span class="fr-badge-id">FR-02</span>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+            <div>
+              <strong style="color: var(--primary);">Employee Functionality:</strong>
+              <ul style="margin-top: 0.5rem;">
+                <li>Create an expense advance request.</li>
+                <li>Specify requested amount (in UGX).</li>
+                <li>Specify destination (e.g., Mbarara, Gulu, Kampala).</li>
+                <li>Specify business reason and operational purpose.</li>
+                <li>Submit request and track approval status in real time.</li>
+              </ul>
+            </div>
+            <div>
+              <strong style="color: var(--accent-indigo);">Approver Functionality:</strong>
+              <ul style="margin-top: 0.5rem;">
+                <li>View pending queue of submitted requests.</li>
+                <li>Approve advance requests with 1-click.</li>
+                <li>Reject requests with mandatory justification text.</li>
+                <li>Audit full request history and timestamp logs.</li>
+              </ul>
+            </div>
+          </div>
+          <div style="margin-top: 1rem; padding: 0.75rem 1rem; background: var(--bg-surface-alt); border-radius: var(--radius-sm); font-size: 0.88rem;">
+            <strong>System Records:</strong> Requester ID, Requested Amount, Date/Time, Destination, Reason, Current Status, Approver ID, Approval/Rejection Timestamp, and Rejection Reason.
+          </div>
+        </div>
+
+        <!-- FR-03 -->
+        <div class="fr-card">
+          <div class="fr-card-header">
+            <div class="fr-title">FR-03 — Funds Issuance &amp; Custody</div>
+            <span class="fr-badge-id">FR-03</span>
+          </div>
+          <p>After an advance is approved, the system shall allow the authorized custodian to log the physical or electronic release of capital:</p>
+          <ul>
+            <li>Amount physically issued (which may match or be adjusted from requested amount).</li>
+            <li>Date and time of issuance.</li>
+            <li>Recipient identification and acknowledgment signature/flag.</li>
+            <li>Disbursing officer / cash custodian identity.</li>
+            <li>Link to the original advance request record.</li>
+          </ul>
+        </div>
+
+        <!-- FR-04 -->
+        <div class="fr-card">
+          <div class="fr-card-header">
+            <div class="fr-title">FR-04 — Expense Recording (Field &amp; Office)</div>
+            <span class="fr-badge-id">FR-04</span>
+          </div>
+          <p>The system shall allow an employee to log actual expenses associated with an active approved advance:</p>
+          <ul>
+            <li>Date of expenditure.</li>
+            <li>Destination / site location.</li>
+            <li>Expense Category (Fuel, Food, Transport, Accommodation, Parking, Misc).</li>
+            <li>Detailed description and purpose of the purchase.</li>
+            <li>Actual amount spent.</li>
+            <li>Ability to record expenses either <strong>while on the road (mobile)</strong> or <strong>after returning to the office</strong>.</li>
+          </ul>
+        </div>
+
+        <!-- FR-05 -->
+        <div class="fr-card">
+          <div class="fr-card-header">
+            <div class="fr-title">FR-05 — Receipt &amp; Voucher Attachment</div>
+            <span class="fr-badge-id">FR-05</span>
+          </div>
+          <p>The system shall allow the employee to attach digital receipt files (camera photos from mobile or image uploads from desktop) to any expense line item:</p>
+          <ul>
+            <li>Support mobile camera capture with automatic image compression.</li>
+            <li>Support JPG, PNG, and PDF file formats.</li>
+            <li>Maintain receipt availability even if receipts are marked optional under BR-004.</li>
+          </ul>
+        </div>
+
+        <!-- FR-06 -->
+        <div class="fr-card">
+          <div class="fr-card-header">
+            <div class="fr-title">FR-06 — Supplemental / Additional Advance</div>
+            <span class="fr-badge-id">FR-06</span>
+          </div>
+          <p>When original funds are insufficient during field activities, the system shall permit requesting additional capital:</p>
+          <ul>
+            <li>Explicitly links to the existing active advance task.</li>
+            <li>Specifies additional amount required and emergency justification.</li>
+            <li>Routes through manager approval before release.</li>
+            <li>Automatically merges approved supplemental funds into the master advance balance calculation.</li>
+          </ul>
+        </div>
+
+        <!-- FR-07 -->
+        <div class="fr-card">
+          <div class="fr-card-header">
+            <div class="fr-title">FR-07 — Out-of-Pocket Reimbursements</div>
+            <span class="fr-badge-id">FR-07</span>
+          </div>
+          <p>The system shall allow an employee to claim expenses paid out of personal pocket for legitimate company activities:</p>
+          <div style="margin: 0.85rem 0;">
+            <span class="status-badge status-pending">Pending</span>
+            <span class="status-badge status-approved">Approved</span>
+            <span class="status-badge status-rejected">Rejected</span>
+            <span class="status-badge status-paid">Paid</span>
+          </div>
+          <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0;">
+            The system tracks reimbursement status through a formal lifecycle until the employee is repaid.
+          </p>
+        </div>
+
+        <!-- FR-08 -->
+        <div class="fr-card">
+          <div class="fr-card-header">
+            <div class="fr-title">FR-08 — Managerial Expense Review</div>
+            <span class="fr-badge-id">FR-08</span>
+          </div>
+          <p>The authorized approver shall inspect submitted expense line items:</p>
+          <ul>
+            <li>Inspect itemized cost breakdowns, descriptions, and categories.</li>
+            <li>Zoom and view attached receipt photos.</li>
+            <li>Approve legitimate expenses or reject invalid items with mandatory feedback reasons.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- Section 6: Reconciliation Models -->
+      <section class="doc-section" id="section-6">
+        <div class="section-header">
+          <div class="section-badge">06</div>
+          <div class="section-title-wrap">
+            <h2>6. Reconciliation Engine (FR-09)</h2>
+            <p>Deterministic mathematical reconciliation models with concrete enterprise scenarios</p>
+          </div>
+        </div>
+
+        <p>
+          The system calculates the final financial position comparing <strong>Total Funds Issued</strong> vs. <strong>Total Legitimate Expenses</strong>, incorporating supplemental advances and personal reimbursements.
+        </p>
+
+        <div class="scenario-grid">
+          <!-- Scenario A: Surplus -->
+          <div class="scenario-card">
+            <div class="scenario-header">
+              <span style="font-weight: 700; font-family: var(--font-heading); color: var(--accent-emerald);">Scenario A: Cash Surplus</span>
+              <span class="badge-pill" style="font-size: 0.72rem;">Balance Return</span>
+            </div>
+            <p style="font-size: 0.88rem; color: var(--text-muted);">
+              Employee spends less than the total company funds disbursed.
+            </p>
+            <div class="scenario-math-box">
+              <div class="scenario-math-row">
+                <span>Initial Advance:</span>
+                <span>UGX 500,000</span>
+              </div>
+              <div class="scenario-math-row">
+                <span>Additional Advance:</span>
+                <span>+ UGX 50,000</span>
+              </div>
+              <div class="scenario-math-divider"></div>
+              <div class="scenario-math-row" style="font-weight: 700;">
+                <span>Total Company Funds:</span>
+                <span>UGX 550,000</span>
+              </div>
+              <div class="scenario-math-row" style="margin-top: 0.5rem; color: var(--accent-rose);">
+                <span>Actual Approved Expenses:</span>
+                <span>&minus; UGX 450,000</span>
+              </div>
+              <div class="scenario-math-divider"></div>
+              <div class="scenario-math-result" style="color: var(--accent-emerald);">
+                <span>Net Balance Surrendered:</span>
+                <span>UGX 100,000</span>
+              </div>
+            </div>
+            <div class="scenario-outcome outcome-surplus">
+              <span>✅</span>
+              <span>UGX 100,000 must be returned to the company safe.</span>
+            </div>
+          </div>
+
+          <!-- Scenario B: Shortfall -->
+          <div class="scenario-card">
+            <div class="scenario-header">
+              <span style="font-weight: 700; font-family: var(--font-heading); color: var(--accent-amber);">Scenario B: Cash Shortfall</span>
+              <span class="badge-pill" style="font-size: 0.72rem; background: var(--accent-amber-light); color: var(--accent-amber); border-color: rgba(245, 158, 11, 0.3);">Reimbursement</span>
+            </div>
+            <p style="font-size: 0.88rem; color: var(--text-muted);">
+              Employee spends more than the initial advance using out-of-pocket funds.
+            </p>
+            <div class="scenario-math-box">
+              <div class="scenario-math-row">
+                <span>Initial Advance:</span>
+                <span>UGX 500,000</span>
+              </div>
+              <div class="scenario-math-row" style="color: var(--accent-rose);">
+                <span>Actual Approved Expenses:</span>
+                <span>&minus; UGX 550,000</span>
+              </div>
+              <div class="scenario-math-divider"></div>
+              <div class="scenario-math-result" style="color: var(--accent-amber);">
+                <span>Shortfall Deficit:</span>
+                <span>UGX 50,000</span>
+              </div>
+            </div>
+            <div class="scenario-outcome outcome-shortfall">
+              <span>⚠️</span>
+              <span>UGX 50,000 is owed and reimbursed to the employee.</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 7: Reporting & Audit Trail -->
+      <section class="doc-section" id="section-7">
+        <div class="section-header">
+          <div class="section-badge">07</div>
+          <div class="section-title-wrap">
+            <h2>7. Reporting, Search &amp; Audit Trail (FR-10 &ndash; FR-12)</h2>
+            <p>Business intelligence dimensions, deep search filters, and tamper-evident audit logs</p>
+          </div>
+        </div>
+
+        <div class="fr-card">
+          <div class="fr-card-header">
+            <div class="fr-title">FR-10 — Management Reporting Dimensions</div>
+            <span class="fr-badge-id">FR-10</span>
+          </div>
+          <p>The system shall generate instant executive summaries and downloadable CSV/Excel reports across 10 key dimensions:</p>
+          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 0.75rem; margin-top: 1rem;">
+            <div style="background: var(--bg-surface-alt); padding: 0.6rem 0.85rem; border-radius: var(--radius-sm); font-size: 0.88rem;">1. Total Expenditure</div>
+            <div style="background: var(--bg-surface-alt); padding: 0.6rem 0.85rem; border-radius: var(--radius-sm); font-size: 0.88rem;">2. Expenses by Employee</div>
+            <div style="background: var(--bg-surface-alt); padding: 0.6rem 0.85rem; border-radius: var(--radius-sm); font-size: 0.88rem;">3. Expenses by Date Range</div>
+            <div style="background: var(--bg-surface-alt); padding: 0.6rem 0.85rem; border-radius: var(--radius-sm); font-size: 0.88rem;">4. Expenses by Destination</div>
+            <div style="background: var(--bg-surface-alt); padding: 0.6rem 0.85rem; border-radius: var(--radius-sm); font-size: 0.88rem;">5. Expenses by Category</div>
+            <div style="background: var(--bg-surface-alt); padding: 0.6rem 0.85rem; border-radius: var(--radius-sm); font-size: 0.88rem;">6. Outstanding Advances</div>
+            <div style="background: var(--bg-surface-alt); padding: 0.6rem 0.85rem; border-radius: var(--radius-sm); font-size: 0.88rem;">7. Unreconciled Advances</div>
+            <div style="background: var(--bg-surface-alt); padding: 0.6rem 0.85rem; border-radius: var(--radius-sm); font-size: 0.88rem;">8. Pending Reimbursements</div>
+            <div style="background: var(--bg-surface-alt); padding: 0.6rem 0.85rem; border-radius: var(--radius-sm); font-size: 0.88rem;">9. Rejected Expenses Log</div>
+            <div style="background: var(--bg-surface-alt); padding: 0.6rem 0.85rem; border-radius: var(--radius-sm); font-size: 0.88rem;">10. Approved Claims Archive</div>
+          </div>
+        </div>
+
+        <div class="fr-card">
+          <div class="fr-card-header">
+            <div class="fr-title">FR-11 — Historical Search &amp; Retrieval</div>
+            <span class="fr-badge-id">FR-11</span>
+          </div>
+          <p>Authorized users shall quickly filter and pinpoint past financial transactions:</p>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 0.5rem;">
+            <div style="background: var(--bg-surface-alt); padding: 0.85rem 1rem; border-radius: var(--radius-sm); border-left: 3px solid var(--primary);">
+              <div style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: var(--primary);">Query Scenario 1</div>
+              <div style="font-weight: 600; font-size: 0.92rem; margin-top: 0.25rem;">“Show me all expenses associated with Paul's trip to Mbarara.”</div>
+            </div>
+            <div style="background: var(--bg-surface-alt); padding: 0.85rem 1rem; border-radius: var(--radius-sm); border-left: 3px solid var(--accent-indigo);">
+              <div style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: var(--accent-indigo);">Query Scenario 2</div>
+              <div style="font-weight: 600; font-size: 0.92rem; margin-top: 0.25rem;">“Show me all company expenses recorded across August 2026.”</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="fr-card">
+          <div class="fr-card-header">
+            <div class="fr-title">FR-12 — Immutable Audit Trail</div>
+            <span class="fr-badge-id">FR-12</span>
+          </div>
+          <p>Every financially relevant action must answer: <strong>Who? What? When?</strong></p>
+          <div style="background: var(--bg-surface-alt); border-radius: var(--radius-sm); padding: 1rem; font-family: var(--font-mono); font-size: 0.85rem; line-height: 1.8;">
+            <div>&bull; <span style="color: var(--primary);">2026-09-12 09:14</span>: Paul submitted advance request <strong>#ADV-001</strong> (UGX 500,000).</div>
+            <div>&bull; <span style="color: var(--accent-emerald);">2026-09-12 10:30</span>: Boss approved <strong>#ADV-001</strong>.</div>
+            <div>&bull; <span style="color: var(--accent-indigo);">2026-09-12 14:22</span>: Paul recorded UGX 40,000 Fuel expense (Receipt attached).</div>
+            <div>&bull; <span style="color: var(--accent-rose);">2026-09-13 11:05</span>: Boss rejected expense <strong>#EXP-017</strong> (Reason: Personal meal exceed limit).</div>
+            <div>&bull; <span style="color: var(--accent-amber);">2026-09-13 15:40</span>: Paul submitted supplemental advance for UGX 50,000.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 8: Policy Decisions & Rules -->
+      <section class="doc-section" id="section-8">
+        <div class="section-header">
+          <div class="section-badge">08</div>
+          <div class="section-title-wrap">
+            <h2>8. Policy Decisions &amp; Business Clarifications</h2>
+            <p>Concrete architectural decisions resolved during stakeholder requirement interviews</p>
+          </div>
+        </div>
+
+        <div class="decision-grid">
+          <!-- Expense Categories -->
+          <div class="decision-card">
+            <div>
+              <div class="decision-topic">Taxonomy</div>
+              <div class="decision-question">What expense categories are officially supported?</div>
+            </div>
+            <div>
+              <span class="decision-answer-badge decision-rule">6 Standard Categories</span>
+              <div class="decision-note">Fuel, Food/Meals, Transport, Accommodation, Parking, and Miscellaneous.</div>
+            </div>
+          </div>
+
+          <!-- Multiple Advances -->
+          <div class="decision-card">
+            <div>
+              <div class="decision-topic">Concurrency</div>
+              <div class="decision-question">Can one employee hold two active advances simultaneously?</div>
+            </div>
+            <div>
+              <span class="decision-answer-badge decision-yes">YES &bull; Supported</span>
+              <div class="decision-note">System must distinctly isolate and track each advance without merging balances.</div>
+            </div>
+          </div>
+
+          <!-- Reimbursement Approval -->
+          <div class="decision-card">
+            <div>
+              <div class="decision-topic">Authorization</div>
+              <div class="decision-question">Is every personal expense automatically reimbursable?</div>
+            </div>
+            <div>
+              <span class="decision-answer-badge decision-no">NO &bull; Managerial Discretion</span>
+              <div class="decision-note">The boss must review and explicitly approve all out-of-pocket claims.</div>
+            </div>
+          </div>
+
+          <!-- Additional Advance Approval -->
+          <div class="decision-card">
+            <div>
+              <div class="decision-topic">Governance</div>
+              <div class="decision-question">Does an additional advance require a new approval?</div>
+            </div>
+            <div>
+              <span class="decision-answer-badge decision-yes">YES &bull; Mandatory Sign-off</span>
+              <div class="decision-note">Every supplementary cash disbursement requires fresh managerial approval.</div>
+            </div>
+          </div>
+
+          <!-- Returning Surplus Money -->
+          <div class="decision-card">
+            <div>
+              <div class="decision-topic">Custody</div>
+              <div class="decision-question">How is surplus money returned by the employee recorded?</div>
+            </div>
+            <div>
+              <span class="decision-answer-badge decision-rule">Direct System Entry</span>
+              <div class="decision-note">Custodian confirms physical cash receipt inside the reconciliation screen.</div>
+            </div>
+          </div>
+
+          <!-- Request Cancellation -->
+          <div class="decision-card">
+            <div>
+              <div class="decision-topic">Self-Service</div>
+              <div class="decision-question">Can an employee cancel an unapproved advance request?</div>
+            </div>
+            <div>
+              <span class="decision-answer-badge decision-yes">YES &bull; Permitted</span>
+              <div class="decision-note">Employees can cancel requests as long as the status remains in 'Pending'.</div>
+            </div>
+          </div>
+
+          <!-- Editing Expenses -->
+          <div class="decision-card">
+            <div>
+              <div class="decision-topic">Modification</div>
+              <div class="decision-question">Can an employee edit an expense after submitting it?</div>
+            </div>
+            <div>
+              <span class="decision-answer-badge decision-yes">YES &bull; Prior to Approval</span>
+              <div class="decision-note">Editable while pending review; changes trigger updated audit timestamps.</div>
+            </div>
+          </div>
+
+          <!-- Rejection Resubmission -->
+          <div class="decision-card">
+            <div>
+              <div class="decision-topic">Correction Window</div>
+              <div class="decision-question">Can a rejected expense be corrected and resubmitted?</div>
+            </div>
+            <div>
+              <span class="decision-answer-badge decision-yes">YES &bull; 3-Day Strict Limit</span>
+              <div class="decision-note">Resubmissions must occur within 3 calendar days of rejection notice.</div>
+            </div>
+          </div>
+
+          <!-- Immutability of Closed Records -->
+          <div class="decision-card" style="grid-column: 1 / -1;">
+            <div>
+              <div class="decision-topic">Audit Security</div>
+              <div class="decision-question">Can anyone modify an already reconciled and closed expense?</div>
+            </div>
+            <div>
+              <span class="decision-answer-badge decision-no">STRICTLY NO &bull; Immutable</span>
+              <div class="decision-note">Once an advance is finalized and reconciled, records become permanently read-only for all roles to guarantee audit integrity.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 9: Non-Functional Requirements -->
+      <section class="doc-section" id="section-9">
+        <div class="section-header">
+          <div class="section-badge">09</div>
+          <div class="section-title-wrap">
+            <h2>9. Non-Functional Requirements (NFR)</h2>
+            <p>System quality attributes, performance SLAs, security constraints, and mobile usability</p>
+          </div>
+        </div>
+
+        <div class="cards-grid">
+          <div class="info-card">
+            <div class="info-card-header">
+              <div class="card-icon-box card-icon-blue">⚡</div>
+              <div class="info-card-title">a. Performance</div>
+            </div>
+            <div class="info-card-body">
+              Standard queries, expense lookups, and submissions shall respond in &lt; 1.5 seconds under expected concurrent office and field load.
+            </div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-card-header">
+              <div class="card-icon-box card-icon-emerald">🕒</div>
+              <div class="info-card-title">b. Availability</div>
+            </div>
+            <div class="info-card-body">
+              99.5% uptime during defined corporate business hours (7:00 AM &ndash; 8:00 PM EAT, Monday to Saturday).
+            </div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-card-header">
+              <div class="card-icon-box card-icon-rose">🔒</div>
+              <div class="info-card-title">c. Security &amp; RBAC</div>
+            </div>
+            <div class="info-card-body">
+              Strict role-based isolation. Employees cannot view peer advances; approvers cannot approve their own expense requests (separation of duties).
+            </div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-card-header">
+              <div class="card-icon-box card-icon-purple">🔑</div>
+              <div class="info-card-title">d. Authentication</div>
+            </div>
+            <div class="info-card-body">
+              Cryptographically salted password hashing with secure JWT / session tokens and automatic idle session timeouts.
+            </div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-card-header">
+              <div class="card-icon-box card-icon-amber">📜</div>
+              <div class="info-card-title">e. Auditability</div>
+            </div>
+            <div class="info-card-body">
+              Every financial transaction and status transition must write an immutable audit log entry capturing user, timestamp, IP, and changes.
+            </div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-card-header">
+              <div class="card-icon-box card-icon-emerald">🛡️</div>
+              <div class="info-card-title">f. Reliability &amp; Integrity</div>
+            </div>
+            <div class="info-card-body">
+              ACID database transactions. Zero partial writes; expense submission cannot fail halfway leaving orphaned receipts or corrupt figures.
+            </div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-card-header">
+              <div class="card-icon-box card-icon-cyan">💾</div>
+              <div class="info-card-title">g. Backup Strategy</div>
+            </div>
+            <div class="info-card-body">
+              Nightly automated database dumps replicated off-site with 30-day point-in-time retention and monthly restoration drill verification.
+            </div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-card-header">
+              <div class="card-icon-box card-icon-blue">🎯</div>
+              <div class="info-card-title">h. Usability</div>
+            </div>
+            <div class="info-card-body">
+              Intuitive, frictionless mobile interface allowing field workers to submit an expense in under 45 seconds with zero formal technical training.
+            </div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-card-header">
+              <div class="card-icon-box card-icon-purple">💻</div>
+              <div class="info-card-title">i. Cross-Platform Compatibility</div>
+            </div>
+            <div class="info-card-body">
+              Seamless rendering across Google Chrome, Microsoft Edge, and Safari; responsive support for .NET MAUI Blazor Hybrid mobile views.
+            </div>
+          </div>
+
+          <div class="info-card" style="grid-column: 1 / -1;">
+            <div class="info-card-header">
+              <div class="card-icon-box card-icon-rose">📱</div>
+              <div class="info-card-title">Mobile Field Optimization</div>
+            </div>
+            <div class="info-card-body">
+              Must operate reliably on budget Android smartphones over intermittent 3G/4G cellular networks, utilizing client-side image compression before upload.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Footer -->
+      <footer class="doc-footer">
+        <p>Petty Cash &amp; Expense Management System &bull; Requirements Analysis Document &bull; Version 1.0</p>
+        <p style="font-size: 0.8rem; margin-top: 0.35rem;">
+          <a href="ProjectPlanning.html" style="color: var(--primary); text-decoration: none;">&larr; Return to Stage 1: Project Planning</a>
+        </p>
+      </footer>
+
+    </main>
+  </div>
+
+  <!-- Interactive JavaScript -->
+  <script>
+    // Theme Toggling with LocalStorage Memory
+    const themeToggleBtn = document.getElementById('themeToggleBtn');
+    const themeIcon = document.getElementById('themeIcon');
+    const themeLabel = document.getElementById('themeLabel');
+
+    function setTheme(isDark) {
+      if (isDark) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        themeIcon.textContent = '☀️';
+        themeLabel.textContent = 'Light';
+        localStorage.setItem('doc-theme', 'dark');
+      } else {
+        document.documentElement.removeAttribute('data-theme');
+        themeIcon.textContent = '🌙';
+        themeLabel.textContent = 'Dark';
+        localStorage.setItem('doc-theme', 'light');
+      }
+    }
+
+    const savedTheme = localStorage.getItem('doc-theme');
+    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+      setTheme(true);
+    } else {
+      setTheme(false);
+    }
+
+    themeToggleBtn.addEventListener('click', () => {
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      setTheme(!isDark);
+    });
+
+    // Reading Progress Bar
+    window.addEventListener('scroll', () => {
+      const scrollTop = window.scrollY;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = (scrollTop / docHeight) * 100;
+      document.getElementById('reading-progress').style.width = progress + '%';
+    });
+
+    // Scrollspy for Sidebar Navigation
+    const sections = document.querySelectorAll('section.doc-section');
+    const navLinks = document.querySelectorAll('.toc-link');
+
+    window.addEventListener('scroll', () => {
+      let currentSectionId = '';
+      const scrollPosition = window.scrollY + 120;
+
+      sections.forEach(section => {
+        const sectionTop = section.offsetTop;
+        const sectionHeight = section.offsetHeight;
+        if (scrollPosition >= sectionTop && scrollPosition < sectionTop + sectionHeight) {
+          currentSectionId = section.getAttribute('id');
+        }
+      });
+
+      navLinks.forEach(link => {
+        link.classList.remove('active');
+        if (currentSectionId && link.getAttribute('href') === '#' + currentSectionId) {
+          link.classList.add('active');
+        }
+      });
+    });
+  </script>
+</body>
+</html>

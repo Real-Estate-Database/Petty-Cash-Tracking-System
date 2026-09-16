@@ -1,0 +1,58 @@
+flowchart TD
+
+    Start([Start])
+
+    A["Employee selects active advance"]
+    B["Enter expense details"]
+    C["Enter amount, date, category and description"]
+    D["Attach receipt if available"]
+    E["Submit expense"]
+
+    F{"Expense valid?"}
+
+    G["Save expense"]
+    H["Status = Pending Review"]
+
+    I["Super Admin reviews expense"]
+
+    J{"Approve?"}
+
+    K["Reject expense"]
+    L["Record rejection reason"]
+
+    Resubmit{"Correct within 3 days?"}
+    ResubmitYes["Employee corrects expense"]
+    ResubmitNo["Rejection is final"]
+
+    M["Approve expense"]
+    N["Include in reconciliation"]
+
+    End([End])
+
+    Start --> A
+    A --> B
+    B --> C
+    C --> D
+    D --> E
+    E --> F
+
+    F -- No --> B
+    F -- Yes --> G
+
+    G --> H
+    H --> I
+    I --> J
+
+    J -- No --> K
+    K --> L
+    L --> Resubmit
+
+    Resubmit -- Yes --> ResubmitYes
+    ResubmitYes --> B
+
+    Resubmit -- No --> ResubmitNo
+    ResubmitNo --> End
+
+    J -- Yes --> M
+    M --> N
+    N --> End

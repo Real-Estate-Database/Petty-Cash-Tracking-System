@@ -1,0 +1,442 @@
+classDiagram
+
+    %% ========================================================
+    %% SHARED PROJECT: ENUMERATIONS (Type-safe C# Enums)
+    %% ========================================================
+    class RoleType {
+        <<enumeration>>
+        SuperAdmin
+        Custom
+    }
+
+    class AdvanceStatus {
+        <<enumeration>>
+        Draft
+        Pending
+        Approved
+        Rejected
+        FundsIssued
+        PartiallyReconciled
+        Reconciled
+        Cancelled
+    }
+
+    class ExpenseStatus {
+        <<enumeration>>
+        PendingReview
+        Approved
+        Rejected
+        Resubmitted
+    }
+
+    class ExpenseCategoryType {
+        <<enumeration>>
+        Fuel
+        Meals
+        Transport
+        Accommodation
+        Parking
+        Miscellaneous
+    }
+
+    class ReimbursementStatus {
+        <<enumeration>>
+        Pending
+        Approved
+        Rejected
+        Paid
+    }
+
+    class ReconciliationStatus {
+        <<enumeration>>
+        InProgress
+        PendingSurplusReturn
+        PendingDeficitPayout
+        Settled
+        Closed
+    }
+
+    class SettlementType {
+        <<enumeration>>
+        Balanced
+        Surplus
+        Shortfall
+    }
+
+    %% ========================================================
+    %% SHARED PROJECT: DOMAIN ENTITIES (C# Model Classes)
+    %% ========================================================
+    class User {
+        +int UserId
+        +int RoleId
+        +string FirstName
+        +string LastName
+        +string Email
+        +string PasswordHash
+        +bool IsActive
+        +DateTime CreatedAt
+        +DateTime UpdatedAt
+        +bool VerifyPassword(string password)
+        +void UpdateProfile(string first, string last)
+    }
+
+    class Role {
+        +int RoleId
+        +string Name
+        +string Description
+        +bool IsSystemRole
+        +bool IsActive
+        +DateTime CreatedAt
+    }
+
+    class Permission {
+        +int PermissionId
+        +string Code
+        +string Name
+        +string Module
+        +string Description
+    }
+
+    class RolePermission {
+        +int RoleId
+        +int PermissionId
+        +DateTime AssignedAt
+    }
+
+    class AdvanceRequest {
+        +int AdvanceId
+        +int EmployeeId
+        +int? ApprovedByUserId
+        +int? IssuedByUserId
+        +int? ParentAdvanceId
+        +decimal RequestedAmount
+        +decimal ApprovedAmount
+        +decimal IssuedAmount
+        +string Purpose
+        +string Destination
+        +AdvanceStatus Status
+        +string RejectionReason
+        +DateTime RequestedAt
+        +DateTime? ApprovedAt
+        +DateTime? IssuedAt
+        +bool IsSupplemental()
+        +void Approve(int approverId, decimal amount)
+        +void Reject(int approverId, string reason)
+        +void IssueFunds(int custodianId, decimal amount)
+        +void Cancel()
+    }
+
+    class Expense {
+        +int ExpenseId
+        +int AdvanceId
+        +int EmployeeId
+        +int CategoryId
+        +int? ReviewedByUserId
+        +decimal Amount
+        +DateTime ExpenseDate
+        +string Destination
+        +string Description
+        +string FundingSource
+        +ExpenseStatus Status
+        +string RejectionReason
+        +DateTime SubmittedAt
+        +DateTime? ReviewedAt
+        +void Approve(int reviewerId)
+        +void Reject(int reviewerId, string reason)
+        +void Resubmit(decimal amount, string description)
+    }
+
+    class ExpenseCategory {
+        +int CategoryId
+        +string Name
+        +string Description
+        +bool IsActive
+    }
+
+    class Receipt {
+        +int ReceiptId
+        +int ExpenseId
+        +string FileName
+        +string FilePath
+        +string ContentType
+        +long FileSize
+        +DateTime UploadedAt
+    }
+
+    class ReimbursementClaim {
+        +int ClaimId
+        +int EmployeeId
+        +int? ExpenseId
+        +int? ApprovedByUserId
+        +int? PaidByUserId
+        +decimal Amount
+        +string Reason
+        +ReimbursementStatus Status
+        +string RejectionReason
+        +DateTime SubmittedAt
+        +DateTime? ApprovedAt
+        +DateTime? PaidAt
+        +void Approve(int approverId)
+        +void Reject(int approverId, string reason)
+        +void MarkAsPaid(int payerId)
+    }
+
+    class Reconciliation {
+        +int ReconciliationId
+        +int AdvanceId
+        +int ReconciledByUserId
+        +decimal TotalIssued
+        +decimal TotalSpent
+        +decimal TotalReturned
+        +decimal TotalReimbursed
+        +decimal Balance
+        +ReconciliationStatus Status
+        +DateTime ReconciledAt
+        +SettlementType DetermineOutcome()
+        +void RecordCashReturn(decimal amount, int custodianId)
+        +void FinalizeAndClose(int userId)
+    }
+
+    class CashReturn {
+        +int CashReturnId
+        +int ReconciliationId
+        +decimal Amount
+        +DateTime ReturnedAt
+        +int ConfirmedByUserId
+        +string Notes
+    }
+
+    class AuditLog {
+        +long AuditLogId
+        +int UserId
+        +string Action
+        +string EntityName
+        +int EntityId
+        +string OldValues
+        +string NewValues
+        +DateTime CreatedAt
+    }
+
+    %% ========================================================
+    %% SHARED PROJECT: SERVICE INTERFACES (Contracts)
+    %% ========================================================
+    class IAuthService {
+        <<interface>>
+        +LoginAsync(email, password) Task
+        +LogoutAsync(token) Task
+        +GetCurrentUserAsync() Task
+    }
+
+    class IUserService {
+        <<interface>>
+        +CreateUserAsync(dto) Task
+        +UpdateUserAsync(id, dto) Task
+        +ToggleUserStatusAsync(id, isActive) Task
+        +GetUsersAsync(filter) Task
+    }
+
+    class IPermissionService {
+        <<interface>>
+        +CreateRoleAsync(name, description) Task
+        +AssignPermissionsToRoleAsync(roleId, permissionIds) Task
+        +GetUserPermissionsAsync(userId) Task
+        +HasPermissionAsync(userId, permissionCode) Task
+    }
+
+    class IAdvanceService {
+        <<interface>>
+        +SubmitAdvanceAsync(dto) Task
+        +SubmitSupplementalAdvanceAsync(parentId, dto) Task
+        +CancelAdvanceAsync(advanceId, userId) Task
+        +ApproveAdvanceAsync(advanceId, dto) Task
+        +RejectAdvanceAsync(advanceId, dto) Task
+        +IssueFundsAsync(advanceId, dto) Task
+        +GetAdvanceByIdAsync(id) Task
+        +GetAdvancesAsync(filter) Task
+    }
+
+    class IExpenseService {
+        <<interface>>
+        +RecordExpenseAsync(dto) Task
+        +AttachReceiptAsync(expenseId, stream, name) Task
+        +GetReceiptAsync(expenseId) Task
+        +ReviewExpenseAsync(expenseId, dto) Task
+        +ResubmitExpenseAsync(expenseId, dto) Task
+        +GetExpensesByAdvanceIdAsync(advanceId) Task
+    }
+
+    class IReconciliationService {
+        <<interface>>
+        +CalculateReconciliationAsync(advanceId) Task
+        +ConfirmSurplusReturnAsync(advanceId, dto) Task
+        +FinalizeReconciliationAsync(advanceId, userId) Task
+    }
+
+    class IReimbursementService {
+        <<interface>>
+        +SubmitClaimAsync(dto) Task
+        +ApproveClaimAsync(claimId, approverId) Task
+        +RejectClaimAsync(claimId, dto) Task
+        +ProcessPayoutAsync(claimId, dto) Task
+    }
+
+    class IReportingService {
+        <<interface>>
+        +GetExecutiveSummaryAsync(filter) Task
+        +ExportExpensesToCsvAsync(filter) Task
+        +SearchTransactionsAsync(query) Task
+    }
+
+    class IAuditService {
+        <<interface>>
+        +LogActivityAsync(entry) Task
+        +GetAuditTrailAsync(filter) Task
+    }
+
+    class INotificationService {
+        <<interface>>
+        +SendNotificationAsync(toEmail, subject, body) Task
+    }
+
+    %% ========================================================
+    %% BACKEND SERVER: SERVICE IMPLEMENTATIONS (Business Logic)
+    %% ========================================================
+    class AuthService {
+        -DbContext _db
+        +LoginAsync(email, password) Task
+        +LogoutAsync(token) Task
+        +GetCurrentUserAsync() Task
+    }
+
+    class UserService {
+        -DbContext _db
+        -IAuditService _audit
+        +CreateUserAsync(dto) Task
+        +UpdateUserAsync(id, dto) Task
+        +ToggleUserStatusAsync(id, isActive) Task
+        +GetUsersAsync(filter) Task
+    }
+
+    class PermissionService {
+        -DbContext _db
+        +CreateRoleAsync(name, description) Task
+        +AssignPermissionsToRoleAsync(roleId, permissionIds) Task
+        +GetUserPermissionsAsync(userId) Task
+        +HasPermissionAsync(userId, permissionCode) Task
+    }
+
+    class AdvanceService {
+        -DbContext _db
+        -INotificationService _notifier
+        -IAuditService _audit
+        +SubmitAdvanceAsync(dto) Task
+        +SubmitSupplementalAdvanceAsync(parentId, dto) Task
+        +CancelAdvanceAsync(advanceId, userId) Task
+        +ApproveAdvanceAsync(advanceId, dto) Task
+        +RejectAdvanceAsync(advanceId, dto) Task
+        +IssueFundsAsync(advanceId, dto) Task
+        +GetAdvanceByIdAsync(id) Task
+        +GetAdvancesAsync(filter) Task
+    }
+
+    class ExpenseService {
+        -DbContext _db
+        -INotificationService _notifier
+        -IAuditService _audit
+        +RecordExpenseAsync(dto) Task
+        +AttachReceiptAsync(expenseId, stream, name) Task
+        +GetReceiptAsync(expenseId) Task
+        +ReviewExpenseAsync(expenseId, dto) Task
+        +ResubmitExpenseAsync(expenseId, dto) Task
+        +GetExpensesByAdvanceIdAsync(advanceId) Task
+    }
+
+    class ReconciliationService {
+        -DbContext _db
+        -IReimbursementService _reimbursement
+        -IAuditService _audit
+        +CalculateReconciliationAsync(advanceId) Task
+        +ConfirmSurplusReturnAsync(advanceId, dto) Task
+        +FinalizeReconciliationAsync(advanceId, userId) Task
+    }
+
+    class ReimbursementService {
+        -DbContext _db
+        -INotificationService _notifier
+        -IAuditService _audit
+        +SubmitClaimAsync(dto) Task
+        +ApproveClaimAsync(claimId, approverId) Task
+        +RejectClaimAsync(claimId, dto) Task
+        +ProcessPayoutAsync(claimId, dto) Task
+    }
+
+    class ReportingService {
+        -DbContext _db
+        +GetExecutiveSummaryAsync(filter) Task
+        +ExportExpensesToCsvAsync(filter) Task
+        +SearchTransactionsAsync(query) Task
+    }
+
+    class AuditService {
+        -DbContext _db
+        +LogActivityAsync(entry) Task
+        +GetAuditTrailAsync(filter) Task
+    }
+
+    class NotificationService {
+        -IEmailClient _emailClient
+        +SendNotificationAsync(toEmail, subject, body) Task
+    }
+
+    %% ========================================================
+    %% RELATIONSHIPS & REALIZATIONS
+    %% ========================================================
+    %% Service Implementations Realizing Shared Interfaces
+    AuthService ..|> IAuthService
+    UserService ..|> IUserService
+    PermissionService ..|> IPermissionService
+    AdvanceService ..|> IAdvanceService
+    ExpenseService ..|> IExpenseService
+    ReconciliationService ..|> IReconciliationService
+    ReimbursementService ..|> IReimbursementService
+    ReportingService ..|> IReportingService
+    AuditService ..|> IAuditService
+    NotificationService ..|> INotificationService
+
+    %% Inter-Service Dependencies
+    AdvanceService --> INotificationService
+    AdvanceService --> IAuditService
+    ExpenseService --> INotificationService
+    ExpenseService --> IAuditService
+    ReconciliationService --> IReimbursementService
+    ReconciliationService --> IAuditService
+    ReimbursementService --> INotificationService
+    ReimbursementService --> IAuditService
+    UserService --> IAuditService
+
+    %% Entity Relationships
+    User "many" --> "1" Role : assigned to
+    Role "1" *-- "many" RolePermission : defines
+    RolePermission "many" --> "1" Permission : grants
+
+    AdvanceRequest "many" --> "1" User : requested by
+    AdvanceRequest "many" --> "0..1" User : approved by
+    AdvanceRequest "many" --> "0..1" User : issued by
+    AdvanceRequest "1" o-- "many" AdvanceRequest : supplemental advance
+
+    AdvanceRequest "1" *-- "many" Expense : funds
+    Expense "many" --> "1" User : recorded by
+    Expense "many" --> "0..1" User : reviewed by
+    Expense "many" --> "1" ExpenseCategory : classified under
+    Expense "1" *-- "0..1" Receipt : has
+
+    ReimbursementClaim "many" --> "1" User : submitted by
+    ReimbursementClaim "1" --> "0..1" Expense : relates to
+    ReimbursementClaim "many" --> "0..1" User : approved by
+    ReimbursementClaim "many" --> "0..1" User : paid by
+
+    AdvanceRequest "1" -- "0..1" Reconciliation : reconciled by
+    Reconciliation "many" --> "1" User : performed by
+    Reconciliation "1" *-- "many" CashReturn : logs
+    CashReturn "many" --> "1" User : confirmed by
+    AuditLog "many" --> "1" User : triggered by

@@ -1,0 +1,170 @@
+erDiagram
+
+    USER {
+        int UserId PK
+        int RoleId FK
+        string FirstName
+        string LastName
+        string Email UK
+        string PasswordHash
+        bool IsActive
+        datetime CreatedAt
+        datetime UpdatedAt
+    }
+
+    ROLE {
+        int RoleId PK
+        string Name UK
+        string Description
+        bool IsActive
+    }
+
+    PERMISSION {
+        int PermissionId PK
+        string Code UK
+        string Name
+        string Description
+    }
+
+    ROLE_PERMISSION {
+        int RoleId PK, FK
+        int PermissionId PK, FK
+    }
+
+    ADVANCE_REQUEST {
+        int AdvanceId PK
+        int EmployeeId FK
+        int ApprovedByUserId FK
+        int IssuedByUserId FK
+        int ParentAdvanceId FK
+        decimal RequestedAmount
+        decimal ApprovedAmount
+        decimal IssuedAmount
+        string Purpose
+        string Destination
+        string Status
+        string RejectionReason
+        datetime RequestedAt
+        datetime ApprovedAt
+        datetime IssuedAt
+        datetime CreatedAt
+        datetime UpdatedAt
+    }
+
+    EXPENSE_CATEGORY {
+        int CategoryId PK
+        string Name UK
+        string Description
+        bool IsActive
+    }
+
+    EXPENSE {
+        int ExpenseId PK
+        int AdvanceId FK
+        int EmployeeId FK
+        int CategoryId FK
+        int ReviewedByUserId FK
+        decimal Amount
+        date ExpenseDate
+        string Destination
+        string Description
+        string FundingSource
+        string Status
+        string RejectionReason
+        datetime SubmittedAt
+        datetime ReviewedAt
+        datetime CreatedAt
+        datetime UpdatedAt
+    }
+
+    RECEIPT {
+        int ReceiptId PK
+        int ExpenseId FK
+        string FileName
+        string FilePath
+        string ContentType
+        long FileSize
+        datetime UploadedAt
+    }
+
+    REIMBURSEMENT_CLAIM {
+        int ClaimId PK
+        int EmployeeId FK
+        int ExpenseId FK
+        int ApprovedByUserId FK
+        int PaidByUserId FK
+        decimal Amount
+        string Reason
+        string Status
+        string RejectionReason
+        datetime SubmittedAt
+        datetime ApprovedAt
+        datetime PaidAt
+        datetime CreatedAt
+        datetime UpdatedAt
+    }
+
+    RECONCILIATION {
+        int ReconciliationId PK
+        int AdvanceId FK
+        int ReconciledByUserId FK
+        decimal TotalIssued
+        decimal TotalSpent
+        decimal TotalReturned
+        decimal TotalReimbursed
+        decimal Balance
+        string Status
+        datetime ReconciledAt
+        datetime CreatedAt
+    }
+
+    CASH_RETURN {
+        int CashReturnId PK
+        int ReconciliationId FK
+        decimal Amount
+        datetime ReturnedAt
+        int ConfirmedByUserId FK
+        string Notes
+    }
+
+    AUDIT_LOG {
+        long AuditLogId PK
+        int UserId FK
+        string Action
+        string EntityName
+        int EntityId
+        string OldValues
+        string NewValues
+        datetime CreatedAt
+    }
+
+
+    ROLE ||--o{ USER : "assigned to"
+
+    ROLE ||--o{ ROLE_PERMISSION : "has"
+    PERMISSION ||--o{ ROLE_PERMISSION : "granted through"
+
+    USER ||--o{ ADVANCE_REQUEST : "submits"
+    USER ||--o{ ADVANCE_REQUEST : "approves"
+    USER ||--o{ ADVANCE_REQUEST : "issues funds for"
+    ADVANCE_REQUEST ||--o{ ADVANCE_REQUEST : "has additional advance"
+
+    USER ||--o{ EXPENSE : "records"
+    USER ||--o{ EXPENSE : "reviews"
+    EXPENSE_CATEGORY ||--o{ EXPENSE : "categorizes"
+    ADVANCE_REQUEST ||--o{ EXPENSE : "funds"
+
+    EXPENSE ||--o{ RECEIPT : "has"
+
+    USER ||--o{ REIMBURSEMENT_CLAIM : "submits"
+    USER ||--o{ REIMBURSEMENT_CLAIM : "approves"
+    USER ||--o{ REIMBURSEMENT_CLAIM : "pays"
+    EXPENSE ||--o| REIMBURSEMENT_CLAIM : "may generate"
+
+    ADVANCE_REQUEST ||--o| RECONCILIATION : "is reconciled through"
+    USER ||--o{ RECONCILIATION : "performs"
+
+    RECONCILIATION ||--o{ CASH_RETURN : "records"
+    USER ||--o{ CASH_RETURN : "confirms"
+
+    USER ||--o{ AUDIT_LOG : "performs"

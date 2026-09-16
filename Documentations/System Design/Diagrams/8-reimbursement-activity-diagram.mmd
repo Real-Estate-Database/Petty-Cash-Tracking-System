@@ -1,0 +1,35 @@
+flowchart TD
+
+    Start([Start])
+
+    A["Employee uses personal funds for company expense"]
+    B["Record expense"]
+    C["Submit reimbursement claim"]
+
+    D["Super Admin reviews claim"]
+
+    E{"Approve reimbursement?"}
+
+    F["Reject claim"]
+    G["Record rejection reason"]
+
+    H["Approve claim"]
+    I["Process reimbursement"]
+    J["Record reimbursement"]
+
+    End([End])
+
+    Start --> A
+    A --> B
+    B --> C
+    C --> D
+    D --> E
+
+    E -- No --> F
+    F --> G
+    G --> End
+
+    E -- Yes --> H
+    H --> I
+    I --> J
+    J --> End

@@ -1,0 +1,33 @@
+sequenceDiagram
+
+    actor Employee
+    participant Client as MAUI / Web Client
+    participant API as Expense API
+    participant Service as Expense Service
+    participant File as Receipt Storage
+    participant DB as SQL Server
+    participant Audit as Audit Service
+    participant Notify as Notification Service
+
+    Employee->>Client: Enter expense
+    Employee->>Client: Attach optional receipt
+
+    Client->>API: POST /expenses
+    API->>API: Authenticate & authorize
+
+    API->>Service: Submit expense
+    Service->>Service: Validate expense
+    Service->>DB: Save expense
+
+    alt Receipt attached
+        Client->>API: Upload receipt
+        API->>File: Store receipt
+        File-->>API: Storage reference
+        API->>DB: Save receipt metadata
+    end
+
+    Service->>Audit: Record submission
+    Service->>Notify: Notify Super Admin
+
+    Service-->>API: Expense submitted
+    API-->>Client: Pending review

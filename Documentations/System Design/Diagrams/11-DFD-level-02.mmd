@@ -1,0 +1,79 @@
+flowchart LR
+
+    Employee["Employee"]
+    SuperAdmin["Super Admin"]
+    EmailProvider["Email / Notification Provider"]
+
+    P1(("1. Authentication & Access"))
+    P2(("2. Advance Management"))
+    P3(("3. Expense Management"))
+    P4(("4. Reimbursement Management"))
+    P5(("5. Reconciliation"))
+    P6(("6. Reporting & Audit"))
+
+    D1[("User Data")]
+    D2[("Advance Data")]
+    D3[("Expense Data")]
+    D4[("Reimbursement Data")]
+    D5[("Audit Data")]
+    D6[("Receipt Storage")]
+
+    %% Process 1: Authentication & Access Control
+    Employee -->|"Credentials"| P1
+    SuperAdmin -->|"User provisioning & role assignment"| P1
+    P1 <--> D1
+    P1 -->|"Authenticated session & tokens"| Employee
+    P1 -->|"Authenticated session & tokens"| SuperAdmin
+
+    %% Process 2: Advance Management (Initial, Additional, Cancellation, Issuance)
+    Employee -->|"Initial & additional advance requests"| P2
+    Employee -->|"Advance cancellation (Pending)"| P2
+    SuperAdmin -->|"Advance approval / rejection"| P2
+    SuperAdmin -->|"Funds issuance & custody record"| P2
+    P2 <--> D2
+    P2 -->|"Advance status & issuance confirmation"| Employee
+
+    %% Process 3: Expense Management (Recording, Receipts, Review, Resubmission)
+    Employee -->|"Expense records & receipt uploads"| P3
+    Employee -->|"Corrected expense resubmissions"| P3
+    P3 <--> D3
+    P3 <--> D6
+    P3 -->|"Expenses & receipt vouchers for review"| SuperAdmin
+    SuperAdmin -->|"Expense review decisions & reasons"| P3
+    P3 -->|"Expense approval / rejection feedback"| Employee
+
+    %% Process 4: Reimbursement Management
+    Employee -->|"Out-of-pocket reimbursement claim"| P4
+    P4 <--> D4
+    P4 -->|"Reimbursement claims for review"| SuperAdmin
+    SuperAdmin -->|"Claim approval / rejection & disbursement"| P4
+    P4 -->|"Claim status & payment notice"| Employee
+
+    %% Process 5: Reconciliation Engine & Settlement
+    P2 -->|"Total issued funds (initial + additional)"| P5
+    P3 -->|"Approved expense totals"| P5
+    Employee -->|"Surplus balance return / cash surrender"| P5
+    SuperAdmin -->|"Surplus confirmation & closure sign-off"| P5
+    P5 -->|"Deficit reimbursement trigger"| P4
+    P5 -->|"Reconciliation statement & settlement status"| Employee
+    P5 -->|"Reconciliation report & final audit"| SuperAdmin
+    P5 <--> D2
+    P5 <--> D3
+    P5 <--> D4
+
+    %% Process 6: Reporting & Audit Trail
+    P1 -->|"Auth events"| P6
+    P2 -->|"Advance events"| P6
+    P3 -->|"Expense events"| P6
+    P4 -->|"Reimbursement events"| P6
+    P5 -->|"Reconciliation events"| P6
+    P6 <--> D5
+    P6 -.->|"Query data"| D2
+    P6 -.->|"Query data"| D3
+    P6 -.->|"Query data"| D4
+    P6 -->|"Reports, search results & CSV export"| SuperAdmin
+
+    %% External Notifications
+    P2 -->|"Advance status alerts"| EmailProvider
+    P3 -->|"Review decision alerts"| EmailProvider
+    P4 -->|"Reimbursement status alerts"| EmailProvider

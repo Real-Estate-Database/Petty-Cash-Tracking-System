@@ -1,0 +1,18 @@
+sequenceDiagram
+
+    actor User
+    participant Client as MAUI / Web Client
+    participant API as ASP.NET Core API
+    participant Auth as Authentication Service
+    participant DB as SQL Server
+
+    User->>Client: Enter email and password
+    Client->>API: POST /auth/login
+    API->>Auth: Authenticate credentials
+    Auth->>DB: Find user by email
+    DB-->>Auth: User record
+    Auth->>Auth: Verify password hash
+    Auth->>Auth: Determine roles/permissions
+    Auth-->>API: Authentication result
+    API-->>Client: Session/JWT + user context
+    Client-->>User: Redirect to authorized area

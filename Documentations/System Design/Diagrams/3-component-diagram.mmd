@@ -1,0 +1,69 @@
+flowchart TB
+
+    subgraph Application["ASP.NET Core Application"]
+
+        subgraph Security["Security"]
+            Authentication["Authentication"]
+            Authorization["Authorization"]
+        end
+
+        UserManagement["User Management"]
+        PermissionManagement["Permission Management"]
+
+        AdvanceManagement["Advance Management"]
+        ExpenseManagement["Expense Management"]
+        ReimbursementManagement["Reimbursement Management"]
+        Reconciliation["Reconciliation"]
+
+        DocumentStorage["Document Storage"]
+        Notification["Notification"]
+
+        Reporting["Reporting"]
+        Audit["Audit"]
+
+    end
+
+    Client["Client Applications"]
+
+    Database[("SQL Server")]
+
+    FileStore["Receipt File Storage"]
+
+    EmailProvider["Email Provider"]
+
+    Client -->|"All requests"| Authentication
+    Authentication --> Authorization
+
+    Authorization --> UserManagement
+    Authorization --> PermissionManagement
+    Authorization --> AdvanceManagement
+    Authorization --> ExpenseManagement
+    Authorization --> ReimbursementManagement
+    Authorization --> Reconciliation
+    Authorization --> Reporting
+
+    ExpenseManagement --> DocumentStorage
+    DocumentStorage --> FileStore
+
+    AdvanceManagement --> Notification
+    ExpenseManagement --> Notification
+    ReimbursementManagement --> Notification
+    Notification --> EmailProvider
+
+    AdvanceManagement --> Audit
+    ExpenseManagement --> Audit
+    ReimbursementManagement --> Audit
+    Reconciliation --> Audit
+    UserManagement --> Audit
+    PermissionManagement --> Audit
+    Reporting --> Audit
+
+    UserManagement --> Database
+    PermissionManagement --> Database
+    AdvanceManagement --> Database
+    ExpenseManagement --> Database
+    ReimbursementManagement --> Database
+    Reconciliation --> Database
+    Reporting --> Database
+    Audit --> Database
+    Authentication --> Database

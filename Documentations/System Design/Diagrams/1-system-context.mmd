@@ -1,0 +1,16 @@
+flowchart LR
+
+    Employee["Employee"]
+    SuperAdmin["Super Admin"]
+
+    System["Expense Management System"]
+
+    EmailProvider["Email / Notification Provider"]
+
+    Employee -->|"Request advances, record expenses,\nsubmit reimbursements, view own records"| System
+    System -->|"Status, notifications,\nfinancial information"| Employee
+
+    SuperAdmin -->|"Manage users, permissions,\napprove, review, reconcile,\nreport"| System
+    System -->|"Administrative information,\nreports, audit information"| SuperAdmin
+
+    System -->|"Sends notifications"| EmailProvider

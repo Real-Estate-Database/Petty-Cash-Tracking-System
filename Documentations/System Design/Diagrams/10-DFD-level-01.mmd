@@ -1,0 +1,16 @@
+flowchart LR
+
+    Employee["Employee"]
+    SuperAdmin["Super Admin"]
+
+    P1(("Expense Management System"))
+
+    D1[("Expense Management Data")]
+
+    Employee -->|"Requests<br/>Expenses<br/>Claims"| P1
+    P1 -->|"Statuses<br/>Results<br/>Notifications"| Employee
+
+    SuperAdmin -->|"Decisions<br/>Approvals<br/>Reconciliation<br/>Reports"| P1
+    P1 -->|"Pending work<br/>Reports<br/>Audit information"| SuperAdmin
+
+    P1 <--> D1

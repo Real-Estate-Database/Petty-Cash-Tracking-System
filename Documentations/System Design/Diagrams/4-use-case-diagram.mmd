@@ -1,0 +1,59 @@
+flowchart LR
+
+    Employee["Employee"]
+    SuperAdmin["Super Admin"]
+
+    subgraph System["Expense Management System"]
+
+        UC1(("Authenticate"))
+        UC2(("Request Advance"))
+        UC3(("Cancel Advance Request"))
+        UC4(("Record Expense"))
+        UC5(("Edit Pending Expense"))
+        UC6(("Resubmit Rejected Expense"))
+        UC7(("Attach Receipt"))
+        UC8(("Request Additional Advance"))
+        UC9(("Submit Reimbursement Claim"))
+        UC10(("View Own Records"))
+
+        UC11(("Manage Users"))
+        UC12(("Assign Permissions"))
+        UC13(("Review Advance"))
+        UC14(("Approve / Reject Advance"))
+        UC15(("Record Funds Issued"))
+        UC16(("Review Expenses"))
+        UC17(("Approve / Reject Expense"))
+        UC18(("Review Reimbursement"))
+        UC19(("Approve / Reject Reimbursement"))
+        UC20(("Reconcile Advance"))
+        UC21(("View Reports"))
+        UC22(("Export Reports"))
+        UC23(("View Audit Records"))
+
+    end
+
+    Employee --> UC1
+    Employee --> UC2
+    Employee --> UC3
+    Employee --> UC4
+    Employee --> UC5
+    Employee --> UC6
+    Employee --> UC7
+    Employee --> UC8
+    Employee --> UC9
+    Employee --> UC10
+
+    SuperAdmin --> UC1
+    SuperAdmin --> UC11
+    SuperAdmin --> UC12
+    SuperAdmin --> UC13
+    SuperAdmin --> UC14
+    SuperAdmin --> UC15
+    SuperAdmin --> UC16
+    SuperAdmin --> UC17
+    SuperAdmin --> UC18
+    SuperAdmin --> UC19
+    SuperAdmin --> UC20
+    SuperAdmin --> UC21
+    SuperAdmin --> UC22
+    SuperAdmin --> UC23

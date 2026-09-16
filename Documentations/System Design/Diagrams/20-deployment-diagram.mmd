@@ -1,0 +1,38 @@
+flowchart TB
+
+    subgraph UserDevices["User Devices"]
+
+        EmployeeDevice["Employee Device<br/>Android / Windows / Browser"]
+
+        AdminDevice["Super Admin Device<br/>Windows / Browser / MAUI"]
+    end
+
+    subgraph Server["Application Server"]
+
+        WebServer["ASP.NET Core Hosting"]
+
+        API["Expense Management API"]
+
+        StaticWeb["Blazor Web Client"]
+    end
+
+    subgraph DatabaseServer["Database Server"]
+
+        SQL["Microsoft SQL Server"]
+    end
+
+    subgraph External["External Services"]
+
+        FileStorage["Receipt/File Storage"]
+        Notification["Email / Notification Provider"]
+    end
+
+    EmployeeDevice -->|"HTTPS"| WebServer
+    AdminDevice -->|"HTTPS"| WebServer
+
+    WebServer --> StaticWeb
+    WebServer --> API
+
+    API --> SQL
+    API --> FileStorage
+    API --> Notification

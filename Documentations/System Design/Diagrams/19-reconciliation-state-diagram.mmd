@@ -1,0 +1,15 @@
+stateDiagram-v2
+
+    [*] --> Open
+
+    Open --> Reviewing: Begin reconciliation
+
+    Reviewing --> PendingSettlement: Financial position determined
+
+    PendingSettlement --> Settled: Settlement completed
+
+    Settled --> Reconciled: Confirm reconciliation
+
+    Reconciled --> Closed: Finalize
+
+    Closed --> [*]

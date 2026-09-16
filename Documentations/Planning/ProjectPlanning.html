@@ -1,0 +1,2567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Petty Cash & Expense Management System - Comprehensive Project Planning & Engineering Strategy Guide">
+  <title>Project Planning | Petty Cash & Expense Management System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --font-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --font-heading: 'Outfit', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+
+      /* Light Theme (Default) */
+      --bg-body: #f8fafc;
+      --bg-surface: #ffffff;
+      --bg-surface-alt: #f1f5f9;
+      --bg-card: #ffffff;
+      --border-color: #e2e8f0;
+      --border-subtle: #edf2f7;
+
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --text-dim: #94a3b8;
+
+      --primary: #2563eb;
+      --primary-light: #eff6ff;
+      --primary-hover: #1d4ed8;
+      --primary-border: #bfdbfe;
+
+      --accent-indigo: #4f46e5;
+      --accent-indigo-light: #eef2ff;
+      --accent-emerald: #059669;
+      --accent-emerald-light: #ecfdf5;
+      --accent-amber: #d97706;
+      --accent-amber-light: #fffbeb;
+      --accent-rose: #e11d48;
+      --accent-rose-light: #fff1f2;
+      --accent-purple: #7c3aed;
+      --accent-purple-light: #f5f3ff;
+
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
+      --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 16px;
+      --radius-full: 9999px;
+
+      --sidebar-width: 290px;
+      --header-height: 68px;
+    }
+
+    /* Dark Theme */
+    [data-theme="dark"] {
+      --bg-body: #0b0f19;
+      --bg-surface: #111827;
+      --bg-surface-alt: #1f2937;
+      --bg-card: #141d2e;
+      --border-color: #243047;
+      --border-subtle: #1e293b;
+
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+
+      --primary: #3b82f6;
+      --primary-light: rgba(59, 130, 246, 0.12);
+      --primary-hover: #60a5fa;
+      --primary-border: #1e3a8a;
+
+      --accent-indigo: #6366f1;
+      --accent-indigo-light: rgba(99, 102, 241, 0.12);
+      --accent-emerald: #10b981;
+      --accent-emerald-light: rgba(16, 185, 129, 0.12);
+      --accent-amber: #f59e0b;
+      --accent-amber-light: rgba(245, 158, 11, 0.12);
+      --accent-rose: #f43f5e;
+      --accent-rose-light: rgba(244, 63, 94, 0.12);
+      --accent-purple: #8b5cf6;
+      --accent-purple-light: rgba(139, 92, 246, 0.12);
+
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.35);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4);
+      --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      font-size: 16px;
+    }
+
+    body {
+      font-family: var(--font-body);
+      background-color: var(--bg-body);
+      color: var(--text-main);
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      transition: background-color 0.25s ease, color 0.25s ease;
+    }
+
+    /* Top Progress Bar */
+    #reading-progress {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--primary), var(--accent-indigo), var(--accent-purple));
+      width: 0%;
+      z-index: 1000;
+      transition: width 0.1s ease-out;
+    }
+
+    /* Header Nav */
+    .top-nav {
+      position: sticky;
+      top: 0;
+      height: var(--header-height);
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-color);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2rem;
+      transition: background-color 0.25s ease, border-color 0.25s ease;
+    }
+
+    [data-theme="dark"] .top-nav {
+      background: rgba(17, 24, 39, 0.85);
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+      color: var(--text-main);
+    }
+
+    .brand-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, var(--primary), var(--accent-indigo));
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-weight: 700;
+      font-size: 1.1rem;
+      box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
+    }
+
+    .brand-text h1 {
+      font-family: var(--font-heading);
+      font-size: 1.15rem;
+      font-weight: 700;
+      line-height: 1.2;
+      color: var(--text-main);
+    }
+
+    .brand-text span {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .badge-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.3rem 0.8rem;
+      border-radius: var(--radius-full);
+      font-size: 0.75rem;
+      font-weight: 600;
+      background-color: var(--accent-emerald-light);
+      color: var(--accent-emerald);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .badge-pill.status-preliminary {
+      background-color: var(--accent-amber-light);
+      color: var(--accent-amber);
+      border-color: rgba(245, 158, 11, 0.25);
+    }
+
+    .nav-link-doc {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.45rem 0.85rem;
+      border-radius: var(--radius-md);
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-decoration: none;
+      color: var(--text-muted);
+      border: 1px solid var(--border-color);
+      background: var(--bg-surface);
+      transition: all 0.2s ease;
+    }
+
+    .nav-link-doc:hover {
+      color: var(--primary);
+      border-color: var(--primary);
+      transform: translateY(-1px);
+    }
+
+    .btn-toggle-theme, .btn-action {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 0.5rem 0.9rem;
+      border-radius: var(--radius-md);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: all 0.2s ease;
+    }
+
+    .btn-toggle-theme:hover, .btn-action:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      transform: translateY(-1px);
+    }
+
+    /* Layout */
+    .app-container {
+      display: flex;
+      max-width: 1560px;
+      margin: 0 auto;
+      padding: 1.5rem 1.5rem 4rem;
+      gap: 2rem;
+    }
+
+    /* Sticky Sidebar Navigation */
+    .sidebar {
+      width: var(--sidebar-width);
+      flex-shrink: 0;
+      position: sticky;
+      top: calc(var(--header-height) + 1.5rem);
+      height: calc(100vh - var(--header-height) - 3rem);
+      overflow-y: auto;
+      padding: 1.25rem 1rem;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .sidebar::-webkit-scrollbar {
+      width: 5px;
+    }
+    .sidebar::-webkit-scrollbar-thumb {
+      background-color: var(--border-color);
+      border-radius: 4px;
+    }
+
+    .toc-title {
+      font-family: var(--font-heading);
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin-bottom: 0.85rem;
+      padding-left: 0.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .toc-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+
+    .toc-link {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.5rem 0.75rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 500;
+      border-radius: var(--radius-sm);
+      transition: all 0.15s ease;
+      line-height: 1.3;
+    }
+
+    .toc-link:hover {
+      color: var(--primary);
+      background-color: var(--primary-light);
+    }
+
+    .toc-link.active {
+      color: var(--primary);
+      background-color: var(--primary-light);
+      font-weight: 600;
+      border-left: 3px solid var(--primary);
+      padding-left: calc(0.75rem - 3px);
+    }
+
+    .toc-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 1.35rem;
+      height: 1.35rem;
+      background: var(--bg-surface-alt);
+      color: var(--text-muted);
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      font-family: var(--font-mono);
+      flex-shrink: 0;
+    }
+
+    .toc-link.active .toc-num {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    /* Main Content Area */
+    .main-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    /* Hero Section */
+    .hero-banner {
+      background: linear-gradient(135deg, #1e3a8a 0%, #1e1b4b 60%, #0f172a 100%);
+      color: #ffffff;
+      border-radius: var(--radius-lg);
+      padding: 3rem 2.5rem;
+      margin-bottom: 2.5rem;
+      position: relative;
+      overflow: hidden;
+      box-shadow: var(--shadow-xl);
+    }
+
+    .hero-banner::before {
+      content: "";
+      position: absolute;
+      top: -30%;
+      right: -10%;
+      width: 450px;
+      height: 450px;
+      background: radial-gradient(circle, rgba(59, 130, 246, 0.35) 0%, rgba(99, 102, 241, 0.1) 60%, transparent 80%);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .hero-tagline {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(8px);
+      padding: 0.35rem 0.9rem;
+      border-radius: var(--radius-full);
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 1.25rem;
+      color: #93c5fd;
+    }
+
+    .hero-title {
+      font-family: var(--font-heading);
+      font-size: 2.75rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      margin-bottom: 1rem;
+      background: linear-gradient(to right, #ffffff, #dbeafe);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-desc {
+      font-size: 1.1rem;
+      color: #cbd5e1;
+      max-width: 800px;
+      line-height: 1.6;
+      margin-bottom: 2rem;
+    }
+
+    .hero-meta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.15);
+      padding-top: 1.5rem;
+    }
+
+    .hero-meta-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .hero-meta-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #94a3b8;
+    }
+
+    .hero-meta-value {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #f8fafc;
+    }
+
+    /* Section Component */
+    .doc-section {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 2.25rem 2.25rem;
+      margin-bottom: 2rem;
+      box-shadow: var(--shadow-sm);
+      scroll-margin-top: calc(var(--header-height) + 1.5rem);
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .doc-section:hover {
+      border-color: rgba(37, 99, 235, 0.3);
+      box-shadow: var(--shadow-md);
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.75rem;
+      padding-bottom: 1.25rem;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .section-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 2.75rem;
+      height: 2.75rem;
+      padding: 0 0.5rem;
+      background: linear-gradient(135deg, var(--primary-light), var(--accent-indigo-light));
+      border: 1px solid var(--primary-border);
+      color: var(--primary);
+      border-radius: var(--radius-md);
+      font-family: var(--font-heading);
+      font-weight: 700;
+      font-size: 1.15rem;
+      flex-shrink: 0;
+    }
+
+    .section-title-wrap h2 {
+      font-family: var(--font-heading);
+      font-size: 1.65rem;
+      font-weight: 700;
+      color: var(--text-main);
+      letter-spacing: -0.01em;
+      line-height: 1.25;
+    }
+
+    .section-title-wrap p {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-top: 0.2rem;
+    }
+
+    /* Subheadings */
+    h3 {
+      font-family: var(--font-heading);
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin: 1.5rem 0 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    h4 {
+      font-family: var(--font-heading);
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--text-main);
+      margin: 1.25rem 0 0.5rem;
+    }
+
+    p {
+      margin-bottom: 1rem;
+      color: var(--text-main);
+    }
+
+    /* Cards Grid */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.25rem;
+      margin: 1.5rem 0;
+    }
+
+    .info-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 1.25rem;
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .info-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+      border-color: var(--primary-border);
+    }
+
+    .info-card-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .card-icon-box {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+
+    .card-icon-blue { background: var(--primary-light); color: var(--primary); }
+    .card-icon-emerald { background: var(--accent-emerald-light); color: var(--accent-emerald); }
+    .card-icon-amber { background: var(--accent-amber-light); color: var(--accent-amber); }
+    .card-icon-rose { background: var(--accent-rose-light); color: var(--accent-rose); }
+    .card-icon-purple { background: var(--accent-purple-light); color: var(--accent-purple); }
+
+    .info-card-title {
+      font-family: var(--font-heading);
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .info-card-body {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      line-height: 1.55;
+    }
+
+    /* Problem Grid Items */
+    .problems-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 1rem;
+      margin: 1.25rem 0;
+    }
+
+    .problem-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.85rem;
+      background: var(--bg-surface-alt);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 1rem 1.15rem;
+      transition: all 0.2s ease;
+    }
+
+    .problem-item:hover {
+      border-color: var(--accent-rose);
+      background: var(--accent-rose-light);
+      transform: translateX(3px);
+    }
+
+    .problem-num {
+      background: var(--accent-rose);
+      color: #ffffff;
+      font-weight: 700;
+      font-size: 0.75rem;
+      font-family: var(--font-mono);
+      min-width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .problem-text {
+      font-size: 0.92rem;
+      font-weight: 500;
+      color: var(--text-main);
+      line-height: 1.45;
+    }
+
+    /* Purpose Box */
+    .callout-purpose {
+      background: linear-gradient(135deg, var(--primary-light), var(--accent-indigo-light));
+      border: 2px solid var(--primary);
+      border-radius: var(--radius-lg);
+      padding: 2rem 2.25rem;
+      margin: 1.5rem 0;
+      position: relative;
+    }
+
+    .callout-purpose-label {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 0.6rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .callout-purpose-text {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--text-main);
+      line-height: 1.5;
+      font-family: var(--font-heading);
+    }
+
+    /* Formula Banner */
+    .formula-box {
+      background: var(--bg-surface-alt);
+      border: 1px dashed var(--accent-emerald);
+      border-radius: var(--radius-md);
+      padding: 1.25rem 1.75rem;
+      margin: 1.25rem 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      gap: 0.75rem;
+    }
+
+    .formula-badge {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 0.25rem 0.6rem;
+      border-radius: var(--radius-sm);
+      background: var(--accent-emerald);
+      color: #ffffff;
+    }
+
+    .formula-code {
+      font-family: var(--font-mono);
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--accent-emerald);
+      letter-spacing: 0.02em;
+    }
+
+    /* Flow Sequence Cards */
+    .flow-chain {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.6rem;
+      margin: 1.5rem 0;
+      padding: 1.5rem;
+      background: var(--bg-surface-alt);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+    }
+
+    .flow-node {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      padding: 0.6rem 0.9rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--text-main);
+      box-shadow: var(--shadow-sm);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .flow-node.highlight {
+      background: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+    }
+
+    .flow-arrow {
+      color: var(--text-dim);
+      font-weight: 800;
+      font-size: 1.1rem;
+    }
+
+    /* Vertical Discovery Flow */
+    .vertical-timeline {
+      position: relative;
+      margin: 2rem 0;
+      padding-left: 2rem;
+    }
+
+    .vertical-timeline::before {
+      content: "";
+      position: absolute;
+      left: 17px;
+      top: 10px;
+      bottom: 10px;
+      width: 2px;
+      background: var(--border-color);
+    }
+
+    .timeline-step {
+      position: relative;
+      margin-bottom: 1.5rem;
+    }
+
+    .timeline-step:last-child {
+      margin-bottom: 0;
+    }
+
+    .step-marker {
+      position: absolute;
+      left: -2rem;
+      top: 0;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--bg-surface);
+      border: 2px solid var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--primary);
+      box-shadow: 0 0 0 4px var(--bg-body);
+    }
+
+    .step-content {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 1rem 1.25rem;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .step-question {
+      font-family: var(--font-heading);
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 0.35rem;
+    }
+
+    .step-answer {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    /* Tables */
+    .table-container {
+      width: 100%;
+      overflow-x: auto;
+      margin: 1.5rem 0;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.92rem;
+    }
+
+    thead th {
+      background: var(--bg-surface-alt);
+      color: var(--text-main);
+      font-family: var(--font-heading);
+      font-weight: 700;
+      padding: 0.9rem 1.25rem;
+      border-bottom: 1px solid var(--border-color);
+      letter-spacing: 0.02em;
+    }
+
+    tbody td {
+      padding: 0.85rem 1.25rem;
+      border-bottom: 1px solid var(--border-subtle);
+      color: var(--text-main);
+    }
+
+    tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    tbody tr:hover {
+      background-color: var(--primary-light);
+    }
+
+    /* Lists */
+    ul, ol {
+      padding-left: 1.5rem;
+      margin-bottom: 1.25rem;
+    }
+
+    li {
+      margin-bottom: 0.45rem;
+      color: var(--text-main);
+    }
+
+    .feature-list {
+      list-style: none;
+      padding-left: 0;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 0.6rem;
+      margin: 1rem 0 1.5rem;
+    }
+
+    .feature-list li {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.65rem 0.85rem;
+      background: var(--bg-surface-alt);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      font-size: 0.88rem;
+      font-weight: 500;
+      margin-bottom: 0;
+    }
+
+    .check-icon {
+      color: var(--accent-emerald);
+      font-weight: 800;
+      font-size: 1rem;
+    }
+
+    .cross-icon {
+      color: var(--accent-rose);
+      font-weight: 800;
+      font-size: 1rem;
+    }
+
+    /* Scope Dual Column */
+    .scope-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin: 1.5rem 0;
+    }
+
+    @media (max-width: 768px) {
+      .scope-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .scope-box {
+      border-radius: var(--radius-md);
+      padding: 1.5rem;
+      border: 1px solid;
+    }
+
+    .scope-in {
+      background: var(--accent-emerald-light);
+      border-color: rgba(16, 185, 129, 0.3);
+    }
+
+    .scope-out {
+      background: var(--accent-rose-light);
+      border-color: rgba(244, 63, 94, 0.3);
+    }
+
+    .scope-title {
+      font-family: var(--font-heading);
+      font-size: 1.15rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .scope-in .scope-title { color: var(--accent-emerald); }
+    .scope-out .scope-title { color: var(--accent-rose); }
+
+    /* Quotes / Callouts */
+    blockquote {
+      border-left: 4px solid var(--primary);
+      padding: 0.85rem 1.25rem;
+      margin: 1.25rem 0;
+      background: var(--primary-light);
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      font-style: italic;
+      color: var(--text-main);
+    }
+
+    .alert-box {
+      border-radius: var(--radius-md);
+      padding: 1.25rem 1.5rem;
+      margin: 1.5rem 0;
+      display: flex;
+      gap: 1rem;
+      align-items: flex-start;
+      border: 1px solid;
+    }
+
+    .alert-box.alert-warning {
+      background: var(--accent-amber-light);
+      border-color: rgba(245, 158, 11, 0.35);
+      color: var(--text-main);
+    }
+
+    .alert-box.alert-danger {
+      background: var(--accent-rose-light);
+      border-color: rgba(244, 63, 94, 0.35);
+      color: var(--text-main);
+    }
+
+    .alert-box.alert-info {
+      background: var(--accent-indigo-light);
+      border-color: rgba(99, 102, 241, 0.35);
+      color: var(--text-main);
+    }
+
+    .alert-icon {
+      font-size: 1.35rem;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .alert-content h4 {
+      margin-top: 0;
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+    }
+
+    .alert-content p:last-child {
+      margin-bottom: 0;
+    }
+
+    /* MVP Phase Badges */
+    .phase-badge {
+      display: inline-block;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.2rem 0.55rem;
+      border-radius: var(--radius-sm);
+      margin-left: 0.5rem;
+    }
+
+    .phase-1 {
+      background: var(--accent-emerald-light);
+      color: var(--accent-emerald);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .phase-2 {
+      background: var(--accent-indigo-light);
+      color: var(--accent-indigo);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+    }
+
+    /* Q&A Definition List Grid */
+    .qa-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1rem;
+      margin: 1.25rem 0;
+    }
+
+    .qa-card {
+      background: var(--bg-surface-alt);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 1rem 1.2rem;
+    }
+
+    .qa-question {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 0.35rem;
+    }
+
+    .qa-answer {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    /* Checkable Deliverables Cards */
+    .deliverable-card {
+      border: 1px solid var(--border-color);
+      background: var(--bg-card);
+      border-radius: var(--radius-md);
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1rem;
+      transition: all 0.2s ease;
+    }
+
+    .deliverable-card:hover {
+      border-color: var(--primary);
+      box-shadow: var(--shadow-md);
+    }
+
+    .deliverable-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.75rem;
+    }
+
+    .deliverable-name {
+      font-family: var(--font-heading);
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    /* Footer */
+    .doc-footer {
+      text-align: center;
+      padding: 2.5rem 0 1rem;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border-color);
+      margin-top: 3rem;
+    }
+
+    /* Print Styles */
+    @media print {
+      .top-nav, .sidebar, #reading-progress, .btn-toggle-theme {
+        display: none !important;
+      }
+      .app-container {
+        display: block;
+        padding: 0;
+      }
+      .doc-section {
+        box-shadow: none !important;
+        border: 1px solid #ccc !important;
+        break-inside: avoid;
+        margin-bottom: 1.5rem;
+      }
+      body {
+        background: #fff !important;
+        color: #000 !important;
+      }
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 1024px) {
+      .sidebar {
+        display: none;
+      }
+      .app-container {
+        padding: 1.25rem 1rem;
+      }
+      .hero-title {
+        font-size: 2.15rem;
+      }
+      .hero-banner {
+        padding: 2rem 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Reading Progress Indicator -->
+  <div id="reading-progress"></div>
+
+  <!-- Header Navigation Bar -->
+  <nav class="top-nav">
+    <a href="#overview" class="nav-brand">
+      <div class="brand-icon">Z</div>
+      <div class="brand-text">
+        <h1>PettyCash Manager</h1>
+        <span>Engineering Documentation</span>
+      </div>
+    </a>
+
+    <div class="nav-actions">
+      <span class="badge-pill status-preliminary">
+        <svg width="8" height="8" viewBox="0 0 8 8" fill="currentColor"><circle cx="4" cy="4" r="4"/></svg>
+        Stage 1: Planning
+      </span>
+      <a href="RequirementsAnalysis.html" class="nav-link-doc" title="View Stage 2 Documentation">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+        <span>Stage 2: Requirements &rarr;</span>
+      </a>
+      <button class="btn-action" onclick="window.print()" title="Print Documentation">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+        <span>Print</span>
+      </button>
+      <button class="btn-toggle-theme" id="themeToggleBtn" title="Toggle Light/Dark Theme">
+        <span id="themeIcon">🌙</span>
+        <span id="themeLabel">Dark</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Main Container with Sidebar + Content -->
+  <div class="app-container">
+
+    <!-- Sticky Table of Contents Sidebar -->
+    <aside class="sidebar" aria-label="Table of Contents">
+      <div class="toc-title">
+        <span>Contents</span>
+        <span style="font-size: 0.7rem; font-family: var(--font-mono);">17 Sections</span>
+      </div>
+      <ul class="toc-list" id="tocList">
+        <li><a href="#section-1" class="toc-link"><span class="toc-num">01</span><span>Potential Problems</span></a></li>
+        <li><a href="#section-2" class="toc-link"><span class="toc-num">02</span><span>System Purpose</span></a></li>
+        <li><a href="#section-3" class="toc-link"><span class="toc-num">03</span><span>Core Objectives</span></a></li>
+        <li><a href="#section-4" class="toc-link"><span class="toc-num">04</span><span>Business Benefits</span></a></li>
+        <li><a href="#section-5" class="toc-link"><span class="toc-num">05</span><span>Stakeholder Matrix</span></a></li>
+        <li><a href="#section-6" class="toc-link"><span class="toc-num">06</span><span>Expense Life Cycle</span></a></li>
+        <li><a href="#section-7" class="toc-link"><span class="toc-num">07</span><span>What Counts as Expense</span></a></li>
+        <li><a href="#section-8" class="toc-link"><span class="toc-num">08</span><span>Money Flows & Policy</span></a></li>
+        <li><a href="#section-9" class="toc-link"><span class="toc-num">09</span><span>Problem Boundary</span></a></li>
+        <li><a href="#section-10" class="toc-link"><span class="toc-num">10</span><span>Project Constraints</span></a></li>
+        <li><a href="#section-11" class="toc-link"><span class="toc-num">11</span><span>Feasibility Study</span></a></li>
+        <li><a href="#section-12" class="toc-link"><span class="toc-num">12</span><span>Definition of Success</span></a></li>
+        <li><a href="#section-13" class="toc-link"><span class="toc-num">13</span><span>MVP Definition</span></a></li>
+        <li><a href="#section-14" class="toc-link"><span class="toc-num">14</span><span>Current Process Discovery</span></a></li>
+        <li><a href="#section-15" class="toc-link"><span class="toc-num">15</span><span>Planning Deliverables</span></a></li>
+        <li><a href="#section-16" class="toc-link"><span class="toc-num">16</span><span>The Brutal Truth</span></a></li>
+        <li><a href="#section-17" class="toc-link"><span class="toc-num">17</span><span>Next: Requirements</span></a></li>
+      </ul>
+    </aside>
+
+    <!-- Main Content Stream -->
+    <main class="main-content">
+
+      <!-- Hero Banner -->
+      <section class="hero-banner" id="overview">
+        <div class="hero-tagline">
+          <span>Enterprise Architecture &amp; SDLC Stage 1</span>
+        </div>
+        <h1 class="hero-title">Petty Cash &amp; Expense Management</h1>
+        <p class="hero-desc">
+          Strategic foundation, feasibility analysis, process lifecycles, and scope boundaries for centralizing corporate expense tracking, advance reconciliation, and financial accountability.
+        </p>
+
+        <div class="hero-meta-grid">
+          <div class="hero-meta-item">
+            <span class="hero-meta-label">Document Stage</span>
+            <span class="hero-meta-value">Stage 1: Project Planning</span>
+          </div>
+          <div class="hero-meta-item">
+            <span class="hero-meta-label">Next Phase</span>
+            <span class="hero-meta-value">Stage 2: Requirements Analysis</span>
+          </div>
+          <div class="hero-meta-item">
+            <span class="hero-meta-label">Primary Stack</span>
+            <span class="hero-meta-value">.NET MAUI Blazor Hybrid and Web App with ASP.NET CORE and APIs</span>
+          </div>
+          <div class="hero-meta-item">
+            <span class="hero-meta-label">Scope Classification</span>
+            <span class="hero-meta-value">Internal Financial Governance</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 1: Potential Problems -->
+      <section class="doc-section" id="section-1">
+        <div class="section-header">
+          <div class="section-badge">01</div>
+          <div class="section-title-wrap">
+            <h2>Potential Problems in the Current System</h2>
+            <p>14 high-risk vulnerabilities and operational bottlenecks identified in current manual operations</p>
+          </div>
+        </div>
+
+        <p>Before writing code or architecting solutions, we must catalog the concrete failure modes that plague day-to-day cash disbursements and reconciliations:</p>
+
+        <div class="problems-grid">
+          <div class="problem-item">
+            <div class="problem-num">1</div>
+            <div class="problem-text">Expenses are recorded manually without standardized entry gates.</div>
+          </div>
+          <div class="problem-item">
+            <div class="problem-num">2</div>
+            <div class="problem-text">Receipts and paper vouchers can get easily misplaced or lost.</div>
+          </div>
+          <div class="problem-item">
+            <div class="problem-num">3</div>
+            <div class="problem-text">Management cannot immediately see how much cash has been issued in real time.</div>
+          </div>
+          <div class="problem-item">
+            <div class="problem-num">4</div>
+            <div class="problem-text">Employees frequently forget line items they spent money on during trips.</div>
+          </div>
+          <div class="problem-item">
+            <div class="problem-num">5</div>
+            <div class="problem-text">Lack of consistent, company-wide expense categories and taxonomy.</div>
+          </div>
+          <div class="problem-item">
+            <div class="problem-num">6</div>
+            <div class="problem-text">Extremely difficult to cross-compare money disbursed vs. money actually spent.</div>
+          </div>
+          <div class="problem-item">
+            <div class="problem-num">7</div>
+            <div class="problem-text">Remaining balances and cash surpluses are not properly tracked or surrendered.</div>
+          </div>
+          <div class="problem-item">
+            <div class="problem-num">8</div>
+            <div class="problem-text">Disjointed approvals happen via WhatsApp, paper scraps, informal chats, and Excel.</div>
+          </div>
+          <div class="problem-item">
+            <div class="problem-num">9</div>
+            <div class="problem-text">Complete absence of an immutable, tamper-evident audit trail.</div>
+          </div>
+          <div class="problem-item">
+            <div class="problem-num">10</div>
+            <div class="problem-text">Management cannot definitively determine who authorized a specific transaction.</div>
+          </div>
+          <div class="problem-item">
+            <div class="problem-num">11</div>
+            <div class="problem-text">Accounting spends days manually consolidating fragmented spreadsheets and receipts.</div>
+          </div>
+          <div class="problem-item">
+            <div class="problem-num">12</div>
+            <div class="problem-text">Historical expense trends and past transaction records are difficult or impossible to retrieve.</div>
+          </div>
+          <div class="problem-item">
+            <div class="problem-num">13</div>
+            <div class="problem-text">Fraudulent submissions, inflated costs, or accidental misuse are difficult to detect.</div>
+          </div>
+          <div class="problem-item">
+            <div class="problem-num">14</div>
+            <div class="problem-text">Management reporting requires exhausting manual effort and produces delayed figures.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 2: Define the Purpose -->
+      <section class="doc-section" id="section-2">
+        <div class="section-header">
+          <div class="section-badge">02</div>
+          <div class="section-title-wrap">
+            <h2>Define the PURPOSE</h2>
+            <p>The foundational reason why this software platform must exist</p>
+          </div>
+        </div>
+
+        <div class="callout-purpose">
+          <div class="callout-purpose-label">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 14 14"/></svg>
+            System Purpose Statement
+          </div>
+          <div class="callout-purpose-text">
+            “To centralize, control, track, and report company expenses from the moment funds are requested or issued through spending, receipt submission, review, approval, reconciliation, and reporting.”
+          </div>
+        </div>
+
+        <p>This single statement anchors every functional decision. Any proposed feature that does not directly advance this lifecycle boundary must be scrutinized or excluded.</p>
+      </section>
+
+      <!-- Section 3: Define the Objectives -->
+      <section class="doc-section" id="section-3">
+        <div class="section-header">
+          <div class="section-badge">03</div>
+          <div class="section-title-wrap">
+            <h2>Define the OBJECTIVES</h2>
+            <p>Translating corporate purpose into measurable, concrete engineering outcomes</p>
+          </div>
+        </div>
+
+        <div class="cards-grid">
+          <!-- Objective 1 -->
+          <div class="info-card">
+            <div class="info-card-header">
+              <div class="card-icon-box card-icon-blue">👁️</div>
+              <div class="info-card-title">Objective 1: Expense Visibility</div>
+            </div>
+            <div class="info-card-body">
+              <p>Management must possess 360-degree real-time visibility into:</p>
+              <ul>
+                <li>Who received company funds</li>
+                <li>How much was issued &amp; disbursement method</li>
+                <li>Why the money was issued (business purpose)</li>
+                <li>What line items it was spent on</li>
+                <li>How much was actually spent vs remaining</li>
+                <li>Official approval status and authorization logs</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Objective 2 -->
+          <div class="info-card">
+            <div class="info-card-header">
+              <div class="card-icon-box card-icon-purple">👤</div>
+              <div class="info-card-title">Objective 2: Accountability</div>
+            </div>
+            <div class="info-card-body">
+              <p>Every single shilling issued must have an unambiguous, identifiable person responsible for it until formal sign-off.</p>
+              <blockquote>
+                <strong>Concrete Example:</strong><br>
+                Paul → Travel Advance → UGX 500,000 → Kampala–Mbarara trip → Expenses → UGX 420,000 → Balance UGX 80,000
+              </blockquote>
+            </div>
+          </div>
+
+          <!-- Objective 3 -->
+          <div class="info-card">
+            <div class="info-card-header">
+              <div class="card-icon-box card-icon-emerald">🧾</div>
+              <div class="info-card-title">Objective 3: Expense Documentation</div>
+            </div>
+            <div class="info-card-body">
+              <p>The system must mandate and associate digital supporting documentation (receipts, fuel vouchers, invoices, photos) with individual expense line items before closure.</p>
+            </div>
+          </div>
+
+          <!-- Objective 4 -->
+          <div class="info-card">
+            <div class="info-card-header">
+              <div class="card-icon-box card-icon-amber">🛡️</div>
+              <div class="info-card-title">Objective 4: Approval Control</div>
+            </div>
+            <div class="info-card-body">
+              <p>Enforce strict corporate authorization hierarchies. Unapproved funds cannot be disbursed; unverified expenses cannot be written off as reconciled.</p>
+            </div>
+          </div>
+
+          <!-- Objective 5 -->
+          <div class="info-card">
+            <div class="info-card-header">
+              <div class="card-icon-box card-icon-emerald">⚖️</div>
+              <div class="info-card-title">Objective 5: Reconciliation</div>
+            </div>
+            <div class="info-card-body">
+              <p>Automate balance determination to guarantee zero unallocated cash floats:</p>
+              <div class="formula-box">
+                <span class="formula-badge">Rule</span>
+                <span class="formula-code">Money Issued − Legitimate Expenses = Balance</span>
+              </div>
+              <p style="font-size: 0.85rem; color: var(--text-muted);">Configured according to the company's official financial chart of accounts.</p>
+            </div>
+          </div>
+
+          <!-- Objective 6 -->
+          <div class="info-card">
+            <div class="info-card-header">
+              <div class="card-icon-box card-icon-blue">📊</div>
+              <div class="info-card-title">Objective 6: Instant Reporting</div>
+            </div>
+            <div class="info-card-body">
+              <p>Allow management and accounting to produce comprehensive expenditure analytics, balance sheets, and tax reports without manually consolidating disparate spreadsheets.</p>
+            </div>
+          </div>
+
+          <!-- Objective 7 -->
+          <div class="info-card" style="grid-column: 1 / -1;">
+            <div class="info-card-header">
+              <div class="card-icon-box card-icon-rose">🔍</div>
+              <div class="info-card-title">Objective 7: Auditability &amp; Non-Repudiation</div>
+            </div>
+            <div class="info-card-body">
+              <p>When money is involved, every ledger entry must answer four immutable questions:</p>
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 0.5rem;">
+                <div style="background: var(--bg-surface-alt); padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+                  <strong style="color: var(--primary);">Who created this record?</strong>
+                  <div style="font-size: 0.85rem; color: var(--text-muted);">Identity &amp; authenticated user session</div>
+                </div>
+                <div style="background: var(--bg-surface-alt); padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+                  <strong style="color: var(--primary);">Who modified or adjusted it?</strong>
+                  <div style="font-size: 0.85rem; color: var(--text-muted);">Change logs, diffs, and justifications</div>
+                </div>
+                <div style="background: var(--bg-surface-alt); padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+                  <strong style="color: var(--primary);">Who authorized/approved it?</strong>
+                  <div style="font-size: 0.85rem; color: var(--text-muted);">Sign-off authority at each gate</div>
+                </div>
+                <div style="background: var(--bg-surface-alt); padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+                  <strong style="color: var(--primary);">When did they do it?</strong>
+                  <div style="font-size: 0.85rem; color: var(--text-muted);">Accurate, server-validated timestamps</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 4: Expected Business Benefits -->
+      <section class="doc-section" id="section-4">
+        <div class="section-header">
+          <div class="section-badge">04</div>
+          <div class="section-title-wrap">
+            <h2>Expected Business Benefits</h2>
+            <p>Why the enterprise invests in this solution — distinct from engineering objectives</p>
+          </div>
+        </div>
+
+        <div class="cards-grid">
+          <div class="info-card">
+            <div class="info-card-header">
+              <div class="card-icon-box card-icon-emerald">💰</div>
+              <div class="info-card-title">Financial Control</div>
+            </div>
+            <div class="info-card-body">
+              The company gains airtight oversight and governance over cash advances, eliminating unaccounted company funds and expenditure leakage.
+            </div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-card-header">
+              <div class="card-icon-box card-icon-blue">⚡</div>
+              <div class="info-card-title">Reduced Administrative Overhead</div>
+            </div>
+            <div class="info-card-body">
+              Finance teams and operational managers save hours each week by replacing manual receipt sorting and Excel consolidation with automated reconciliation workflows.
+            </div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-card-header">
+              <div class="card-icon-box card-icon-purple">🎯</div>
+              <div class="info-card-title">Enforced Accountability</div>
+            </div>
+            <div class="info-card-body">
+              Employees take clear personal responsibility for documenting funds, attaching receipts promptly, and surrendering surplus cash.
+            </div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-card-header">
+              <div class="card-icon-box card-icon-amber">🚀</div>
+              <div class="info-card-title">Faster Decision-Making</div>
+            </div>
+            <div class="info-card-body">
+              Executive leadership views live burn rates, department budgets, and project expenditures on demand without waiting for month-end reports.
+            </div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-card-header">
+              <div class="card-icon-box card-icon-emerald">📉</div>
+              <div class="info-card-title">Minimization of Calculation Errors</div>
+            </div>
+            <div class="info-card-body">
+              Eliminates transcription errors, formula bugs, duplicate payments, and currency discrepancies common in spreadsheets.
+            </div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-card-header">
+              <div class="card-icon-box card-icon-blue">🗄️</div>
+              <div class="info-card-title">Historical Data Retrieval</div>
+            </div>
+            <div class="info-card-body">
+              Past travel, project, or maintenance costs can be filtered, analyzed, and retrieved in seconds for accurate future budgeting.
+            </div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-card-header">
+              <div class="card-icon-box card-icon-purple">📋</div>
+              <div class="info-card-title">Audit Readiness</div>
+            </div>
+            <div class="info-card-body">
+              Complies effortlessly with external tax bodies and internal auditors through instant access to digital receipts and historical approval chains.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 5: Stakeholder Matrix -->
+      <section class="doc-section" id="section-5">
+        <div class="section-header">
+          <div class="section-badge">05</div>
+          <div class="section-title-wrap">
+            <h2>Stakeholder Identification &amp; Role Mapping</h2>
+            <p>Identifying everyone who touches company money and why they care</p>
+          </div>
+        </div>
+
+        <p>
+          Never assume <em>“the users are just employees.”</em> Different roles interact with financial data in completely distinct ways.
+        </p>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 25%;">Stakeholder Role</th>
+                <th style="width: 50%;">Core Concerns &amp; Operational Motivations</th>
+                <th style="width: 25%;">Key System Interactions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>CEO / Managing Director</strong></td>
+                <td>Total financial visibility, control over company runway, fraud prevention, high-value approvals</td>
+                <td>Executive dashboards, advance approvals, macro reports</td>
+              </tr>
+              <tr>
+                <td><strong>Operations Manager</strong></td>
+                <td>Operational budgets, project/travel cost adherence, team schedule enablement</td>
+                <td>Reviews advance requests, validates task justification</td>
+              </tr>
+              <tr>
+                <td><strong>Accountant / Finance Team</strong></td>
+                <td>Accuracy, tax compliance, receipts verification, balance reconciliation, general ledger exports</td>
+                <td>Disburses funds, verifies receipts, reconciles balances</td>
+              </tr>
+              <tr>
+                <td><strong>Staff Employee</strong></td>
+                <td>Fast disbursement of funds, simple receipt uploads via mobile, clear status of balances</td>
+                <td>Submits advance requests, uploads receipts, returns balances</td>
+              </tr>
+              <tr>
+                <td><strong>Driver / Field Agent</strong></td>
+                <td>Quick recording of fuel, parking, tolls, vehicle maintenance on mobile devices with low data usage</td>
+                <td>Quick photo uploads, fuel and per diem tracking</td>
+              </tr>
+              <tr>
+                <td><strong>Designated Approver</strong></td>
+                <td>Clarity on purpose of request, rapid 1-click approvals without paper bottlenecks</td>
+                <td>Reviews notifications, approves or rejects with reasons</td>
+              </tr>
+              <tr>
+                <td><strong>System Administrator</strong></td>
+                <td>User provisioning, permission security, role-based access control (RBAC), data backups</td>
+                <td>Manages categories, audit logs, system configuration</td>
+              </tr>
+              <tr>
+                <td><strong>Internal / External Auditor</strong></td>
+                <td>Independent verification of historical expenditures, tax compliance, tamper checking</td>
+                <td>Read-only export access to historical ledger and attachments</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="alert-box alert-warning">
+          <div class="alert-icon">⚠️</div>
+          <div class="alert-content">
+            <h4>Rule of Grounded Discovery: Do Not Invent Roles!</h4>
+            <p>
+              Always interview the company to discover their true, on-the-ground operational structure. For example, maybe there is no Operations Manager and the CEO approves everything directly; maybe there are two accountants; or maybe drivers do not request cash themselves. Planning must flow directly into Requirements Analysis.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 6: Expense Life Cycle -->
+      <section class="doc-section" id="section-6">
+        <div class="section-header">
+          <div class="section-badge">06</div>
+          <div class="section-title-wrap">
+            <h2>The Expense Life Cycle</h2>
+            <p>Mapping the complete journey of corporate money from disbursement to audit archive</p>
+          </div>
+        </div>
+
+        <p>The core architectural question: <strong>What actually happens to company money from beginning to end?</strong></p>
+
+        <div class="flow-chain">
+          <div class="flow-node highlight">1. Cash in Account</div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node">2. Advance Request</div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node">3. Manager Approval</div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node">4. Funds Disbursed</div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node">5. Travel / Spending</div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node">6. Receipts Uploaded</div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node">7. Accountant Review</div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node">8. Approve / Reject</div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node">9. Reconciliation</div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node highlight">10. Executive Report</div>
+        </div>
+
+        <div class="cards-grid">
+          <div class="info-card">
+            <div class="info-card-header">
+              <div class="card-icon-box card-icon-blue">1</div>
+              <div class="info-card-title">Phase A: Fund Issuance</div>
+            </div>
+            <div class="info-card-body">
+              Employee fills out purpose, estimated cost, and destination. Manager reviews and approves. Disbursing officer releases cash or electronic transfer.
+            </div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-card-header">
+              <div class="card-icon-box card-icon-amber">2</div>
+              <div class="info-card-title">Phase B: Incurring &amp; Logging</div>
+            </div>
+            <div class="info-card-body">
+              Employee undertakes travel/project, spending funds and capturing physical receipts immediately via mobile photos or digital vouchers.
+            </div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-card-header">
+              <div class="card-icon-box card-icon-emerald">3</div>
+              <div class="info-card-title">Phase C: Reconciliation &amp; Closure</div>
+            </div>
+            <div class="info-card-body">
+              Accountant audits receipts against advance. Unspent balance is returned (or deficit reimbursed). Case closed and ledger locked.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 7: What Counts as an Expense -->
+      <section class="doc-section" id="section-7">
+        <div class="section-header">
+          <div class="section-badge">07</div>
+          <div class="section-title-wrap">
+            <h2>Define WHAT COUNTS AS AN EXPENSE</h2>
+            <p>Categorization rules, eligible expense types, and supporting documentation policies</p>
+          </div>
+        </div>
+
+        <p>An expense is defined as <em>any company-related spending that requires documentation, reconciliation, and/or management authorization.</em></p>
+
+        <h3>Core Expense Categories</h3>
+        <ul class="feature-list">
+          <li><span class="check-icon">✓</span> Fuel (Petrol / Diesel)</li>
+          <li><span class="check-icon">✓</span> Accommodation / Lodging</li>
+          <li><span class="check-icon">✓</span> Meals &amp; Subsistence</li>
+          <li><span class="check-icon">✓</span> Public Transport &amp; Boda-Boda</li>
+          <li><span class="check-icon">✓</span> Parking Fees</li>
+          <li><span class="check-icon">✓</span> Highway Tolls</li>
+          <li><span class="check-icon">✓</span> Emergency Vehicle Maintenance</li>
+          <li><span class="check-icon">✓</span> Communication &amp; Internet Airtime</li>
+          <li><span class="check-icon">✓</span> Direct Office / Field Supplies</li>
+          <li><span class="check-icon">✓</span> Client Entertainment / Refreshments</li>
+          <li><span class="check-icon">✓</span> Fixed Per Diem Travel Allowances</li>
+          <li><span class="check-icon">✓</span> Approved Miscellaneous Expenses</li>
+        </ul>
+
+        <div class="alert-box alert-info">
+          <div class="alert-icon">💡</div>
+          <div class="alert-content">
+            <h4>Category-Specific Validation Rules (Requirements Transition)</h4>
+            <p>
+              Different categories must enforce distinct business rules in the software:
+            </p>
+            <ul style="margin-top: 0.5rem; margin-bottom: 0;">
+              <li><strong>Fuel:</strong> Mandatory photo of pump receipt + current vehicle odometer reading.</li>
+              <li><strong>Accommodation:</strong> Official hotel tax invoice showing guest name and dates.</li>
+              <li><strong>Per Diem Allowances:</strong> Fixed company rate without requiring micro-receipts.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 8: Money Flows & Policy -->
+      <section class="doc-section" id="section-8">
+        <div class="section-header">
+          <div class="section-badge">08</div>
+          <div class="section-title-wrap">
+            <h2>Money Flows &amp; Policy Baseline</h2>
+            <p>Formal operational rules governing requests, custody, disbursements, and deficits</p>
+          </div>
+        </div>
+
+        <p>Because the platform governs real company capital, the money flow rules must be explicitly codified:</p>
+
+        <div class="qa-grid">
+          <div class="qa-card">
+            <div class="qa-question">Where does money originate?</div>
+            <div class="qa-answer">Dedicated Company Petty Cash Reserve</div>
+          </div>
+          <div class="qa-card">
+            <div class="qa-question">Who initiates the request?</div>
+            <div class="qa-answer">The Employee / Assigned Team Lead</div>
+          </div>
+          <div class="qa-card">
+            <div class="qa-question">Who authorizes / approves?</div>
+            <div class="qa-answer">Managing Director (MD) / Designated Approver</div>
+          </div>
+          <div class="qa-card">
+            <div class="qa-question">Who physically releases the funds?</div>
+            <div class="qa-answer">Managing Director (MD) / Custodian</div>
+          </div>
+          <div class="qa-card">
+            <div class="qa-question">How is cash disbursed?</div>
+            <div class="qa-answer">Physical Cash (Option for Mobile Money / Bank)</div>
+          </div>
+          <div class="qa-card">
+            <div class="qa-question">How is spending recorded?</div>
+            <div class="qa-answer">Individual Line Entries initially, then Batch Submissions</div>
+          </div>
+          <div class="qa-card">
+            <div class="qa-question">How are receipts documented?</div>
+            <div class="qa-answer">Physical Paper Archive &amp; In-App Photograph</div>
+          </div>
+          <div class="qa-card">
+            <div class="qa-question">When Spending &lt; Advance?</div>
+            <div class="qa-answer">Employee returns remaining balance directly to Cash Custodian</div>
+          </div>
+          <div class="qa-card">
+            <div class="qa-question">When Spending &gt; Advance?</div>
+            <div class="qa-answer">Employee files Supplemental Reimbursement Claim with receipts</div>
+          </div>
+          <div class="qa-card">
+            <div class="qa-question">When an expense is rejected?</div>
+            <div class="qa-answer">Employee refunds the company, or Management handles it via payroll offset</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 9: Problem Boundary -->
+      <section class="doc-section" id="section-9">
+        <div class="section-header">
+          <div class="section-badge">09</div>
+          <div class="section-title-wrap">
+            <h2>Define the PROBLEM BOUNDARY</h2>
+            <p>Strictly defining In-Scope vs Out-of-Scope features to prevent scope explosion</p>
+          </div>
+        </div>
+
+        <p>A major failure pattern in internal software is <em>scope creep</em> (e.g. <em>“Since we are tracking expenses, let's also build a full payroll and inventory system!”</em>). Defining hard boundaries protects the project budget and timeline.</p>
+
+        <div class="scope-grid">
+          <div class="scope-box scope-in">
+            <div class="scope-title">
+              <span class="check-icon">✓</span> Potentially IN Scope
+            </div>
+            <ul>
+              <li>Cash Advance Requests &amp; Approvals</li>
+              <li>Advance Issuance &amp; Custody Logging</li>
+              <li>Line-Item Expense Recording</li>
+              <li>Digital Receipt Camera Uploads &amp; Viewing</li>
+              <li>Multi-tier Approval / Rejection Workflows</li>
+              <li>Advance Reconciliation &amp; Surplus Balancing</li>
+              <li>Standard Expense Categories &amp; Policies</li>
+              <li>User Roles, Authentication &amp; Permissions</li>
+              <li>Management Dashboards &amp; Expense Reports</li>
+              <li>Tamper-Evident Audit History &amp; Timestamps</li>
+              <li>Email &amp; System Notifications</li>
+            </ul>
+          </div>
+
+          <div class="scope-box scope-out">
+            <div class="scope-title">
+              <span class="cross-icon">✕</span> Strictly OUT of Scope (Phase 1)
+            </div>
+            <ul>
+              <li>Full Corporate Accounting / General Ledger</li>
+              <li>Employee Payroll &amp; Salary Processing</li>
+              <li>Direct Automated Core Banking Integrations</li>
+              <li>National Tax Filing / Electronic Fiscal Systems</li>
+              <li>Warehouse Inventory &amp; Stock Management</li>
+              <li>Vendor Procurement &amp; Purchase Orders</li>
+              <li>Human Resource Management (HRIS)</li>
+              <li>GPS Vehicle Fleet Telematics</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="alert-box alert-danger">
+          <div class="alert-icon">🛑</div>
+          <div class="alert-content">
+            <h4>Protecting the Project Scope</h4>
+            <p>
+              When stakeholders suggest adding unrelated systems six months later, remind them: <strong>That is a separate scope discussion with its own charter, budget, and timeline.</strong>
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 10: Constraints -->
+      <section class="doc-section" id="section-10">
+        <div class="section-header">
+          <div class="section-badge">10</div>
+          <div class="section-title-wrap">
+            <h2>Establish PROJECT CONSTRAINTS</h2>
+            <p>Technical, budgetary, environmental, and human realities governing development</p>
+          </div>
+        </div>
+
+        <div class="cards-grid">
+          <div class="info-card">
+            <div class="info-card-header">
+              <div class="card-icon-box card-icon-emerald">💵</div>
+              <div class="info-card-title">Financial Budget</div>
+            </div>
+            <div class="info-card-body">
+              How much capital can the company allocate for engineering, infrastructure, licensing, and ongoing maintenance?
+            </div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-card-header">
+              <div class="card-icon-box card-icon-blue">👥</div>
+              <div class="info-card-title">People &amp; Team Capacity</div>
+            </div>
+            <div class="info-card-body">
+              Development is driven by the lead engineer and technical director. Are there additional developers, or must architecture stay lightweight and maintainable?
+            </div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-card-header">
+              <div class="card-icon-box card-icon-amber">⏱️</div>
+              <div class="info-card-title">Timeline to MVP</div>
+            </div>
+            <div class="info-card-body">
+              When does the company demand the first functional, usable release to replace vulnerable paper procedures?
+            </div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-card-header">
+              <div class="card-icon-box card-icon-purple">☁️</div>
+              <div class="info-card-title">Hosting Infrastructure</div>
+            </div>
+            <div class="info-card-body">
+              Cloud VM vs. Company Server vs. Dedicated VPS (IONOS / DigitalOcean). Needs secure SSL, PostgreSQL database engine, and automated nightly backups.
+            </div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-card-header">
+              <div class="card-icon-box card-icon-rose">📶</div>
+              <div class="info-card-title">Network Connectivity</div>
+            </div>
+            <div class="info-card-body">
+              Field staff and drivers will log expenses in upcountry areas where mobile 3G/4G connectivity is intermittent. Uploads must be compressed and resilient.
+            </div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-card-header">
+              <div class="card-icon-box card-icon-blue">📱</div>
+              <div class="info-card-title">Target Devices</div>
+            </div>
+            <div class="info-card-body">
+              Management &amp; Finance operate on Desktop / Laptop (Chrome, Edge). Field staff operate on Android smartphones and iPhones. Responsive mobile web is essential.
+            </div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-card-header">
+              <div class="card-icon-box card-icon-emerald">🔒</div>
+              <div class="info-card-title">Security &amp; Privacy</div>
+            </div>
+            <div class="info-card-body">
+              Financial data requires encrypted connections (HTTPS), role-segregated databases, protected receipt storage, and hardened authentication.
+            </div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-card-header">
+              <div class="card-icon-box card-icon-amber">🔄</div>
+              <div class="info-card-title">Existing Tools &amp; Legacy Flow</div>
+            </div>
+            <div class="info-card-body">
+              Excel sheets, WhatsApp receipts, and paper vouchers currently dominate. Migration strategies must assist users rather than create sudden friction.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 11: Feasibility Study -->
+      <section class="doc-section" id="section-11">
+        <div class="section-header">
+          <div class="section-badge">11</div>
+          <div class="section-title-wrap">
+            <h2>Four-Dimensional Feasibility Study</h2>
+            <p>Determining realistically whether this system can and should be built</p>
+          </div>
+        </div>
+
+        <div class="cards-grid">
+          <!-- Technical Feasibility -->
+          <div class="info-card">
+            <div class="info-card-header">
+              <div class="card-icon-box card-icon-blue">💻</div>
+              <div class="info-card-title">1. Technical Feasibility</div>
+            </div>
+            <div class="info-card-body">
+              <p><strong>Proposed Stack:</strong> Laravel + React + PostgreSQL</p>
+              <p>While technically sound, we must answer:</p>
+              <ul>
+                <li>Does our team have the production proficiency?</li>
+                <li>Can we securely maintain and update it over years?</li>
+                <li>Can we handle image compression and reliable cloud storage?</li>
+                <li>Can we guarantee automated automated database backups?</li>
+                <li>Can we optimize for low-bandwidth mobile devices?</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Operational Feasibility -->
+          <div class="info-card">
+            <div class="info-card-header">
+              <div class="card-icon-box card-icon-purple">⚙️</div>
+              <div class="info-card-title">2. Operational Feasibility</div>
+            </div>
+            <div class="info-card-body">
+              <p><em>“You can build the most beautiful expense system in Uganda. If the accountant says ‘I prefer my Excel sheet,’ you have failed.”</em></p>
+              <ul>
+                <li>Will employees find receipt uploads simple enough?</li>
+                <li>Will busy managers actually approve in the system?</li>
+                <li>Does it align with actual company disbursement steps?</li>
+                <li>What structured user training is necessary for rollout?</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Economic Feasibility -->
+          <div class="info-card">
+            <div class="info-card-header">
+              <div class="card-icon-box card-icon-emerald">📈</div>
+              <div class="info-card-title">3. Economic Feasibility</div>
+            </div>
+            <div class="info-card-body">
+              <p><strong>Cost vs. Value Equation:</strong></p>
+              <div class="formula-box" style="margin: 0.75rem 0;">
+                <span class="formula-code" style="font-size: 0.95rem;">Dev + Hosting + Maintenance &lt; Time Saved + Leakage Prevented</span>
+              </div>
+              <p>Internal software earns ROI by eliminating financial leakage, recovering surplus cash floats, and reclaiming hundreds of administrative hours.</p>
+            </div>
+          </div>
+
+          <!-- Legal / Compliance Feasibility -->
+          <div class="info-card">
+            <div class="info-card-header">
+              <div class="card-icon-box card-icon-rose">⚖️</div>
+              <div class="info-card-title">4. Legal &amp; Compliance</div>
+            </div>
+            <div class="info-card-body">
+              <p>Financial governance requires considering:</p>
+              <ul>
+                <li>Data privacy and financial confidentiality</li>
+                <li>Strict Role-Based Access Control (RBAC)</li>
+                <li>Tax document retention standards</li>
+                <li>Non-repudiation of approvals and transactions</li>
+                <li>Off-site automated encrypted backups</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 12: Definition of Success -->
+      <section class="doc-section" id="section-12">
+        <div class="section-header">
+          <div class="section-badge">12</div>
+          <div class="section-title-wrap">
+            <h2>Define SUCCESS</h2>
+            <p>How we quantitatively verify that the platform solved the real business problem</p>
+          </div>
+        </div>
+
+        <div class="alert-box alert-warning">
+          <div class="alert-icon">⚠️</div>
+          <div class="alert-content">
+            <h4>Do Not Confuse "Software Works" with "Project Success"</h4>
+            <p>
+              Never say: <em>“The project is successful when the software works without bugs.”</em> Software can be defect-free while failing completely to solve the company's financial chaos.
+            </p>
+          </div>
+        </div>
+
+        <h3>Key Success Metrics (KPIs)</h3>
+        <ul class="feature-list">
+          <li><span class="check-icon">✓</span> <strong>100%</strong> of travel advances recorded digitally prior to disbursement.</li>
+          <li><span class="check-icon">✓</span> Every spent shilling linked to an accountable, authenticated employee.</li>
+          <li><span class="check-icon">✓</span> Supporting receipts attached and instantly retrievable on 95%+ of claims.</li>
+          <li><span class="check-icon">✓</span> Real-time executive dashboard displaying total outstanding cash advances.</li>
+          <li><span class="check-icon">✓</span> Finance reconciles travel expenses without opening a single manual spreadsheet.</li>
+          <li><span class="check-icon">✓</span> Full traceability for all approved, rejected, and amended vouchers.</li>
+          <li><span class="check-icon">✓</span> 1-click monthly expenditure summary reports delivered on demand.</li>
+          <li><span class="check-icon">✓</span> Staff submit and reconcile claims with minimal training or friction.</li>
+          <li><span class="check-icon">✓</span> Instant retrieval of historical financial records during internal/external audits.</li>
+        </ul>
+      </section>
+
+      <!-- Section 13: Define the MVP -->
+      <section class="doc-section" id="section-13">
+        <div class="section-header">
+          <div class="section-badge">13</div>
+          <div class="section-title-wrap">
+            <h2>Define the MVP (Minimum Viable Product)</h2>
+            <p>Discipline over feature bloat — prioritizing essential modules for initial deployment</p>
+          </div>
+        </div>
+
+        <p>
+          Rather than constructing an bloated enterprise platform that takes a year to launch, we deliver a laser-focused MVP structured in two disciplined releases:
+        </p>
+
+        <div class="cards-grid">
+          <!-- Users -->
+          <div class="info-card">
+            <div class="info-card-header">
+              <div class="card-icon-box card-icon-blue">👤</div>
+              <div class="info-card-title">User Management <span class="phase-badge phase-1">Phase 1</span></div>
+            </div>
+            <div class="info-card-body">
+              <ul>
+                <li>Secure email/password authentication</li>
+                <li>Role assignment (Admin, Approver, Employee)</li>
+                <li>Session security &amp; permission gates</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Expenses -->
+          <div class="info-card">
+            <div class="info-card-header">
+              <div class="card-icon-box card-icon-emerald">🧾</div>
+              <div class="info-card-title">Expense Recording <span class="phase-badge phase-1">Phase 1</span></div>
+            </div>
+            <div class="info-card-body">
+              <ul>
+                <li>Record amount, date, description &amp; category</li>
+                <li>Upload photo of receipt / voucher</li>
+                <li>View individual submission log</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Reporting -->
+          <div class="info-card">
+            <div class="info-card-header">
+              <div class="card-icon-box card-icon-purple">📊</div>
+              <div class="info-card-title">Basic Reporting <span class="phase-badge phase-1">Phase 1</span></div>
+            </div>
+            <div class="info-card-body">
+              <ul>
+                <li>Filter expenses by employee, date, category</li>
+                <li>Total expenditure aggregations</li>
+                <li>CSV / Excel export for accounting</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Advance -->
+          <div class="info-card">
+            <div class="info-card-header">
+              <div class="card-icon-box card-icon-amber">💸</div>
+              <div class="info-card-title">Expense Advances <span class="phase-badge phase-2">Phase 2</span></div>
+            </div>
+            <div class="info-card-body">
+              <ul>
+                <li>Formal advance request form</li>
+                <li>Manager review and sign-off</li>
+                <li>Record actual amount disbursed &amp; date</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Reconciliation -->
+          <div class="info-card">
+            <div class="info-card-header">
+              <div class="card-icon-box card-icon-emerald">⚖️</div>
+              <div class="info-card-title">Reconciliation <span class="phase-badge phase-2">Phase 2</span></div>
+            </div>
+            <div class="info-card-body">
+              <ul>
+                <li>Cross-match: Issued vs Spent</li>
+                <li>Surplus balance calculation &amp; return tracking</li>
+                <li>Deficit reimbursement approvals</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Approval -->
+          <div class="info-card">
+            <div class="info-card-header">
+              <div class="card-icon-box card-icon-rose">🛡️</div>
+              <div class="info-card-title">Formal Approvals <span class="phase-badge phase-2">Phase 2</span></div>
+            </div>
+            <div class="info-card-body">
+              <ul>
+                <li>One-click approve / reject buttons</li>
+                <li>Mandatory rejection reason text</li>
+                <li>Email notifications to requester</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Audit -->
+          <div class="info-card" style="grid-column: 1 / -1;">
+            <div class="info-card-header">
+              <div class="card-icon-box card-icon-blue">🔒</div>
+              <div class="info-card-title">Audit Trail &amp; Governance <span class="phase-badge phase-2">Phase 2</span></div>
+            </div>
+            <div class="info-card-body">
+              <p>Automated logging for: Created By, Approved By, Timestamp, and Complete Status Transition History for every record.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 14: Requirements Discovery Flow -->
+      <section class="doc-section" id="section-14">
+        <div class="section-header">
+          <div class="section-badge">14</div>
+          <div class="section-title-wrap">
+            <h2>Current Process Discovery: “Follow the Money”</h2>
+            <p>The single most powerful requirements discovery technique for financial software</p>
+          </div>
+        </div>
+
+        <div class="alert-box alert-info">
+          <div class="alert-icon">🎙️</div>
+          <div class="alert-content">
+            <h4>The Golden Interview Rule</h4>
+            <p>
+              Never ask stakeholders: <em>“What features do you want in the app?”</em> That invites fantasy feature-lists. Instead, say:
+              <br><strong>“Show me the last real travel expense from beginning to end.”</strong>
+            </p>
+          </div>
+        </div>
+
+        <p>
+          <em>Real-World Case Study:</em> “Yesterday John needed <strong>UGX 500,000</strong> to travel to Mbarara.” We follow the chain:
+        </p>
+
+        <div class="vertical-timeline">
+          <div class="timeline-step">
+            <div class="step-marker">01</div>
+            <div class="step-content">
+              <div class="step-question">Why did he need the money?</div>
+              <div class="step-answer">Operational client meeting, field site visit, and vehicle fuel in Mbarara.</div>
+            </div>
+          </div>
+
+          <div class="timeline-step">
+            <div class="step-marker">02</div>
+            <div class="step-content">
+              <div class="step-question">Who requested it?</div>
+              <div class="step-answer">John (Field Officer) via written note / verbal request to supervisor.</div>
+            </div>
+          </div>
+
+          <div class="timeline-step">
+            <div class="step-marker">03</div>
+            <div class="step-content">
+              <div class="step-question">Who approved it?</div>
+              <div class="step-answer">Managing Director authorized the amount before any disbursement occurred.</div>
+            </div>
+          </div>
+
+          <div class="timeline-step">
+            <div class="step-marker">04</div>
+            <div class="step-content">
+              <div class="step-question">Who gave him the money?</div>
+              <div class="step-answer">MD / Petty Cash Custodian opened safe and counted the currency.</div>
+            </div>
+          </div>
+
+          <div class="timeline-step">
+            <div class="step-marker">05</div>
+            <div class="step-content">
+              <div class="step-question">How was it received?</div>
+              <div class="step-answer">Physical cash banknotes handed over at the head office.</div>
+            </div>
+          </div>
+
+          <div class="timeline-step">
+            <div class="step-marker">06</div>
+            <div class="step-content">
+              <div class="step-question">What did he actually spend?</div>
+              <div class="step-answer">UGX 220,000 fuel + UGX 100,000 hotel + UGX 60,000 meals + UGX 40,000 tolls = UGX 420,000.</div>
+            </div>
+          </div>
+
+          <div class="timeline-step">
+            <div class="step-marker">07</div>
+            <div class="step-content">
+              <div class="step-question">Where are the receipts?</div>
+              <div class="step-answer">Fuel station paper printout, hotel invoice, toll tickets stuffed into wallet.</div>
+            </div>
+          </div>
+
+          <div class="timeline-step">
+            <div class="step-marker">08</div>
+            <div class="step-content">
+              <div class="step-question">Who checked them upon return?</div>
+              <div class="step-answer">Accountant inspected papers, cross-checking totals against vouchers.</div>
+            </div>
+          </div>
+
+          <div class="timeline-step">
+            <div class="step-marker">09</div>
+            <div class="step-content">
+              <div class="step-question">What happened to the remaining UGX 80,000?</div>
+              <div class="step-answer">Returned in cash to safe and recorded as balance surrendered.</div>
+            </div>
+          </div>
+
+          <div class="timeline-step">
+            <div class="step-marker">10</div>
+            <div class="step-content">
+              <div class="step-question">Where was everything recorded?</div>
+              <div class="step-answer">Handwritten petty cash logbook and an offline Excel spreadsheet.</div>
+            </div>
+          </div>
+
+          <div class="timeline-step">
+            <div class="step-marker">11</div>
+            <div class="step-content">
+              <div class="step-question">What report does management ultimately demand?</div>
+              <div class="step-answer">Monthly project cost report showing travel expenditure vs budget.</div>
+            </div>
+          </div>
+        </div>
+
+        <p style="font-size: 0.95rem; color: var(--text-muted);">
+          That single walkthrough uncovers more real requirements than weeks of developers brainstorming abstract features.
+        </p>
+      </section>
+
+      <!-- Section 15: Planning Deliverables -->
+      <section class="doc-section" id="section-15">
+        <div class="section-header">
+          <div class="section-badge">15</div>
+          <div class="section-title-wrap">
+            <h2>Official Planning Deliverables</h2>
+            <p>Five tangible artifacts required before concluding the Planning phase</p>
+          </div>
+        </div>
+
+        <div class="deliverable-card">
+          <div class="deliverable-header">
+            <div class="deliverable-name">
+              <span class="card-icon-box card-icon-blue" style="width: 28px; height: 28px; font-size: 0.85rem;">1</span>
+              <span>Project Charter</span>
+            </div>
+            <span class="badge-pill">Deliverable 1</span>
+          </div>
+          <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.5rem;">
+            Formal document codifying: Problem Statement, Purpose, Measurable Objectives, Success Criteria, Stakeholder Matrix, Assumptions, Constraints, and Scope Classification.
+          </p>
+        </div>
+
+        <div class="deliverable-card">
+          <div class="deliverable-header">
+            <div class="deliverable-name">
+              <span class="card-icon-box card-icon-emerald" style="width: 28px; height: 28px; font-size: 0.85rem;">2</span>
+              <span>Feasibility Study Report</span>
+            </div>
+            <span class="badge-pill">Deliverable 2</span>
+          </div>
+          <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.5rem;">
+            Detailed evaluation of Technical capacity, Operational readiness, Economic viability (ROI), and Legal/Compliance considerations with clear Proceed / Modify / Stop recommendation.
+          </p>
+        </div>
+
+        <div class="deliverable-card">
+          <div class="deliverable-header">
+            <div class="deliverable-name">
+              <span class="card-icon-box card-icon-purple" style="width: 28px; height: 28px; font-size: 0.85rem;">3</span>
+              <span>Preliminary Scope Specification</span>
+            </div>
+            <span class="badge-pill">Deliverable 3</span>
+          </div>
+          <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.5rem;">
+            Explicit boundary catalog: Defined In-Scope features, Out-of-Scope non-goals, Minimum Viable Product (MVP) core, and future enhancement roadmap.
+          </p>
+        </div>
+
+        <div class="deliverable-card">
+          <div class="deliverable-header">
+            <div class="deliverable-name">
+              <span class="card-icon-box card-icon-amber" style="width: 28px; height: 28px; font-size: 0.85rem;">4</span>
+              <span>Preliminary Process Map</span>
+            </div>
+            <span class="badge-pill">Deliverable 4</span>
+          </div>
+          <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.5rem;">
+            End-to-end swimlane workflow: <em>Fund Request → Approval → Fund Issued → Activity → Expense Recording → Receipt Attachment → Review → Reconciliation → Reporting</em> (marked PRELIMINARY until user validation).
+          </p>
+        </div>
+
+        <div class="deliverable-card">
+          <div class="deliverable-header">
+            <div class="deliverable-name">
+              <span class="card-icon-box card-icon-rose" style="width: 28px; height: 28px; font-size: 0.85rem;">5</span>
+              <span>Preliminary Project Roadmap</span>
+            </div>
+            <span class="badge-pill">Deliverable 5</span>
+          </div>
+          <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.5rem;">
+            High-level SDLC phases with estimated milestone buffers: <em>Planning → Requirements Analysis → Architecture/Design → Development → Testing → Deployment → Maintenance</em>.
+          </p>
+        </div>
+      </section>
+
+      <!-- Section 16: The Brutal Truth -->
+      <section class="doc-section" id="section-16">
+        <div class="section-header">
+          <div class="section-badge">16</div>
+          <div class="section-title-wrap">
+            <h2>The Brutal Truth: The Deliverables Gate</h2>
+            <p>Why calendar schedules do not dictate when planning is complete</p>
+          </div>
+        </div>
+
+        <div class="alert-box alert-danger">
+          <div class="alert-icon">⚡</div>
+          <div class="alert-content">
+            <h4>The Calendar Fallacy</h4>
+            <p>
+              Saying: <em>“We have allocated two solid days for planning, therefore planning must finish today”</em> is dangerous. <strong>The calendar does not determine whether planning is complete — the deliverables and answers do.</strong>
+            </p>
+          </div>
+        </div>
+
+        <p>If you cannot definitively answer these 7 fundamental questions, planning is <strong>not finished</strong>, regardless of the clock:</p>
+
+        <div class="cards-grid">
+          <div class="info-card">
+            <div class="info-card-header">
+              <div class="card-icon-box card-icon-rose">Q1</div>
+              <div class="info-card-title">What business problem are we solving?</div>
+            </div>
+            <div class="info-card-body">Clear understanding of friction, delays, and cash loss.</div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-card-header">
+              <div class="card-icon-box card-icon-rose">Q2</div>
+              <div class="info-card-title">Who has the problem?</div>
+            </div>
+            <div class="info-card-body">Field employees, accounting staff, and executive leadership.</div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-card-header">
+              <div class="card-icon-box card-icon-rose">Q3</div>
+              <div class="info-card-title">How does the current process work?</div>
+            </div>
+            <div class="info-card-body">Grounded reality from real recent travel examples.</div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-card-header">
+              <div class="card-icon-box card-icon-rose">Q4</div>
+              <div class="info-card-title">Why is software necessary?</div>
+            </div>
+            <div class="info-card-body">Why existing spreadsheets or paper forms fail at scale.</div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-card-header">
+              <div class="card-icon-box card-icon-rose">Q5</div>
+              <div class="info-card-title">What does success look like?</div>
+            </div>
+            <div class="info-card-body">Quantifiable business KPIs, not just code execution.</div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-card-header">
+              <div class="card-icon-box card-icon-rose">Q6</div>
+              <div class="info-card-title">What is in vs out of scope?</div>
+            </div>
+            <div class="info-card-body">Airtight boundaries preventing scope explosion.</div>
+          </div>
+
+          <div class="info-card" style="grid-column: 1 / -1;">
+            <div class="info-card-header">
+              <div class="card-icon-box card-icon-rose">Q7</div>
+              <div class="info-card-title">Is the project technically, operationally, economically, and legally feasible?</div>
+            </div>
+            <div class="info-card-body">
+              Spending an extra 4 hours discovering that the accountant urgently requires advance reconciliation, while you were about to build a generic receipt uploader, will save <strong>weeks of wasted programming</strong>.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 17: Next - Requirements Analysis -->
+      <section class="doc-section" id="section-17">
+        <div class="section-header">
+          <div class="section-badge">17</div>
+          <div class="section-title-wrap">
+            <h2>The SDLC Separation: Transition to Requirements</h2>
+            <p>Maintaining clean architectural discipline across software lifecycle stages</p>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem; margin: 1.5rem 0;">
+          <div style="background: var(--primary-light); border: 2px solid var(--primary); border-radius: var(--radius-md); padding: 1.5rem;">
+            <div style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--primary);">Stage 1</div>
+            <h3 style="margin: 0.4rem 0 0.75rem; color: var(--primary);">Planning asks:</h3>
+            <p style="font-size: 1.05rem; font-weight: 600; line-height: 1.4; color: var(--text-main);">
+              “Should we build this, why are we building it, and what are the boundaries?”
+            </p>
+          </div>
+
+          <div style="background: var(--accent-indigo-light); border: 2px solid var(--accent-indigo); border-radius: var(--radius-md); padding: 1.5rem;">
+            <div style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--accent-indigo);">Stage 2</div>
+            <h3 style="margin: 0.4rem 0 0.75rem; color: var(--accent-indigo);">Requirements asks:</h3>
+            <p style="font-size: 1.05rem; font-weight: 600; line-height: 1.4; color: var(--text-main);">
+              “Exactly what must the system do, for whom, under what rules and conditions?”
+            </p>
+          </div>
+
+          <div style="background: var(--accent-emerald-light); border: 2px solid var(--accent-emerald); border-radius: var(--radius-md); padding: 1.5rem;">
+            <div style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--accent-emerald);">Stage 3</div>
+            <h3 style="margin: 0.4rem 0 0.75rem; color: var(--accent-emerald);">Design asks:</h3>
+            <p style="font-size: 1.05rem; font-weight: 600; line-height: 1.4; color: var(--text-main);">
+              “How are we going to engineer and architect a system that satisfies those requirements?”
+            </p>
+          </div>
+        </div>
+
+        <div class="alert-box alert-warning">
+          <div class="alert-icon">⚠️</div>
+          <div class="alert-content">
+            <h4>Engineering Discipline Warning</h4>
+            <p>
+              <strong>Do not design database schemas yet. Do not choose tables yet. Do not draw UI mockups yet.</strong>
+              <br><br>
+              1. First establish the <strong>Business Reality</strong>.
+              <br>
+              2. Turn that reality into verified <strong>Requirements</strong>.
+              <br>
+              3. Turn those requirements into <strong>Architecture &amp; Design</strong>.
+              <br>
+              4. Then — and only then — start writing code.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Footer -->
+      <footer class="doc-footer">
+        <p>Petty Cash &amp; Expense Management System &bull; Project Planning Documentation &bull; Version 1.0</p>
+        <p style="font-size: 0.8rem; margin-top: 0.35rem;">Authored for Engineering Alignment and Executive Review</p>
+      </footer>
+
+    </main>
+  </div>
+
+  <!-- Interactive JavaScript -->
+  <script>
+    // Theme Toggling with LocalStorage Memory
+    const themeToggleBtn = document.getElementById('themeToggleBtn');
+    const themeIcon = document.getElementById('themeIcon');
+    const themeLabel = document.getElementById('themeLabel');
+
+    function setTheme(isDark) {
+      if (isDark) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        themeIcon.textContent = '☀️';
+        themeLabel.textContent = 'Light';
+        localStorage.setItem('doc-theme', 'dark');
+      } else {
+        document.documentElement.removeAttribute('data-theme');
+        themeIcon.textContent = '🌙';
+        themeLabel.textContent = 'Dark';
+        localStorage.setItem('doc-theme', 'light');
+      }
+    }
+
+    const savedTheme = localStorage.getItem('doc-theme');
+    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+      setTheme(true);
+    } else {
+      setTheme(false);
+    }
+
+    themeToggleBtn.addEventListener('click', () => {
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      setTheme(!isDark);
+    });
+
+    // Reading Progress Bar
+    window.addEventListener('scroll', () => {
+      const scrollTop = window.scrollY;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = (scrollTop / docHeight) * 100;
+      document.getElementById('reading-progress').style.width = progress + '%';
+    });
+
+    // Scrollspy for Sidebar Navigation
+    const sections = document.querySelectorAll('section.doc-section');
+    const navLinks = document.querySelectorAll('.toc-link');
+
+    window.addEventListener('scroll', () => {
+      let currentSectionId = '';
+      const scrollPosition = window.scrollY + 120;
+
+      sections.forEach(section => {
+        const sectionTop = section.offsetTop;
+        const sectionHeight = section.offsetHeight;
+        if (scrollPosition >= sectionTop && scrollPosition < sectionTop + sectionHeight) {
+          currentSectionId = section.getAttribute('id');
+        }
+      });
+
+      navLinks.forEach(link => {
+        link.classList.remove('active');
+        if (currentSectionId && link.getAttribute('href') === '#' + currentSectionId) {
+          link.classList.add('active');
+        }
+      });
+    });
+  </script>
+</body>
+</html>

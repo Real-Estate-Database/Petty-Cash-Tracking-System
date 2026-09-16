@@ -1,0 +1,51 @@
+flowchart TD
+
+    Start([Reconciliation Begins])
+
+    A["Identify advance"]
+    B["Calculate total company funds issued"]
+    C["Collect approved expenses"]
+    D["Identify additional funds issued"]
+    E["Identify approved reimbursement claims"]
+    F["Identify returned surplus funds"]
+
+    G["Determine final financial position"]
+
+    H{"Final position?"}
+
+    I["Employee owes company"]
+    J["Record returned funds"]
+
+    K["Company owes employee"]
+    L["Process / record reimbursement"]
+
+    M["Balanced"]
+    N["Mark advance as reconciled"]
+    O["Close advance"]
+    P["Record immutable audit event"]
+
+    End([End])
+
+    Start --> A
+    A --> B
+    B --> C
+    C --> D
+    D --> E
+    E --> F
+    F --> G
+    G --> H
+
+    H -- Surplus --> I
+    I --> J
+    J --> N
+
+    H -- Shortfall --> K
+    K --> L
+    L --> N
+
+    H -- Balanced --> M
+    M --> N
+
+    N --> O
+    O --> P
+    P --> End

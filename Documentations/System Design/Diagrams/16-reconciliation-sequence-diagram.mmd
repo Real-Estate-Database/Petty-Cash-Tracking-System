@@ -1,0 +1,41 @@
+sequenceDiagram
+
+    actor SuperAdmin
+    participant Client as MAUI / Web Client
+    participant API as Reconciliation API
+    participant Service as Reconciliation Service
+    participant Expense as Expense Service
+    participant Advance as Advance Service
+    participant DB as SQL Server
+    participant Audit as Audit Service
+
+    SuperAdmin->>Client: Open advance reconciliation
+    Client->>API: GET /advances/{id}/reconciliation
+
+    API->>Advance: Get advance and funds issued
+    Advance->>DB: Query advance
+    DB-->>Advance: Advance data
+
+    API->>Expense: Get approved expenses
+    Expense->>DB: Query approved expenses
+    DB-->>Expense: Expense data
+
+    API->>Service: Calculate financial position
+
+    Service->>Service: Evaluate funds issued
+    Service->>Service: Evaluate approved expenses
+    Service->>Service: Evaluate additional funds
+    Service->>Service: Evaluate returns/reimbursements
+
+    Service-->>API: Reconciliation result
+    API-->>Client: Display reconciliation
+
+    SuperAdmin->>Client: Confirm reconciliation
+    Client->>API: POST /reconciliations/{id}/close
+
+    API->>Service: Finalize reconciliation
+    Service->>DB: Save reconciliation
+    Service->>Audit: Record immutable closure event
+
+    Service-->>API: Reconciliation closed
+    API-->>Client: Closed / read-only

@@ -1,0 +1,16 @@
+stateDiagram-v2
+
+    [*] --> Draft
+
+    Draft --> PendingReview: Submit
+
+    PendingReview --> Approved: Approve
+    PendingReview --> Rejected: Reject
+
+    Rejected --> PendingReview: Correct and resubmit
+
+    Approved --> IncludedInReconciliation
+
+    IncludedInReconciliation --> Closed: Advance reconciled
+
+    Closed --> [*]

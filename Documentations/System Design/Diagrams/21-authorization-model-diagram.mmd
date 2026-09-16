@@ -1,0 +1,64 @@
+flowchart TB
+
+    %% ========================================================
+    %% PART 1: ADMINISTRATIVE CONFIGURATION (PB-RBAC SETUP)
+    %% ========================================================
+    subgraph Setup["1. Administrative Setup (Super Admin Governance)"]
+        direction TB
+
+        SuperAdmin["Super Admin (Hardcoded Root Role)"]
+
+        subgraph Catalog["Permission Catalog (System Defined)"]
+            P1["Advances.Create"]
+            P2["Advances.Approve"]
+            P3["Advances.IssueFunds"]
+            P4["Expenses.Record"]
+            P5["Expenses.Review"]
+            P6["Reconciliations.SignOff"]
+            P7["Reports.Export"]
+        end
+
+        CustomRoles["Custom Roles\n(e.g., Field Officer, Approver, Accountant)"]
+
+        RolePermissions["Role-Permission Mapping\n(RolePermission Link Table)"]
+
+        Employees["Employees / Users"]
+
+        SuperAdmin -->|"1. Creates / Manages"| CustomRoles
+        SuperAdmin -->|"2. Assigns Permissions to"| RolePermissions
+        Catalog --> RolePermissions
+        RolePermissions -->|"Grants to"| CustomRoles
+        SuperAdmin -->|"3. Assigns Role to"| Employees
+        CustomRoles -->|"Assigned to"| Employees
+    end
+
+    %% ========================================================
+    %% PART 2: RUNTIME AUTHORIZATION PIPELINE (WHEN ACTION OCCURS)
+    %% ========================================================
+    subgraph Runtime["2. Runtime Authorization Pipeline (Request Execution)"]
+        direction TB
+
+        Request["User Request / Action\n(e.g., Click 'Approve Advance')"]
+
+        Identity["Authentication & Session\n(Extract User Claims & Roles)"]
+
+        SuperAdminCheck{"Is User\nSuper Admin?"}
+
+        PermissionCheck{"Does User's Role Have\nRequired Permission\n(e.g., 'Advances.Approve')?"}
+
+        Allow["Allow Request (200 OK)\nExecute Business Logic"]
+        Deny["Deny Request (403 Forbidden)\nAudit Unauthorized Attempt"]
+
+        Request --> Identity
+        Identity --> SuperAdminCheck
+
+        SuperAdminCheck -->|"YES (Root Bypass)"| Allow
+        SuperAdminCheck -->|"NO (Standard User)"| PermissionCheck
+
+        PermissionCheck -->|"YES (Permission Granted)"| Allow
+        PermissionCheck -->|"NO (Permission Missing)"| Deny
+    end
+
+    %% Connection between Setup and Runtime
+    Employees -.->|"Logs in & executes"| Request
+    RolePermissions -.->|"Evaluated by"| PermissionCheck
