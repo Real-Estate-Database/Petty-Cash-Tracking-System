@@ -350,7 +350,7 @@
               <div class="info-card-title">Shared Core Project</div>
             </div>
             <div class="info-card-body">
-              Contains domain entity models (`User`, `AdvanceRequest`, `Expense`, `Receipt`, `Reconciliation`), type-safe C# Enums (`AdvanceStatus`, `ExpenseStatus`, `SettlementType`), and service interface contracts (`IAdvanceService`, `IExpenseService`).
+              Contains Data Transfer Objects (DTOs: `CreateAdvanceDto`, `ExpenseDto`, `LoginRequestDto`), type-safe C# Enums (`AdvanceStatus`, `ExpenseStatus`, `SettlementType`), and service interface contracts (`IAdvanceService`, `IExpenseService`). Shared across Web &amp; Mobile clients.
             </div>
           </div>
 
@@ -360,7 +360,7 @@
               <div class="info-card-title">Backend Server Project</div>
             </div>
             <div class="info-card-body">
-              Houses concrete service implementations (`AdvanceService`, `ExpenseService`, `ReconciliationService`) containing all financial validation rules, custody calculations, EF Core database mappings, and audit logging.
+              Houses EF Core domain entity models (`User`, `AdvanceRequest`, `Expense`, `Receipt`, `Reconciliation`), `AppDbContext`, API Controllers, and concrete service implementations (`AdvanceService`, `ExpenseService`, `ReconciliationService`) containing validation rules, SQL Server persistence, and audit logging.
             </div>
           </div>
 
