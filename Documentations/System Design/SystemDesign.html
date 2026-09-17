@@ -1312,6 +1312,82 @@ classDiagram
             </div>
           </div>
         </div>
+
+        <!-- Section 12.2: Concrete C# Code Implementation Pattern -->
+        <div class="diagram-card" style="margin-top: 1.5rem;">
+          <div class="diagram-title">
+            <span>12.2 Concrete C# Code Implementation Pattern</span>
+            <span class="badge-pill">C# .NET 8 / Clean Architecture</span>
+          </div>
+          <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 1rem;">
+            Below is the exact production-ready C# code structure showing how the Shared interfaces, DTOs, EF Core Entities, Backend Services, and Controllers link together:
+          </p>
+          <pre style="background: var(--bg-card); padding: 1.25rem; border-radius: var(--radius-md); font-family: var(--font-mono); font-size: 0.82rem; overflow-x: auto; color: var(--text-main); border: 1px solid var(--border-color); line-height: 1.5;">
+<span style="color: var(--accent-indigo);">// -------------------------------------------------------------</span>
+<span style="color: var(--accent-indigo);">// 1. SHARED PROJECT (Zillion.PettyCash.Shared)</span>
+<span style="color: var(--accent-indigo);">// -------------------------------------------------------------</span>
+
+<span style="color: var(--accent-emerald);">// Shared/Enums/AdvanceStatus.cs</span>
+<span style="color: var(--primary);">public enum</span> <span style="color: var(--accent-amber);">AdvanceStatus</span> { Draft = 1, Pending = 2, Approved = 3, Rejected = 4, FundsIssued = 5, Reconciled = 6 }
+
+<span style="color: var(--accent-emerald);">// Shared/DTOs/AdvanceDtos.cs</span>
+<span style="color: var(--primary);">public record</span> <span style="color: var(--accent-amber);">CreateAdvanceDto</span>(<span style="color: var(--primary);">decimal</span> RequestedAmount, <span style="color: var(--primary);">string</span> Purpose, <span style="color: var(--primary);">string</span> Destination);
+<span style="color: var(--primary);">public record</span> <span style="color: var(--accent-amber);">AdvanceDetailDto</span>(<span style="color: var(--primary);">int</span> AdvanceId, <span style="color: var(--primary);">int</span> EmployeeId, <span style="color: var(--primary);">decimal</span> Amount, <span style="color: var(--accent-amber);">AdvanceStatus</span> Status, <span style="color: var(--primary);">DateTime</span> RequestedAt);
+
+<span style="color: var(--accent-emerald);">// Shared/Interfaces/IAdvanceService.cs</span>
+<span style="color: var(--primary);">public interface</span> <span style="color: var(--accent-amber);">IAdvanceService</span>
+{
+    <span style="color: var(--accent-purple);">Task</span>&lt;<span style="color: var(--accent-amber);">AdvanceDetailDto</span>&gt; SubmitAdvanceAsync(<span style="color: var(--accent-amber);">CreateAdvanceDto</span> dto, <span style="color: var(--primary);">int</span> employeeId);
+    <span style="color: var(--accent-purple);">Task</span> ApproveAdvanceAsync(<span style="color: var(--primary);">int</span> advanceId, <span style="color: var(--primary);">int</span> approverId, <span style="color: var(--primary);">decimal</span> approvedAmount);
+}
+
+<span style="color: var(--accent-indigo);">// -------------------------------------------------------------</span>
+<span style="color: var(--accent-indigo);">// 2. BACKEND SERVER PROJECT (Zillion.PettyCash.Server)</span>
+<span style="color: var(--accent-indigo);">// -------------------------------------------------------------</span>
+
+<span style="color: var(--accent-emerald);">// Server/Entities/AdvanceRequest.cs (EF Core Entity)</span>
+<span style="color: var(--primary);">public class</span> <span style="color: var(--accent-amber);">AdvanceRequest</span>
+{
+    <span style="color: var(--primary);">public int</span> AdvanceId { <span style="color: var(--primary);">get</span>; <span style="color: var(--primary);">set</span>; }
+    <span style="color: var(--primary);">public int</span> EmployeeId { <span style="color: var(--primary);">get</span>; <span style="color: var(--primary);">set</span>; }
+    <span style="color: var(--primary);">public decimal</span> RequestedAmount { <span style="color: var(--primary);">get</span>; <span style="color: var(--primary);">set</span>; }
+    <span style="color: var(--primary);">public string</span> Purpose { <span style="color: var(--primary);">get</span>; <span style="color: var(--primary);">set</span>; } = <span style="color: var(--accent-rose);">""</span>;
+    <span style="color: var(--primary);">public</span> <span style="color: var(--accent-amber);">AdvanceStatus</span> Status { <span style="color: var(--primary);">get</span>; <span style="color: var(--primary);">set</span>; } = <span style="color: var(--accent-amber);">AdvanceStatus</span>.Pending;
+    <span style="color: var(--primary);">public DateTime</span> RequestedAt { <span style="color: var(--primary);">get</span>; <span style="color: var(--primary);">set</span>; } = <span style="color: var(--accent-purple);">DateTime</span>.UtcNow;
+}
+
+<span style="color: var(--accent-emerald);">// Server/Services/AdvanceService.cs (Concrete Realization)</span>
+<span style="color: var(--primary);">public class</span> <span style="color: var(--accent-amber);">AdvanceService</span> : <span style="color: var(--accent-amber);">IAdvanceService</span>
+{
+    <span style="color: var(--primary);">private readonly</span> <span style="color: var(--accent-amber);">AppDbContext</span> _db;
+    <span style="color: var(--primary);">public</span> AdvanceService(<span style="color: var(--accent-amber);">AppDbContext</span> db) =&gt; _db = db;
+
+    <span style="color: var(--primary);">public async</span> <span style="color: var(--accent-purple);">Task</span>&lt;<span style="color: var(--accent-amber);">AdvanceDetailDto</span>&gt; SubmitAdvanceAsync(<span style="color: var(--accent-amber);">CreateAdvanceDto</span> dto, <span style="color: var(--primary);">int</span> employeeId)
+    {
+        <span style="color: var(--primary);">var</span> entity = <span style="color: var(--primary);">new</span> <span style="color: var(--accent-amber);">AdvanceRequest</span> { EmployeeId = employeeId, RequestedAmount = dto.RequestedAmount, Purpose = dto.Purpose };
+        _db.AdvanceRequests.Add(entity);
+        <span style="color: var(--primary);">await</span> _db.SaveChangesAsync();
+        <span style="color: var(--primary);">return new</span> <span style="color: var(--accent-amber);">AdvanceDetailDto</span>(entity.AdvanceId, entity.EmployeeId, entity.RequestedAmount, entity.Status, entity.RequestedAt);
+    }
+}
+
+<span style="color: var(--accent-emerald);">// Server/Controllers/AdvanceController.cs (Lightweight API Endpoint)</span>
+[ApiController]
+[Route(<span style="color: var(--accent-rose);">"api/[controller]"</span>)]
+<span style="color: var(--primary);">public class</span> <span style="color: var(--accent-amber);">AdvanceController</span> : ControllerBase
+{
+    <span style="color: var(--primary);">private readonly</span> <span style="color: var(--accent-amber);">IAdvanceService</span> _service;
+    <span style="color: var(--primary);">public</span> AdvanceController(<span style="color: var(--accent-amber);">IAdvanceService</span> service) =&gt; _service = service;
+
+    [HttpPost]
+    <span style="color: var(--primary);">public async</span> <span style="color: var(--accent-purple);">Task</span>&lt;IActionResult&gt; Create(<span style="color: var(--accent-amber);">CreateAdvanceDto</span> dto)
+    {
+        <span style="color: var(--primary);">var</span> result = <span style="color: var(--primary);">await</span> _service.SubmitAdvanceAsync(dto, User.GetUserId());
+        <span style="color: var(--primary);">return</span> CreatedAtAction(nameof(GetById), <span style="color: var(--primary);">new</span> { id = result.AdvanceId }, result);
+    }
+}
+          </pre>
+        </div>
       </section>
 
       <!-- Section 13: Deployment Topology -->
