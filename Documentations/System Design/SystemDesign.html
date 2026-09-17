@@ -1181,79 +1181,136 @@ erDiagram
         <div class="section-header">
           <div class="section-badge">12</div>
           <div class="section-title-wrap">
-            <h2>12. Service-Oriented Class Architecture</h2>
-            <p>C# Interface and Service realization contracts (Shared vs. Server Projects)</p>
+            <h2>12. Service-Oriented Class Architecture &amp; Project Layering</h2>
+            <p>Clean Architecture separation: Shared DTOs/Interfaces vs. Server EF Entities &amp; Business Services</p>
+          </div>
+        </div>
+
+        <div class="cards-grid" style="margin-bottom: 1.5rem;">
+          <div class="info-card">
+            <div class="info-card-header">
+              <div class="card-icon-box card-icon-blue">📦</div>
+              <div>
+                <h3 style="font-size: 1.05rem; font-weight: 700;">Shared Project</h3>
+                <span style="font-size: 0.78rem; color: var(--text-muted);">Shared across Web &amp; Mobile Clients</span>
+              </div>
+            </div>
+            <ul style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.6; padding-left: 1.25rem;">
+              <li><strong>Data Transfer Objects (DTOs)</strong>: <code>CreateAdvanceDto</code>, <code>ExpenseDto</code>, <code>LoginRequestDto</code>, etc.</li>
+              <li><strong>Service Interfaces</strong>: <code>IAdvanceService</code>, <code>IExpenseService</code>, <code>IAuthService</code>.</li>
+              <li><strong>Type-Safe Enums</strong>: <code>AdvanceStatus</code>, <code>ExpenseStatus</code>, <code>SettlementType</code>.</li>
+            </ul>
+          </div>
+
+          <div class="info-card">
+            <div class="info-card-header">
+              <div class="card-icon-box card-icon-emerald">⚙️</div>
+              <div>
+                <h3 style="font-size: 1.05rem; font-weight: 700;">Backend Server Project</h3>
+                <span style="font-size: 0.78rem; color: var(--text-muted);">ASP.NET Core Web API + EF Core</span>
+              </div>
+            </div>
+            <ul style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.6; padding-left: 1.25rem;">
+              <li><strong>EF Core Database Entities</strong>: <code>User</code>, <code>AdvanceRequest</code>, <code>Expense</code>, <code>Reconciliation</code>.</li>
+              <li><strong>DbContext</strong>: <code>AppDbContext</code> managing migrations &amp; SQL Server persistence.</li>
+              <li><strong>Service Realizations</strong>: <code>AdvanceService</code>, <code>ExpenseService</code>, <code>AuthService</code> implementing Shared interfaces.</li>
+              <li><strong>API Controllers</strong>: Lightweight HTTP endpoints routing requests to Services.</li>
+            </ul>
           </div>
         </div>
 
         <div class="diagram-card">
           <div class="diagram-title">
-            <span>12.1 Object-Oriented Class Diagram</span>
+            <span>12.1 Object-Oriented Class &amp; Architecture Diagram</span>
             <span class="badge-pill">23-class-diagram.mmd</span>
           </div>
           <pre class="mermaid">
 classDiagram
+    %% SHARED PROJECT: DTOs & INTERFACES
+    class CreateAdvanceDto {
+        +decimal RequestedAmount
+        +string Purpose
+        +string Destination
+    }
+
+    class AdvanceDetailDto {
+        +int AdvanceId
+        +decimal ApprovedAmount
+        +AdvanceStatus Status
+    }
+
     class IAdvanceService {
         <<interface>>
-        +SubmitAdvanceAsync(dto) Task
-        +ApproveAdvanceAsync(advanceId, dto) Task
-        +IssueFundsAsync(advanceId, dto) Task
+        +SubmitAdvanceAsync(CreateAdvanceDto dto) Task~AdvanceDetailDto~
+        +ApproveAdvanceAsync(int id, decimal amount) Task
     }
 
     class IExpenseService {
         <<interface>>
-        +RecordExpenseAsync(dto) Task
-        +AttachReceiptAsync(expenseId, stream, name) Task
-        +ReviewExpenseAsync(expenseId, dto) Task
+        +RecordExpenseAsync(RecordExpenseDto dto) Task
+        +AttachReceiptAsync(int expenseId, Stream file, string name) Task
     }
 
     class IAuditService {
         <<interface>>
-        +LogActivityAsync(entry) Task
-        +GetAuditTrailAsync(filter) Task
+        +LogActivityAsync(int userId, string action, string entity, int entityId) Task
     }
 
-    class INotificationService {
-        <<interface>>
-        +SendNotificationAsync(toEmail, subject, body) Task
+    %% BACKEND SERVER PROJECT: ENTITIES & SERVICES
+    class AdvanceRequest {
+        +int AdvanceId
+        +int EmployeeId
+        +decimal RequestedAmount
+        +AdvanceStatus Status
+    }
+
+    class AppDbContext {
+        +DbSet~AdvanceRequest~ AdvanceRequests
+        +DbSet~Expense~ Expenses
+        +SaveChangesAsync() Task~int~
     }
 
     class AdvanceService {
-        -DbContext _db
-        -INotificationService _notifier
+        -AppDbContext _db
         -IAuditService _audit
-        +SubmitAdvanceAsync(dto) Task
-        +ApproveAdvanceAsync(advanceId, dto) Task
+        +SubmitAdvanceAsync(CreateAdvanceDto dto) Task~AdvanceDetailDto~
+        +ApproveAdvanceAsync(int id, decimal amount) Task
     }
 
     class ExpenseService {
-        -DbContext _db
-        -INotificationService _notifier
+        -AppDbContext _db
         -IAuditService _audit
-        +RecordExpenseAsync(dto) Task
-        +AttachReceiptAsync(expenseId, stream, name) Task
+        +RecordExpenseAsync(RecordExpenseDto dto) Task
+        +AttachReceiptAsync(int expenseId, Stream file, string name) Task
     }
 
-    class AuditService {
-        -DbContext _db
-        +LogActivityAsync(entry) Task
-    }
-
-    class NotificationService {
-        -IEmailClient _emailClient
-        +SendNotificationAsync(toEmail, subject, body) Task
-    }
-
+    %% Realizations & Dependencies
     AdvanceService ..|> IAdvanceService
     ExpenseService ..|> IExpenseService
-    AuditService ..|> IAuditService
-    NotificationService ..|> INotificationService
-
-    AdvanceService --> INotificationService
+    AdvanceService --> AppDbContext
+    ExpenseService --> AppDbContext
     AdvanceService --> IAuditService
-    ExpenseService --> INotificationService
     ExpenseService --> IAuditService
+    AppDbContext "1" *-- "many" AdvanceRequest
           </pre>
+        </div>
+
+        <div class="info-card" style="margin-top: 1.5rem; background: var(--bg-surface-alt);">
+          <h3 style="font-size: 1.1rem; font-weight: 700; color: var(--primary); margin-bottom: 0.75rem;">💡 Why Service-Oriented Class Architecture is Essential</h3>
+          <div style="font-size: 0.9rem; line-height: 1.65; color: var(--text-main);">
+            <p style="margin-bottom: 0.75rem;"><strong>1. What it is:</strong> Encapsulating all domain rules, validation, database queries, and workflow logic into dedicated C# Service classes (e.g., <code>AdvanceService</code>) rather than writing code inside API Controllers or Blazor UI components.</p>
+            <p style="margin-bottom: 0.75rem;"><strong>2. Why it is necessary:</strong></p>
+            <ul style="padding-left: 1.25rem; margin-bottom: 0.75rem;">
+              <li><strong>Prevents Fat Controllers</strong>: API Controllers remain clean 5-line wrappers handling only HTTP status codes and route binding.</li>
+              <li><strong>Code Reusability</strong>: Business rules can be called by Web API endpoints, background queue processors, or CLI tools without duplicating logic.</li>
+              <li><strong>Testability</strong>: Allows unit testing <code>AdvanceService</code> in isolation by mocking <code>AppDbContext</code> or <code>IAuditService</code> without spinning up a live web server.</li>
+              <li><strong>Maintainability</strong>: Changing a rule (e.g., auto-flagging expenses over $200) requires editing <em>only one file</em> (<code>ExpenseService.cs</code>).</li>
+            </ul>
+            <p><strong>3. How it operates in practice:</strong></p>
+            <div style="background: var(--bg-card); padding: 0.85rem 1rem; border-radius: var(--radius-sm); font-family: var(--font-mono); font-size: 0.82rem; border: 1px solid var(--border-color); margin-top: 0.5rem;">
+              Blazor UI / MAUI &rarr; Sends DTO via HTTP &rarr; API Controller &rarr; Calls IAdvanceService interface &rarr; AdvanceService validates &amp; mutates EF Core Entity &rarr; AppDbContext saves to SQL Server &rarr; Returns DTO to Client
+            </div>
+          </div>
         </div>
       </section>
 
