@@ -1,0 +1,1379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Petty Cash & Expense Management System - Stage 3: Comprehensive System Analysis & Design Specification">
+  <title>System Analysis & Design | Petty Cash & Expense Management System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    :root {
+      --font-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --font-heading: 'Outfit', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+
+      /* Light Theme (Default) */
+      --bg-body: #f8fafc;
+      --bg-surface: #ffffff;
+      --bg-surface-alt: #f1f5f9;
+      --bg-card: #ffffff;
+      --border-color: #e2e8f0;
+      --border-subtle: #edf2f7;
+
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --text-dim: #94a3b8;
+
+      --primary: #2563eb;
+      --primary-light: #eff6ff;
+      --primary-hover: #1d4ed8;
+      --primary-border: #bfdbfe;
+
+      --accent-indigo: #4f46e5;
+      --accent-indigo-light: #eef2ff;
+      --accent-emerald: #059669;
+      --accent-emerald-light: #ecfdf5;
+      --accent-amber: #d97706;
+      --accent-amber-light: #fffbeb;
+      --accent-rose: #e11d48;
+      --accent-rose-light: #fff1f2;
+      --accent-purple: #7c3aed;
+      --accent-purple-light: #f5f3ff;
+      --accent-cyan: #0891b2;
+      --accent-cyan-light: #ecfeff;
+
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
+      --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 16px;
+      --radius-full: 9999px;
+
+      --sidebar-width: 300px;
+      --header-height: 68px;
+    }
+
+    /* Dark Theme */
+    [data-theme="dark"] {
+      --bg-body: #0b0f19;
+      --bg-surface: #111827;
+      --bg-surface-alt: #1f2937;
+      --bg-card: #141d2e;
+      --border-color: #243047;
+      --border-subtle: #1e293b;
+
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+
+      --primary: #3b82f6;
+      --primary-light: rgba(59, 130, 246, 0.12);
+      --primary-hover: #60a5fa;
+      --primary-border: #1e3a8a;
+
+      --accent-indigo: #6366f1;
+      --accent-indigo-light: rgba(99, 102, 241, 0.12);
+      --accent-emerald: #10b981;
+      --accent-emerald-light: rgba(16, 185, 129, 0.12);
+      --accent-amber: #f59e0b;
+      --accent-amber-light: rgba(245, 158, 11, 0.12);
+      --accent-rose: #f43f5e;
+      --accent-rose-light: rgba(244, 63, 94, 0.12);
+      --accent-purple: #8b5cf6;
+      --accent-purple-light: rgba(139, 92, 246, 0.12);
+      --accent-cyan: #06b6d4;
+      --accent-cyan-light: rgba(6, 182, 212, 0.12);
+
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.35);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4);
+      --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; font-size: 16px; }
+
+    body {
+      font-family: var(--font-body);
+      background-color: var(--bg-body);
+      color: var(--text-main);
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+      transition: background-color 0.25s ease, color 0.25s ease;
+    }
+
+    #reading-progress {
+      position: fixed; top: 0; left: 0; height: 3px;
+      background: linear-gradient(90deg, var(--primary), var(--accent-indigo), var(--accent-cyan));
+      width: 0%; z-index: 1000; transition: width 0.1s ease-out;
+    }
+
+    .top-nav {
+      position: sticky; top: 0; height: var(--header-height);
+      background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-color); z-index: 100;
+      display: flex; align-items: center; justify-content: space-between; padding: 0 2rem;
+      transition: background-color 0.25s ease, border-color 0.25s ease;
+    }
+    [data-theme="dark"] .top-nav { background: rgba(17, 24, 39, 0.85); }
+
+    .nav-brand { display: flex; align-items: center; gap: 0.75rem; text-decoration: none; color: var(--text-main); }
+    .brand-icon {
+      width: 38px; height: 38px; background: linear-gradient(135deg, var(--accent-indigo), var(--primary));
+      border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center;
+      color: #fff; font-weight: 700; font-size: 1.15rem; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+    }
+    .brand-text h1 { font-family: var(--font-heading); font-size: 1.15rem; font-weight: 700; line-height: 1.2; }
+    .brand-text span { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); font-weight: 600; }
+
+    .nav-actions { display: flex; align-items: center; gap: 0.85rem; }
+    .nav-link-doc {
+      display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.45rem 0.85rem;
+      background: var(--bg-surface-alt); border: 1px solid var(--border-color); border-radius: var(--radius-sm);
+      font-size: 0.85rem; font-weight: 600; color: var(--text-muted); text-decoration: none; transition: all 0.2s ease;
+    }
+    .nav-link-doc:hover { color: var(--primary); border-color: var(--primary-border); transform: translateY(-1px); }
+
+    .badge-pill {
+      display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.3rem 0.75rem;
+      border-radius: var(--radius-full); font-size: 0.78rem; font-weight: 700;
+      background: var(--primary-light); color: var(--primary); border: 1px solid var(--primary-border);
+    }
+
+    .btn-action, .btn-toggle-theme {
+      display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.45rem 0.85rem;
+      border-radius: var(--radius-sm); border: 1px solid var(--border-color); background: var(--bg-surface);
+      color: var(--text-main); font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s ease;
+    }
+    .btn-action:hover, .btn-toggle-theme:hover { border-color: var(--primary); color: var(--primary); transform: translateY(-1px); }
+
+    .app-container { display: flex; max-width: 1440px; margin: 0 auto; padding: 2rem; gap: 2rem; }
+    .sidebar { width: var(--sidebar-width); flex-shrink: 0; position: sticky; top: calc(var(--header-height) + 1.5rem); height: calc(100vh - var(--header-height) - 3rem); overflow-y: auto; }
+    .toc-title { font-family: var(--font-heading); font-weight: 700; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; }
+    .toc-list { list-style: none; display: flex; flex-direction: column; gap: 0.25rem; }
+    .toc-link { display: flex; align-items: center; gap: 0.6rem; padding: 0.5rem 0.75rem; border-radius: var(--radius-sm); color: var(--text-muted); text-decoration: none; font-size: 0.88rem; font-weight: 500; transition: all 0.15s ease; }
+    .toc-link:hover, .toc-link.active { background: var(--bg-surface-alt); color: var(--primary); font-weight: 600; }
+    .toc-num { font-family: var(--font-mono); font-size: 0.75rem; opacity: 0.7; }
+
+    .main-content { flex-grow: 1; min-width: 0; }
+
+    .hero-banner {
+      background: linear-gradient(135deg, #1e1b4b 0%, #312e81 40%, #1e3a8a 100%);
+      color: #fff; border-radius: var(--radius-lg); padding: 3rem 2.5rem; margin-bottom: 2rem;
+      box-shadow: var(--shadow-xl); position: relative; overflow: hidden;
+    }
+    .hero-tagline { font-family: var(--font-mono); font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.1em; color: #a5b4fc; margin-bottom: 0.75rem; display: inline-block; padding: 0.25rem 0.75rem; background: rgba(255,255,255,0.1); border-radius: var(--radius-full); }
+    .hero-title { font-family: var(--font-heading); font-size: 2.5rem; font-weight: 800; letter-spacing: -0.02em; line-height: 1.15; margin-bottom: 1rem; background: linear-gradient(to right, #ffffff, #c7d2fe); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .hero-desc { font-size: 1.12rem; color: #cbd5e1; max-width: 840px; line-height: 1.6; margin-bottom: 2rem; }
+    .hero-meta-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.25rem; border-top: 1px solid rgba(255,255,255,0.15); padding-top: 1.5rem; }
+    .hero-meta-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; color: #94a3b8; }
+    .hero-meta-value { font-size: 0.95rem; font-weight: 600; color: #f8fafc; }
+
+    .doc-section {
+      background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-lg);
+      padding: 2.25rem; margin-bottom: 2rem; box-shadow: var(--shadow-sm); scroll-margin-top: calc(var(--header-height) + 1.5rem);
+    }
+    .doc-section:hover { border-color: rgba(79, 70, 229, 0.3); box-shadow: var(--shadow-md); }
+
+    .section-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.75rem; padding-bottom: 1.25rem; border-bottom: 1px solid var(--border-subtle); }
+    .section-badge {
+      display: inline-flex; align-items: center; justify-content: center; min-width: 2.75rem; height: 2.75rem; padding: 0 0.5rem;
+      background: linear-gradient(135deg, var(--accent-indigo-light), var(--primary-light)); border: 1px solid var(--primary-border);
+      color: var(--accent-indigo); border-radius: var(--radius-md); font-family: var(--font-heading); font-weight: 700; font-size: 1.15rem; flex-shrink: 0;
+    }
+    .section-title-wrap h2 { font-family: var(--font-heading); font-size: 1.65rem; font-weight: 700; color: var(--text-main); letter-spacing: -0.01em; line-height: 1.25; }
+    .section-title-wrap p { font-size: 0.9rem; color: var(--text-muted); margin-top: 0.2rem; }
+
+    .diagram-card {
+      background: var(--bg-surface-alt); border: 1px solid var(--border-color); border-radius: var(--radius-md);
+      padding: 1.5rem; margin: 1.5rem 0; overflow-x: auto; box-shadow: var(--shadow-sm);
+    }
+    .diagram-title { font-family: var(--font-heading); font-weight: 700; font-size: 1.1rem; color: var(--text-main); margin-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center; }
+    .diagram-subtitle { font-size: 0.88rem; color: var(--text-muted); margin-bottom: 1.25rem; }
+
+    .mermaid { display: flex; justify-content: center; margin: 1rem 0; }
+
+    .api-table, .spec-table { width: 100%; border-collapse: collapse; margin: 1.25rem 0; font-size: 0.88rem; }
+    .api-table th, .spec-table th { background: var(--bg-surface-alt); color: var(--text-muted); font-family: var(--font-heading); font-weight: 700; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; padding: 0.75rem 1rem; border-bottom: 2px solid var(--border-color); text-align: left; }
+    .api-table td, .spec-table td { padding: 0.85rem 1rem; border-bottom: 1px solid var(--border-subtle); color: var(--text-main); vertical-align: top; }
+    .api-table tr:hover, .spec-table tr:hover { background: rgba(59, 130, 246, 0.03); }
+
+    .method-badge { font-family: var(--font-mono); font-weight: 700; font-size: 0.75rem; padding: 0.2rem 0.5rem; border-radius: var(--radius-sm); text-transform: uppercase; }
+    .method-get { background: var(--accent-emerald-light); color: var(--accent-emerald); border: 1px solid rgba(16, 185, 129, 0.3); }
+    .method-post { background: var(--primary-light); color: var(--primary); border: 1px solid var(--primary-border); }
+    .method-put { background: var(--accent-amber-light); color: var(--accent-amber); border: 1px solid rgba(245, 158, 11, 0.3); }
+    .method-patch { background: var(--accent-purple-light); color: var(--accent-purple); border: 1px solid rgba(139, 92, 246, 0.3); }
+    .method-delete { background: var(--accent-rose-light); color: var(--accent-rose); border: 1px solid rgba(244, 63, 94, 0.3); }
+
+    .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem; margin: 1.5rem 0; }
+    .info-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.25rem; transition: all 0.2s ease; display: flex; flex-direction: column; }
+    .info-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); border-color: var(--primary-border); }
+    .info-card-header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem; }
+    .card-icon-box { width: 38px; height: 38px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; font-size: 1.15rem; flex-shrink: 0; }
+    .card-icon-blue { background: var(--primary-light); color: var(--primary); }
+    .card-icon-emerald { background: var(--accent-emerald-light); color: var(--accent-emerald); }
+    .card-icon-amber { background: var(--accent-amber-light); color: var(--accent-amber); }
+    .card-icon-rose { background: var(--accent-rose-light); color: var(--accent-rose); }
+    .card-icon-purple { background: var(--accent-purple-light); color: var(--accent-purple); }
+
+    .doc-footer { text-align: center; padding: 2.5rem 0 1rem; color: var(--text-muted); font-size: 0.85rem; border-top: 1px solid var(--border-color); margin-top: 3rem; }
+
+    @media print {
+      .top-nav, .sidebar, #reading-progress, .btn-toggle-theme { display: none !important; }
+      .app-container { display: block; padding: 0; }
+      .doc-section { box-shadow: none !important; border: 1px solid #ccc !important; break-inside: avoid; margin-bottom: 1.5rem; }
+      body { background: #fff !important; color: #000 !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="reading-progress"></div>
+
+  <!-- Header Navigation Bar -->
+  <nav class="top-nav">
+    <a href="#overview" class="nav-brand">
+      <div class="brand-icon">Z</div>
+      <div class="brand-text">
+        <h1>PettyCash Manager</h1>
+        <span>Engineering Documentation</span>
+      </div>
+    </a>
+
+    <div class="nav-actions">
+      <a href="../Planning/ProjectPlanning.html" class="nav-link-doc" title="View Stage 1 Documentation">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+        <span>Stage 1: Planning</span>
+      </a>
+      <a href="../Requirements/RequirementsAnalysis.html" class="nav-link-doc" title="View Stage 2 Documentation">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+        <span>Stage 2: Requirements</span>
+      </a>
+      <span class="badge-pill">
+        <svg width="8" height="8" viewBox="0 0 8 8" fill="currentColor"><circle cx="4" cy="4" r="4"/></svg>
+        Stage 3: System Design
+      </span>
+      <button class="btn-action" onclick="window.print()" title="Print Documentation">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+        <span>Print</span>
+      </button>
+      <button class="btn-toggle-theme" id="themeToggleBtn" title="Toggle Light/Dark Theme">
+        <span id="themeIcon">🌙</span>
+        <span id="themeLabel">Dark</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Main Container -->
+  <div class="app-container">
+
+    <!-- Sticky TOC Sidebar -->
+    <aside class="sidebar" aria-label="Table of Contents">
+      <div class="toc-title">
+        <span>Design Specification</span>
+        <span style="font-size: 0.7rem; font-family: var(--font-mono);">Stage 03</span>
+      </div>
+      <ul class="toc-list" id="tocList">
+        <li><a href="#section-1" class="toc-link"><span class="toc-num">01</span><span>Architecture Overview</span></a></li>
+        <li><a href="#section-2" class="toc-link"><span class="toc-num">02</span><span>C4 Model (Context, Container)</span></a></li>
+        <li><a href="#section-3" class="toc-link"><span class="toc-num">03</span><span>Component Breakdown</span></a></li>
+        <li><a href="#section-4" class="toc-link"><span class="toc-num">04</span><span>Use Case &amp; Actor Specification</span></a></li>
+        <li><a href="#section-5" class="toc-link"><span class="toc-num">05</span><span>Business Activity Workflows</span></a></li>
+        <li><a href="#section-6" class="toc-link"><span class="toc-num">06</span><span>Data Flow Diagrams (DFD)</span></a></li>
+        <li><a href="#section-7" class="toc-link"><span class="toc-num">07</span><span>API Architecture &amp; Endpoints</span></a></li>
+        <li><a href="#section-8" class="toc-link"><span class="toc-num">08</span><span>Sequence Diagrams</span></a></li>
+        <li><a href="#section-9" class="toc-link"><span class="toc-num">09</span><span>State Machine Lifecycles</span></a></li>
+        <li><a href="#section-10" class="toc-link"><span class="toc-num">10</span><span>Security &amp; PB-RBAC Governance</span></a></li>
+        <li><a href="#section-11" class="toc-link"><span class="toc-num">11</span><span>Database ERD Schema</span></a></li>
+        <li><a href="#section-12" class="toc-link"><span class="toc-num">12</span><span>Class Diagram &amp; Services</span></a></li>
+        <li><a href="#section-13" class="toc-link"><span class="toc-num">13</span><span>Deployment Topology</span></a></li>
+      </ul>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+      <!-- Hero Banner -->
+      <section class="hero-banner" id="overview">
+        <div class="hero-tagline">
+          <span>Enterprise Architecture &bull; SDLC Stage 3</span>
+        </div>
+        <h1 class="hero-title">System Analysis &amp; Design Specification</h1>
+        <p class="hero-desc">
+          Complete structural architecture, component interactions, RESTful API specifications, state machines, permission governance (PB-RBAC), EF Core entity relationships, and C# service contracts for the Petty Cash &amp; Expense Management System.
+        </p>
+
+        <div class="hero-meta-grid">
+          <div class="hero-meta-item">
+            <span class="hero-meta-label">Document Stage</span>
+            <span class="hero-meta-value">Stage 3: System Analysis &amp; Design</span>
+          </div>
+          <div class="hero-meta-item">
+            <span class="hero-meta-label">Target Stack</span>
+            <span class="hero-meta-value">.NET MAUI Blazor Hybrid + ASP.NET Core APIs</span>
+          </div>
+          <div class="hero-meta-item">
+            <span class="hero-meta-label">ORM &amp; Database</span>
+            <span class="hero-meta-value">EF Core Code-First + SQL Server</span>
+          </div>
+          <div class="hero-meta-item">
+            <span class="hero-meta-label">Total Artifacts</span>
+            <span class="hero-meta-value">23 Mermaid Diagrams + API Matrix</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 1: Architecture Overview -->
+      <section class="doc-section" id="section-1">
+        <div class="section-header">
+          <div class="section-badge">01</div>
+          <div class="section-title-wrap">
+            <h2>1. System Architecture Overview</h2>
+            <p>Core engineering principles, technology stack, and layer separation</p>
+          </div>
+        </div>
+
+        <p>
+          The Petty Cash &amp; Expense Management System is designed as a modern, multi-tier enterprise platform leveraging **.NET MAUI Blazor Hybrid** for mobile cross-platform field usage and **ASP.NET Core Web API** for centralized business logic and financial custody.
+        </p>
+
+        <div class="cards-grid">
+          <div class="info-card">
+            <div class="info-card-header">
+              <div class="card-icon-box card-icon-blue">💻</div>
+              <div class="info-card-title">Shared Core Project</div>
+            </div>
+            <div class="info-card-body">
+              Contains domain entity models (`User`, `AdvanceRequest`, `Expense`, `Receipt`, `Reconciliation`), type-safe C# Enums (`AdvanceStatus`, `ExpenseStatus`, `SettlementType`), and service interface contracts (`IAdvanceService`, `IExpenseService`).
+            </div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-card-header">
+              <div class="card-icon-box card-icon-emerald">⚙️</div>
+              <div class="info-card-title">Backend Server Project</div>
+            </div>
+            <div class="info-card-body">
+              Houses concrete service implementations (`AdvanceService`, `ExpenseService`, `ReconciliationService`) containing all financial validation rules, custody calculations, EF Core database mappings, and audit logging.
+            </div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-card-header">
+              <div class="card-icon-box card-icon-amber">📱</div>
+              <div class="info-card-title">Client Applications</div>
+            </div>
+            <div class="info-card-body">
+              Responsive Blazor Web application for office management/approvers and .NET MAUI Blazor Hybrid app for budget Android/iOS mobile devices used by field officers.
+            </div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-card-header">
+              <div class="card-icon-box card-icon-purple">🔒</div>
+              <div class="info-card-title">Security &amp; PB-RBAC</div>
+            </div>
+            <div class="info-card-body">
+              Permission-Based Role-Based Access Control. `SuperAdmin` is the single seeded system root role; all custom roles and granular permissions are managed dynamically.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 2: C4 Model (Context, Container) -->
+      <section class="doc-section" id="section-2">
+        <div class="section-header">
+          <div class="section-badge">02</div>
+          <div class="section-title-wrap">
+            <h2>2. C4 Model: System Context &amp; Container Architecture</h2>
+            <p>High-level system boundaries and containerized service topologies</p>
+          </div>
+        </div>
+
+        <div class="diagram-card">
+          <div class="diagram-title">
+            <span>2.1 System Context Diagram (C4 Level 1)</span>
+            <span class="badge-pill">1-system-context.mmd</span>
+          </div>
+          <div class="diagram-subtitle">External actors, primary system boundaries, and outgoing email notification integration</div>
+          <pre class="mermaid">
+flowchart LR
+    Employee["Employee"]
+    SuperAdmin["Super Admin"]
+    System["Expense Management System"]
+    EmailProvider["Email / Notification Provider"]
+
+    Employee -->|"Request advances, record expenses, submit reimbursements"| System
+    SuperAdmin -->|"Approve requests, issue cash, reconcile balances, view reports"| System
+    System -->|"Sends notifications"| EmailProvider
+          </pre>
+        </div>
+
+        <div class="diagram-card">
+          <div class="diagram-title">
+            <span>2.2 Container Diagram (C4 Level 2)</span>
+            <span class="badge-pill">2-container-diagram.mmd</span>
+          </div>
+          <div class="diagram-subtitle">Decomposition into Web client, MAUI Hybrid mobile app, ASP.NET Core Web API, SQL Server, and File Storage</div>
+          <pre class="mermaid">
+flowchart TB
+    Employee["Employee"]
+    SuperAdmin["Super Admin"]
+
+    subgraph System["Expense Management System"]
+        Web["Blazor Web Application"]
+        Maui[".NET MAUI Blazor Hybrid Application"]
+        API["ASP.NET Core Web API"]
+        DB[("SQL Server Database")]
+        FileStore["Receipt File Storage"]
+    end
+
+    Notification["Notification Service (Email)"]
+
+    Employee -->|"Browser / HTTPS"| Web
+    Employee -->|"Mobile App / HTTPS"| Maui
+    SuperAdmin -->|"Browser / HTTPS"| Web
+
+    Web -->|"HTTPS / JSON"| API
+    Maui -->|"HTTPS / JSON"| API
+
+    API -->|"EF Core / SQL"| DB
+    API -->|"File I/O"| FileStore
+    API -->|"SMTP / External API"| Notification
+          </pre>
+        </div>
+      </section>
+
+      <!-- Section 3: Component Breakdown -->
+      <section class="doc-section" id="section-3">
+        <div class="section-header">
+          <div class="section-badge">03</div>
+          <div class="section-title-wrap">
+            <h2>3. Component Architecture (C4 Level 3)</h2>
+            <p>Modular decomposition of the ASP.NET Core Application Layer</p>
+          </div>
+        </div>
+
+        <div class="diagram-card">
+          <div class="diagram-title">
+            <span>3.1 Application Component Diagram</span>
+            <span class="badge-pill">3-component-diagram.mmd</span>
+          </div>
+          <div class="diagram-subtitle">Security gateway, core domain components, document storage, reporting, and audit trail linkages</div>
+          <pre class="mermaid">
+flowchart TB
+    subgraph Application["ASP.NET Core Application"]
+        subgraph Security["Security"]
+            Authentication["Authentication"]
+            Authorization["Authorization"]
+        end
+
+        UserManagement["User Management"]
+        PermissionManagement["Permission Management"]
+        AdvanceManagement["Advance Management"]
+        ExpenseManagement["Expense Management"]
+        ReimbursementManagement["Reimbursement Management"]
+        Reconciliation["Reconciliation"]
+        DocumentStorage["Document Storage"]
+        Notification["Notification"]
+        Reporting["Reporting"]
+        Audit["Audit"]
+    end
+
+    Client["Client Applications"]
+    Database[("SQL Server")]
+    FileStore["Receipt File Storage"]
+    EmailProvider["Email Provider"]
+
+    Client -->|"All requests"| Authentication
+    Authentication --> Authorization
+
+    Authorization --> UserManagement
+    Authorization --> PermissionManagement
+    Authorization --> AdvanceManagement
+    Authorization --> ExpenseManagement
+    Authorization --> ReimbursementManagement
+    Authorization --> Reconciliation
+    Authorization --> Reporting
+
+    ExpenseManagement --> DocumentStorage
+    DocumentStorage --> FileStore
+
+    AdvanceManagement --> Notification
+    ExpenseManagement --> Notification
+    ReimbursementManagement --> Notification
+    Notification --> EmailProvider
+
+    AdvanceManagement --> Audit
+    ExpenseManagement --> Audit
+    ReimbursementManagement --> Audit
+    Reconciliation --> Audit
+    UserManagement --> Audit
+    PermissionManagement --> Audit
+    Reporting --> Audit
+
+    UserManagement --> Database
+    PermissionManagement --> Database
+    AdvanceManagement --> Database
+    ExpenseManagement --> Database
+    ReimbursementManagement --> Database
+    Reconciliation --> Database
+    Reporting --> Database
+    Audit --> Database
+    Authentication --> Database
+          </pre>
+        </div>
+      </section>
+
+      <!-- Section 4: Use Case & Actor Specification -->
+      <section class="doc-section" id="section-4">
+        <div class="section-header">
+          <div class="section-badge">04</div>
+          <div class="section-title-wrap">
+            <h2>4. Use Case &amp; Actor Specification</h2>
+            <p>Functional capabilities mapped across Employee and Super Admin actors</p>
+          </div>
+        </div>
+
+        <div class="diagram-card">
+          <div class="diagram-title">
+            <span>4.1 Complete System Use Case Diagram</span>
+            <span class="badge-pill">4-use-case-diagram.mmd</span>
+          </div>
+          <div class="diagram-subtitle">23 distinct use cases covering authentication, advances, expenses, receipts, reimbursements, reconciliation, and audit</div>
+          <pre class="mermaid">
+flowchart LR
+    Employee["Employee"]
+    SuperAdmin["Super Admin"]
+
+    subgraph System["Expense Management System"]
+        UC1(("Authenticate"))
+        UC2(("Request Advance"))
+        UC3(("Cancel Advance Request"))
+        UC4(("Record Field Expense"))
+        UC5(("Record Office Expense"))
+        UC6(("Categorize Expense"))
+        UC7(("Attach Receipt"))
+        UC8(("Request Additional Advance"))
+        UC9(("Submit Reimbursement Claim"))
+        UC10(("View Personal Submissions"))
+
+        UC11(("Manage Users"))
+        UC12(("Manage Roles & Permissions"))
+        UC13(("Approve Advance Request"))
+        UC14(("Reject Advance Request"))
+        UC15(("Record Funds Issued"))
+        UC16(("Review Submitted Expense"))
+        UC17(("Reject Line Item Expense"))
+        UC18(("Approve Reimbursement Claim"))
+        UC19(("Process Reimbursement Payment"))
+        UC20(("Reconcile Advance & Expenses"))
+        UC21(("Generate Expense Reports"))
+        UC22(("Export Reports CSV/Excel"))
+        UC23(("View Audit Trail"))
+    end
+
+    Employee --> UC1
+    Employee --> UC2
+    Employee --> UC3
+    Employee --> UC4
+    Employee --> UC5
+    Employee --> UC6
+    Employee --> UC7
+    Employee --> UC8
+    Employee --> UC9
+    Employee --> UC10
+
+    SuperAdmin --> UC1
+    SuperAdmin --> UC11
+    SuperAdmin --> UC12
+    SuperAdmin --> UC13
+    SuperAdmin --> UC14
+    SuperAdmin --> UC15
+    SuperAdmin --> UC16
+    SuperAdmin --> UC17
+    SuperAdmin --> UC18
+    SuperAdmin --> UC19
+    SuperAdmin --> UC20
+    SuperAdmin --> UC21
+    SuperAdmin --> UC22
+    SuperAdmin --> UC23
+          </pre>
+        </div>
+      </section>
+
+      <!-- Section 5: Business Activity Workflows -->
+      <section class="doc-section" id="section-5">
+        <div class="section-header">
+          <div class="section-badge">05</div>
+          <div class="section-title-wrap">
+            <h2>5. Business Activity Workflows</h2>
+            <p>Step-by-step procedural decision trees for all core financial operations</p>
+          </div>
+        </div>
+
+        <div class="diagram-card">
+          <div class="diagram-title">
+            <span>5.1 Advance Request &amp; Approval Activity Workflow</span>
+            <span class="badge-pill">5-advance-request-activity-diagram.mmd</span>
+          </div>
+          <pre class="mermaid">
+flowchart TD
+    Start([Start]) --> A["Employee creates advance request"]
+    A --> B["Enter purpose, destination and requested amount"]
+    B --> C["Submit request"]
+    C --> D{"Valid request?"}
+    D -- No --> B
+    D -- Yes --> E["Save request (Status = Pending)"]
+    E --> F{"Employee cancels?"}
+    F -- Yes --> G["Status = Cancelled"] --> End([End])
+    F -- No --> H["Approver reviews request"]
+    H --> I{"Approve request?"}
+    I -- No --> J["Enter mandatory rejection reason"] --> K["Status = Rejected"] --> End
+    I -- Yes --> L["Status = Approved"] --> M["Cash Custodian issues funds"] --> N["Record issued amount & date"] --> O["Status = FundsIssued"] --> End
+          </pre>
+        </div>
+
+        <div class="diagram-card">
+          <div class="diagram-title">
+            <span>5.2 Expense Recording &amp; Resubmission Activity Workflow</span>
+            <span class="badge-pill">6-expense-recording-activity-diagram.mmd</span>
+          </div>
+          <pre class="mermaid">
+flowchart TD
+    Start([Start]) --> A["Employee selects active advance"]
+    A --> B["Enter amount, date, category and description"]
+    B --> C["Attach receipt photo if available"]
+    C --> D["Submit expense (Status = PendingReview)"]
+    D --> E["Approver inspects expense & receipt"]
+    E --> F{"Approve expense?"}
+    F -- Yes --> G["Status = Approved"] --> End([End])
+    F -- No --> H["Enter mandatory rejection reason"] --> I["Status = Rejected"]
+    I --> J{"Correct within 3 days?"}
+    J -- Yes --> B
+    J -- No --> K["Final Rejection"] --> End
+          </pre>
+        </div>
+
+        <div class="diagram-card">
+          <div class="diagram-title">
+            <span>5.3 Reconciliation &amp; Financial Settlement Activity Workflow</span>
+            <span class="badge-pill">9-reconciliation-activity-diagram.mmd</span>
+          </div>
+          <pre class="mermaid">
+flowchart TD
+    Start([Start]) --> A["Select completed advance task"]
+    A --> B["Calculate Total Funds Issued (Initial + Additional)"]
+    B --> C["Calculate Total Approved Expenses"]
+    C --> D["Compute Balance = Total Issued - Total Spent"]
+    D --> E{"Evaluate Balance Outcome"}
+    E -- "Balance > 0 (Surplus)" --> F["Employee returns surplus cash to custodian"] --> G["Custodian confirms cash receipt"] --> H["Status = Settled"]
+    E -- "Balance = 0 (Equal)" --> H
+    E -- "Balance < 0 (Shortfall)" --> I["Create Out-of-Pocket Reimbursement Claim"] --> J["Approver reviews & pays claim"] --> H
+    H --> K["Final Managerial Sign-off & Lock Records (Status = Closed)"] --> End([End])
+          </pre>
+        </div>
+      </section>
+
+      <!-- Section 6: Data Flow Diagrams -->
+      <section class="doc-section" id="section-6">
+        <div class="section-header">
+          <div class="section-badge">06</div>
+          <div class="section-title-wrap">
+            <h2>6. Data Flow Diagrams (DFD Level 01 &amp; Level 02)</h2>
+            <p>Information transformation pipelines and data store boundaries</p>
+          </div>
+        </div>
+
+        <div class="diagram-card">
+          <div class="diagram-title">
+            <span>6.1 DFD Level 02 Decomposition</span>
+            <span class="badge-pill">11-DFD-level-02.mmd</span>
+          </div>
+          <div class="diagram-subtitle">Decomposition into 6 core processes with data stores D1 through D6 and complete feedback loops</div>
+          <pre class="mermaid">
+flowchart LR
+    Employee["Employee"]
+    SuperAdmin["Super Admin"]
+    EmailProvider["Email / Notification Provider"]
+
+    P1(("1. Authentication & Access"))
+    P2(("2. Advance Management"))
+    P3(("3. Expense Management"))
+    P4(("4. Reimbursement Management"))
+    P5(("5. Reconciliation"))
+    P6(("6. Reporting & Audit"))
+
+    D1[("User Data")]
+    D2[("Advance Data")]
+    D3[("Expense Data")]
+    D4[("Reimbursement Data")]
+    D5[("Audit Data")]
+    D6[("Receipt Storage")]
+
+    Employee -->|"Credentials"| P1
+    SuperAdmin -->|"User provisioning & role assignment"| P1
+    P1 <--> D1
+    P1 -->|"Authenticated session & tokens"| Employee
+    P1 -->|"Authenticated session & tokens"| SuperAdmin
+
+    Employee -->|"Initial & additional advance requests"| P2
+    Employee -->|"Advance cancellation (Pending)"| P2
+    SuperAdmin -->|"Advance approval / rejection"| P2
+    SuperAdmin -->|"Funds issuance & custody record"| P2
+    P2 <--> D2
+    P2 -->|"Advance status & issuance confirmation"| Employee
+
+    Employee -->|"Expense records & receipt uploads"| P3
+    Employee -->|"Corrected expense resubmissions"| P3
+    P3 <--> D3
+    P3 <--> D6
+    P3 -->|"Expenses & receipt vouchers for review"| SuperAdmin
+    SuperAdmin -->|"Expense review decisions & reasons"| P3
+    P3 -->|"Expense approval / rejection feedback"| Employee
+
+    Employee -->|"Out-of-pocket reimbursement claim"| P4
+    P4 <--> D4
+    P4 -->|"Reimbursement claims for review"| SuperAdmin
+    SuperAdmin -->|"Claim approval / rejection & disbursement"| P4
+    P4 -->|"Claim status & payment notice"| Employee
+
+    P2 -->|"Total issued funds (initial + additional)"| P5
+    P3 -->|"Approved expense totals"| P5
+    Employee -->|"Surplus balance return / cash surrender"| P5
+    SuperAdmin -->|"Surplus confirmation & closure sign-off"| P5
+    P5 -->|"Deficit reimbursement trigger"| P4
+    P5 -->|"Reconciliation statement & settlement status"| Employee
+    P5 -->|"Reconciliation report & final audit"| SuperAdmin
+    P5 <--> D2
+    P5 <--> D3
+    P5 <--> D4
+
+    P1 -->|"Auth events"| P6
+    P2 -->|"Advance events"| P6
+    P3 -->|"Expense events"| P6
+    P4 -->|"Reimbursement events"| P6
+    P5 -->|"Reconciliation events"| P6
+    P6 <--> D5
+    P6 -.->|"Query data"| D2
+    P6 -.->|"Query data"| D3
+    P6 -.->|"Query data"| D4
+    P6 -->|"Reports, search results & CSV export"| SuperAdmin
+
+    P2 -->|"Advance status alerts"| EmailProvider
+    P3 -->|"Review decision alerts"| EmailProvider
+    P4 -->|"Reimbursement status alerts"| EmailProvider
+          </pre>
+        </div>
+      </section>
+
+      <!-- Section 7: API Architecture & Comprehensive Endpoint Specification -->
+      <section class="doc-section" id="section-7">
+        <div class="section-header">
+          <div class="section-badge">07</div>
+          <div class="section-title-wrap">
+            <h2>7. API Architecture &amp; RESTful Endpoints Specification</h2>
+            <p>Complete HTTP route mapping, payload contracts, and business rules</p>
+          </div>
+        </div>
+
+        <div class="diagram-card">
+          <div class="diagram-title">
+            <span>7.1 API Architecture Diagram</span>
+            <span class="badge-pill">12-api-architecture-diagram.mmd</span>
+          </div>
+          <pre class="mermaid">
+flowchart TB
+    subgraph Clients["Clients"]
+        Maui["MAUI Blazor Hybrid"]
+        Web["Blazor Web Client"]
+    end
+
+    subgraph API["ASP.NET Core Web API"]
+        Gateway["HTTPS API Gateway"]
+        AuthAPI["Authentication Endpoints"]
+        UserAPI["User Management Endpoints"]
+        AdvanceAPI["Advance Endpoints"]
+        ExpenseAPI["Expense Endpoints"]
+        ReceiptAPI["Receipt Endpoints"]
+        ReimbursementAPI["Reimbursement Endpoints"]
+        ReconciliationAPI["Reconciliation Endpoints"]
+        ReportAPI["Reporting Endpoints"]
+        AuditAPI["Audit Endpoints"]
+    end
+
+    subgraph Application["Application Layer"]
+        AuthService["Authentication Service"]
+        UserService["User Management Service"]
+        AdvanceService["Advance Service"]
+        ExpenseService["Expense Service"]
+        ReimbursementService["Reimbursement Service"]
+        ReconciliationService["Reconciliation Service"]
+        ReportingService["Reporting Service"]
+        AuditService["Audit Service"]
+        NotificationService["Notification Service"]
+    end
+
+    Data["EF Core / Data Access"]
+    DB[("SQL Server")]
+    FileStore["Receipt File Storage"]
+    NotificationProvider["Email / Notification Provider"]
+
+    Maui -->|"HTTPS / JSON"| Gateway
+    Web -->|"HTTPS / JSON"| Gateway
+
+    Gateway --> AuthAPI
+    Gateway --> UserAPI
+    Gateway --> AdvanceAPI
+    Gateway --> ExpenseAPI
+    Gateway --> ReceiptAPI
+    Gateway --> ReimbursementAPI
+    Gateway --> ReconciliationAPI
+    Gateway --> ReportAPI
+    Gateway --> AuditAPI
+
+    AuthAPI --> AuthService
+    UserAPI --> UserService
+    AdvanceAPI --> AdvanceService
+    ExpenseAPI --> ExpenseService
+    ReceiptAPI --> ExpenseService
+    ReimbursementAPI --> ReimbursementService
+    ReconciliationAPI --> ReconciliationService
+    ReportAPI --> ReportingService
+    AuditAPI --> AuditService
+
+    AuthService --> Data
+    UserService --> Data
+    AdvanceService --> Data
+    ExpenseService --> Data
+    ReimbursementService --> Data
+    ReconciliationService --> Data
+    ReportingService --> Data
+    AuditService --> Data
+
+    AdvanceService -->|"Alerts"| NotificationService
+    ExpenseService -->|"Alerts"| NotificationService
+    ReimbursementService -->|"Alerts"| NotificationService
+    NotificationService --> NotificationProvider
+    ExpenseService --> FileStore
+    Data --> DB
+          </pre>
+        </div>
+
+        <h3>7.2 Endpoints Execution Matrix</h3>
+        <div style="overflow-x: auto;">
+          <table class="api-table">
+            <thead>
+              <tr>
+                <th>Group</th>
+                <th>HTTP &amp; Route</th>
+                <th>Description &amp; Business Rules</th>
+                <th>Scope &amp; MVP</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>AuthAPI</strong></td>
+                <td><span class="method-badge method-post">POST</span> <code>/api/auth/login</code></td>
+                <td>Authenticates credentials with salted password hashing (NFR-d). Returns JWT session token. Logs audit event.</td>
+                <td>In-Scope &bull; Phase 1</td>
+              </tr>
+              <tr>
+                <td><strong>UserAPI</strong></td>
+                <td><span class="method-badge method-post">POST</span> <code>/api/users</code></td>
+                <td>Admin provisions user accounts and assigns roles (FR-01). Enforces unique email constraint.</td>
+                <td>In-Scope &bull; Phase 1</td>
+              </tr>
+              <tr>
+                <td><strong>AdvanceAPI</strong></td>
+                <td><span class="method-badge method-post">POST</span> <code>/api/advances</code></td>
+                <td>Employee creates advance request specifying amount (UGX), destination, and purpose (FR-02). Status = Pending.</td>
+                <td>In-Scope &bull; Phase 2</td>
+              </tr>
+              <tr>
+                <td><strong>AdvanceAPI</strong></td>
+                <td><span class="method-badge method-post">POST</span> <code>/api/advances/{id}/approve</code></td>
+                <td>Approver grants request (BR-001). Sets approved amount. Triggers email notification to employee.</td>
+                <td>In-Scope &bull; Phase 2</td>
+              </tr>
+              <tr>
+                <td><strong>AdvanceAPI</strong></td>
+                <td><span class="method-badge method-post">POST</span> <code>/api/advances/{id}/issue-funds</code></td>
+                <td>Custodian logs physical/electronic release of capital (FR-03). Status transitions to FundsIssued.</td>
+                <td>In-Scope &bull; Phase 2</td>
+              </tr>
+              <tr>
+                <td><strong>AdvanceAPI</strong></td>
+                <td><span class="method-badge method-post">POST</span> <code>/api/advances/{id}/additional</code></td>
+                <td>Employee requests supplemental funds for active advance (FR-06, BR-005). Requires independent approval.</td>
+                <td>In-Scope &bull; Phase 2</td>
+              </tr>
+              <tr>
+                <td><strong>ExpenseAPI</strong></td>
+                <td><span class="method-badge method-post">POST</span> <code>/api/expenses</code></td>
+                <td>Employee records field/office expense against active advance (FR-04, BR-003). Category must match 6 standard types.</td>
+                <td>In-Scope &bull; Phase 1</td>
+              </tr>
+              <tr>
+                <td><strong>ReceiptAPI</strong></td>
+                <td><span class="method-badge method-post">POST</span> <code>/api/expenses/{id}/receipt</code></td>
+                <td>Uploads camera photo / PDF receipt (FR-05, BR-004). Applies client-side compression before storage.</td>
+                <td>In-Scope &bull; Phase 1</td>
+              </tr>
+              <tr>
+                <td><strong>ExpenseAPI</strong></td>
+                <td><span class="method-badge method-post">POST</span> <code>/api/expenses/{id}/resubmit</code></td>
+                <td>Employee resubmits corrected rejected expense within strict 3-calendar-day window (Section 8 Policy).</td>
+                <td>In-Scope &bull; Phase 2</td>
+              </tr>
+              <tr>
+                <td><strong>ReconciliationAPI</strong></td>
+                <td><span class="method-badge method-get">GET</span> <code>/api/reconciliations/advance/{id}/calculate</code></td>
+                <td>Computes balance ($\text{Total Issued} - \text{Total Spent}$). Evaluates Surplus vs Shortfall outcome (FR-09, BR-008).</td>
+                <td>In-Scope &bull; Phase 2</td>
+              </tr>
+              <tr>
+                <td><strong>ReconciliationAPI</strong></td>
+                <td><span class="method-badge method-post">POST</span> <code>/api/reconciliations/advance/{id}/finalize</code></td>
+                <td>Custodian sign-off. Permanently locks advance and expenses into Immutable Read-Only state.</td>
+                <td>In-Scope &bull; Phase 2</td>
+              </tr>
+              <tr>
+                <td><strong>ReportAPI</strong></td>
+                <td><span class="method-badge method-get">GET</span> <code>/api/reports/export</code></td>
+                <td>Generates 1-click downloadable CSV/Excel reports across 10 executive dimensions (FR-10).</td>
+                <td>In-Scope &bull; Phase 1/2</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Section 8: Sequence Diagrams -->
+      <section class="doc-section" id="section-8">
+        <div class="section-header">
+          <div class="section-badge">08</div>
+          <div class="section-title-wrap">
+            <h2>8. Sequence Diagrams &amp; System Dynamics</h2>
+            <p>Chronological message passing between Client, Services, Database, and Storage</p>
+          </div>
+        </div>
+
+        <div class="diagram-card">
+          <div class="diagram-title">
+            <span>8.1 Submit Advance Request Sequence</span>
+            <span class="badge-pill">14-submit-advance-sequence-diagram.mmd</span>
+          </div>
+          <pre class="mermaid">
+sequenceDiagram
+    autonumber
+    actor Employee
+    participant Client as Client App
+    participant API as Advance API
+    participant Service as Advance Service
+    participant DB as SQL Server DB
+    participant Audit as Audit Service
+    participant Notify as Notification Service
+
+    Employee->>Client: Submit Advance Request
+    Client->>API: POST /api/advances
+    API->>Service: CreateAdvanceAsync(dto)
+    Service->>DB: Save Advance (Status = Pending)
+    DB-->>Service: Advance ID
+    Service->>Audit: LogActivity("CreateAdvance", AdvanceID)
+    Service->>Notify: SendApprovalNotification(ApproverEmail)
+    Service-->>API: Success Response
+    API-->>Client: 201 Created (Advance Dto)
+    Client-->>Employee: Display Confirmation & Request Number
+          </pre>
+        </div>
+
+        <div class="diagram-card">
+          <div class="diagram-title">
+            <span>8.2 Reconciliation &amp; Settlement Sequence</span>
+            <span class="badge-pill">16-reconciliation-sequence-diagram.mmd</span>
+          </div>
+          <pre class="mermaid">
+sequenceDiagram
+    autonumber
+    actor Custodian as Cash Custodian
+    participant API as Reconciliation API
+    participant Service as Reconciliation Service
+    participant DB as SQL Server DB
+    participant Audit as Audit Service
+
+    Custodian->>API: GET /api/reconciliations/advance/{id}/calculate
+    API->>Service: CalculateReconciliationAsync(advanceId)
+    Service->>DB: Fetch Issued Advances & Approved Expenses
+    DB-->>Service: Financial Totals
+    Service-->>API: Balance Result (Surplus / Shortfall)
+    API-->>Custodian: Display Reconciliation Statement
+
+    alt Surplus Cash Returned
+        Custodian->>API: POST /api/reconciliations/advance/{id}/return-surplus
+        API->>Service: ConfirmSurplusReturnAsync(dto)
+        Service->>DB: Record CashReturn Entry
+    end
+
+    Custodian->>API: POST /api/reconciliations/advance/{id}/finalize
+    API->>Service: FinalizeReconciliationAsync(advanceId)
+    Service->>DB: Mark Advance = Closed & Lock Records
+    Service->>Audit: LogActivity("FinalizeReconciliation", advanceId)
+    Service-->>API: Closed Status
+    API-->>Custodian: Display Finalized Settlement Confirmation
+          </pre>
+        </div>
+      </section>
+
+      <!-- Section 9: State Machine Lifecycles -->
+      <section class="doc-section" id="section-9">
+        <div class="section-header">
+          <div class="section-badge">09</div>
+          <div class="section-title-wrap">
+            <h2>9. State Machine Lifecycles</h2>
+            <p>Formal state transition rules governing financial entities</p>
+          </div>
+        </div>
+
+        <div class="cards-grid">
+          <div class="diagram-card" style="margin: 0;">
+            <div class="diagram-title"><span>9.1 Advance Request States</span></div>
+            <pre class="mermaid">
+stateDiagram-v2
+    [*] --> Draft
+    Draft --> Pending : Submit
+    Pending --> Cancelled : Cancel Request
+    Pending --> Rejected : Reject Request
+    Pending --> Approved : Approve Request
+    Approved --> FundsIssued : Release Cash
+    FundsIssued --> PartiallyReconciled : Record Expenses
+    PartiallyReconciled --> Reconciled : Finalize
+    FundsIssued --> Reconciled : Finalize
+    Reconciled --> Closed : Lock Audit
+    Closed --> [*]
+            </pre>
+          </div>
+
+          <div class="diagram-card" style="margin: 0;">
+            <div class="diagram-title"><span>9.2 Expense Record States</span></div>
+            <pre class="mermaid">
+stateDiagram-v2
+    [*] --> PendingReview
+    PendingReview --> Approved : Manager Sign-off
+    PendingReview --> Rejected : Rejection with Reason
+    Rejected --> Resubmitted : Edit within 3 Days
+    Resubmitted --> PendingReview : Re-evaluate
+    Approved --> [*]
+            </pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 10: Security & PB-RBAC Governance -->
+      <section class="doc-section" id="section-10">
+        <div class="section-header">
+          <div class="section-badge">10</div>
+          <div class="section-title-wrap">
+            <h2>10. Security &amp; Permission-Based RBAC Governance</h2>
+            <p>Administrative role configuration and runtime permission evaluation pipeline</p>
+          </div>
+        </div>
+
+        <div class="diagram-card">
+          <div class="diagram-title">
+            <span>10.1 Permission-Based Access Control Architecture</span>
+            <span class="badge-pill">21-authorization-model-diagram.mmd</span>
+          </div>
+          <pre class="mermaid">
+flowchart TB
+    subgraph Setup["1. Administrative Setup (Super Admin Governance)"]
+        direction TB
+        SuperAdmin["Super Admin (Hardcoded Root Role)"]
+        subgraph Catalog["Permission Catalog (System Defined)"]
+            P1["Advances.Create"]
+            P2["Advances.Approve"]
+            P3["Advances.IssueFunds"]
+            P4["Expenses.Record"]
+            P5["Expenses.Review"]
+            P6["Reconciliations.SignOff"]
+            P7["Reports.Export"]
+        end
+        CustomRoles["Custom Roles\n(e.g., Field Officer, Approver, Accountant)"]
+        RolePermissions["Role-Permission Mapping\n(RolePermission Link Table)"]
+        Employees["Employees / Users"]
+
+        SuperAdmin -->|"1. Creates / Manages"| CustomRoles
+        SuperAdmin -->|"2. Assigns Permissions to"| RolePermissions
+        Catalog --> RolePermissions
+        RolePermissions -->|"Grants to"| CustomRoles
+        SuperAdmin -->|"3. Assigns Role to"| Employees
+        CustomRoles -->|"Assigned to"| Employees
+    end
+
+    subgraph Runtime["2. Runtime Authorization Pipeline (Request Execution)"]
+        direction TB
+        Request["User Request / Action\n(e.g., Click 'Approve Advance')"]
+        Identity["Authentication & Session\n(Extract User Claims & Roles)"]
+        SuperAdminCheck{"Is User\nSuper Admin?"}
+        PermissionCheck{"Does User's Role Have\nRequired Permission\n(e.g., 'Advances.Approve')?"}
+        Allow["Allow Request (200 OK)\nExecute Business Logic"]
+        Deny["Deny Request (403 Forbidden)\nAudit Unauthorized Attempt"]
+
+        Request --> Identity
+        Identity --> SuperAdminCheck
+        SuperAdminCheck -->|"YES (Root Bypass)"| Allow
+        SuperAdminCheck -->|"NO (Standard User)"| PermissionCheck
+        PermissionCheck -->|"YES (Permission Granted)"| Allow
+        PermissionCheck -->|"NO (Permission Missing)"| Deny
+    end
+
+    Employees -.->|"Logs in & executes"| Request
+    RolePermissions -.->|"Evaluated by"| PermissionCheck
+          </pre>
+        </div>
+      </section>
+
+      <!-- Section 11: Database ERD Schema -->
+      <section class="doc-section" id="section-11">
+        <div class="section-header">
+          <div class="section-badge">11</div>
+          <div class="section-title-wrap">
+            <h2>11. Database Entity Relationship Diagram (ERD)</h2>
+            <p>Normalized relational schema, primary/foreign keys, and data integrity constraints</p>
+          </div>
+        </div>
+
+        <div class="diagram-card">
+          <div class="diagram-title">
+            <span>11.1 Entity Relationship Diagram</span>
+            <span class="badge-pill">22-entity-relationship-diagram.mmd</span>
+          </div>
+          <pre class="mermaid">
+erDiagram
+    USER ||--o{ ADVANCE_REQUEST : "requests / approves / issues"
+    ROLE ||--o{ USER : "assigned to"
+    ROLE ||--o{ ROLE_PERMISSION : "defines"
+    PERMISSION ||--o{ ROLE_PERMISSION : "granted through"
+
+    ADVANCE_REQUEST ||--o{ ADVANCE_REQUEST : "has additional advance"
+    ADVANCE_REQUEST ||--o{ EXPENSE : "funds"
+    EXPENSE_CATEGORY ||--o{ EXPENSE : "categorizes"
+    EXPENSE ||--o{ RECEIPT : "has"
+
+    USER ||--o{ REIMBURSEMENT_CLAIM : "submits / approves / pays"
+    EXPENSE ||--o| REIMBURSEMENT_CLAIM : "may generate"
+
+    ADVANCE_REQUEST ||--o| RECONCILIATION : "is reconciled through"
+    RECONCILIATION ||--o{ CASH_RETURN : "records"
+    USER ||--o{ AUDIT_LOG : "performs"
+          </pre>
+        </div>
+      </section>
+
+      <!-- Section 12: Class Diagram & Services -->
+      <section class="doc-section" id="section-12">
+        <div class="section-header">
+          <div class="section-badge">12</div>
+          <div class="section-title-wrap">
+            <h2>12. Service-Oriented Class Architecture</h2>
+            <p>C# Interface and Service realization contracts (Shared vs. Server Projects)</p>
+          </div>
+        </div>
+
+        <div class="diagram-card">
+          <div class="diagram-title">
+            <span>12.1 Object-Oriented Class Diagram</span>
+            <span class="badge-pill">23-class-diagram.mmd</span>
+          </div>
+          <pre class="mermaid">
+classDiagram
+    class IAdvanceService {
+        <<interface>>
+        +SubmitAdvanceAsync(dto) Task
+        +ApproveAdvanceAsync(advanceId, dto) Task
+        +IssueFundsAsync(advanceId, dto) Task
+    }
+
+    class IExpenseService {
+        <<interface>>
+        +RecordExpenseAsync(dto) Task
+        +AttachReceiptAsync(expenseId, stream, name) Task
+        +ReviewExpenseAsync(expenseId, dto) Task
+    }
+
+    class IAuditService {
+        <<interface>>
+        +LogActivityAsync(entry) Task
+        +GetAuditTrailAsync(filter) Task
+    }
+
+    class INotificationService {
+        <<interface>>
+        +SendNotificationAsync(toEmail, subject, body) Task
+    }
+
+    class AdvanceService {
+        -DbContext _db
+        -INotificationService _notifier
+        -IAuditService _audit
+        +SubmitAdvanceAsync(dto) Task
+        +ApproveAdvanceAsync(advanceId, dto) Task
+    }
+
+    class ExpenseService {
+        -DbContext _db
+        -INotificationService _notifier
+        -IAuditService _audit
+        +RecordExpenseAsync(dto) Task
+        +AttachReceiptAsync(expenseId, stream, name) Task
+    }
+
+    class AuditService {
+        -DbContext _db
+        +LogActivityAsync(entry) Task
+    }
+
+    class NotificationService {
+        -IEmailClient _emailClient
+        +SendNotificationAsync(toEmail, subject, body) Task
+    }
+
+    AdvanceService ..|> IAdvanceService
+    ExpenseService ..|> IExpenseService
+    AuditService ..|> IAuditService
+    NotificationService ..|> INotificationService
+
+    AdvanceService --> INotificationService
+    AdvanceService --> IAuditService
+    ExpenseService --> INotificationService
+    ExpenseService --> IAuditService
+          </pre>
+        </div>
+      </section>
+
+      <!-- Section 13: Deployment Topology -->
+      <section class="doc-section" id="section-13">
+        <div class="section-header">
+          <div class="section-badge">13</div>
+          <div class="section-title-wrap">
+            <h2>13. Deployment Topology &amp; Infrastructure</h2>
+            <p>Production hosting environment, SSL encryption, and backup strategies</p>
+          </div>
+        </div>
+
+        <div class="diagram-card">
+          <div class="diagram-title">
+            <span>13.1 Production Deployment Diagram</span>
+            <span class="badge-pill">20-deployment-diagram.mmd</span>
+          </div>
+          <pre class="mermaid">
+flowchart TB
+    subgraph Clients["Client Tier"]
+        Desktop["Office PC (Chrome / Edge)"]
+        Mobile["Android / iOS Smartphone"]
+    end
+
+    subgraph Infrastructure["IONOS / Dedicated Cloud Server"]
+        Nginx["Nginx Reverse Proxy / SSL (HTTPS:443)"]
+        Kestrel["ASP.NET Core Kestrel Web API (Port 5000)"]
+        SQL[("SQL Server 2022 Express / Standard")]
+        FileStorage["Receipt File Storage Directory"]
+    end
+
+    ExternalNotification["External Email Provider (SMTP)"]
+
+    Desktop -->|"HTTPS"| Nginx
+    Mobile -->|"HTTPS"| Nginx
+
+    Nginx -->|"Proxy Pass"| Kestrel
+    Kestrel -->|"TCP/IP"| SQL
+    Kestrel -->|"Local File IO"| FileStorage
+    Kestrel -->|"SMTP / TLS"| ExternalNotification
+          </pre>
+        </div>
+      </section>
+
+      <!-- Footer -->
+      <footer class="doc-footer">
+        <p>Petty Cash &amp; Expense Management System &bull; System Analysis &amp; Design Specification &bull; Stage 3 Final Version</p>
+        <p style="font-size: 0.8rem; margin-top: 0.35rem;">
+          <a href="../Planning/ProjectPlanning.html" style="color: var(--primary); text-decoration: none;">&larr; Stage 1: Planning</a> &nbsp;&bull;&nbsp; 
+          <a href="../Requirements/RequirementsAnalysis.html" style="color: var(--primary); text-decoration: none;">Stage 2: Requirements &rarr;</a>
+        </p>
+      </footer>
+
+    </main>
+  </div>
+
+  <!-- Interactive JavaScript -->
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default',
+      securityLevel: 'loose'
+    });
+
+    // Reading progress bar
+    window.addEventListener('scroll', () => {
+      const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+      const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      const scrolled = (winScroll / height) * 100;
+      document.getElementById('reading-progress').style.width = scrolled + '%';
+    });
+
+    // Theme toggle
+    const themeBtn = document.getElementById('themeToggleBtn');
+    const themeIcon = document.getElementById('themeIcon');
+    const themeLabel = document.getElementById('themeLabel');
+
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    if (savedTheme === 'dark') {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      themeIcon.textContent = '☀️';
+      themeLabel.textContent = 'Light';
+    }
+
+    themeBtn.addEventListener('click', () => {
+      const currentTheme = document.documentElement.getAttribute('data-theme');
+      if (currentTheme === 'dark') {
+        document.documentElement.removeAttribute('data-theme');
+        localStorage.setItem('theme', 'light');
+        themeIcon.textContent = '🌙';
+        themeLabel.textContent = 'Dark';
+      } else {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        localStorage.setItem('theme', 'dark');
+        themeIcon.textContent = '☀️';
+        themeLabel.textContent = 'Light';
+      }
+      location.reload();
+    });
+
+    // ScrollSpy TOC
+    const sections = document.querySelectorAll('.doc-section');
+    const navLinks = document.querySelectorAll('.toc-link');
+
+    window.addEventListener('scroll', () => {
+      let current = '';
+      sections.forEach(section => {
+        const sectionTop = section.offsetTop;
+        if (pageYOffset >= sectionTop - 120) {
+          current = section.getAttribute('id');
+        }
+      });
+      navLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === '#' + current) {
+          link.classList.add('active');
+        }
+      });
+    });
+  </script>
+</body>
+</html>
