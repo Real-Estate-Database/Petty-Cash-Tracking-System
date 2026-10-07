@@ -1,0 +1,22 @@
+sequenceDiagram
+
+    actor Employee
+    participant Client as MAUI / Web Client
+    participant API as Transactions API (/api/transactions)
+    participant Service as Unified Transactions Service
+    participant DB as SQL Server 2022
+    participant Audit as Audit Service
+    participant Notify as Notification Service
+
+    Employee->>Client: Enter advance request details
+    Client->>API: POST /api/transactions/advances
+    API->>API: Authenticate JWT & authorize permission
+    API->>Service: Submit advance request
+    Service->>Service: Validate input fields (Amount > 0, Purpose)
+    Service->>DB: Save AdvanceRequest (Status = Pending)
+    DB-->>Service: Saved
+    Service->>Audit: Record creation event
+    Service->>Notify: Send alert to Manager / Super Admin
+    Service-->>API: Advance created
+    API-->>Client: Success (201 Created) + Pending status
+    Client-->>Employee: Display request pending approval

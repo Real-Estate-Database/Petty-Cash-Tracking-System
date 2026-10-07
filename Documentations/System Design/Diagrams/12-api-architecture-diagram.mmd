@@ -1,0 +1,74 @@
+flowchart TB
+
+    subgraph Clients["Clients"]
+        Maui[".NET MAUI Blazor Hybrid App"]
+        Web["Blazor Web App"]
+    end
+
+    subgraph API["ASP.NET Core Web API Controllers"]
+        TenantMiddleware["Tenant Resolution Middleware\n(Extracts TenantId from Header/Subdomain)"]
+        Gateway["HTTPS API Gateway / Router"]
+
+        AuthAPI["Auth Endpoints\n(/api/auth)"]
+        UserAPI["User & Role Endpoints\n(/api/users, /api/roles)"]
+        TxAPI["Transactions Endpoints\n(/api/transactions, /api/advances, /api/expenses)"]
+        ApprovalAPI["Approvals Endpoints\n(/api/approvals)"]
+        ReconciliationAPI["Reconciliation Endpoints\n(/api/reconciliations)"]
+        ReportAPI["Reporting Endpoints\n(/api/reports)"]
+        AuditAPI["Audit Endpoints\n(/api/audit)"]
+    end
+
+    subgraph Application["Application Service Layer (Tenant Scope Enforced)"]
+        TenantContext["Tenant Context Provider (ITenantContext)"]
+        AuthService["Authentication Service (IAuthService)"]
+        UserService["User & Role Service (IUserService)"]
+        TxService["Transactions Service (ITransactionService)"]
+        ApprovalService["Approval Service (IApprovalService)"]
+        ReconciliationService["Reconciliation Service (IReconciliationService)"]
+        ReportingService["Reporting Service (IReportingService)"]
+        AuditService["Audit Service (IAuditService)"]
+        NotificationService["Notification Service (INotificationService)"]
+    end
+
+    Data["EF Core Data Access\n(Global Tenant Query Filters)"]
+    DB[("SQL Server 2022\n(Multi-Tenant Database)")]
+    FileStore["Receipt File Storage"]
+    NotificationProvider["Email / SMTP Provider"]
+
+    Maui -->|"HTTPS / JSON + X-Tenant-Id"| TenantMiddleware
+    Web -->|"HTTPS / JSON + X-Tenant-Id"| TenantMiddleware
+
+    TenantMiddleware --> TenantContext
+    TenantMiddleware --> Gateway
+
+    Gateway --> AuthAPI
+    Gateway --> UserAPI
+    Gateway --> TxAPI
+    Gateway --> ApprovalAPI
+    Gateway --> ReconciliationAPI
+    Gateway --> ReportAPI
+    Gateway --> AuditAPI
+
+    AuthAPI --> AuthService
+    UserAPI --> UserService
+    TxAPI --> TxService
+    ApprovalAPI --> ApprovalService
+    ReconciliationAPI --> ReconciliationService
+    ReportAPI --> ReportingService
+    AuditAPI --> AuditService
+
+    AuthService --> Data
+    UserService --> Data
+    TxService --> Data
+    ApprovalService --> Data
+    ReconciliationService --> Data
+    ReportingService --> Data
+    AuditService --> Data
+
+    TxService -->|"Alerts"| NotificationService
+    ApprovalService -->|"Approval notifications"| NotificationService
+    ReconciliationService -->|"Settlement notifications"| NotificationService
+    NotificationService -->|"SMTP / External API"| NotificationProvider
+    TxService -->|"Receipt files"| FileStore
+
+    Data --> DB

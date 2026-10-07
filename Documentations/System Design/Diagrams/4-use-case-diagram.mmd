@@ -1,0 +1,64 @@
+flowchart LR
+
+    Employee["Field Employee"]
+    SuperAdmin["Manager / Super Admin"]
+
+    subgraph System["Petty Cash & Expense Management System"]
+
+        subgraph SecurityModule["Security & Identity"]
+            UC1(("Authenticate / Login"))
+        end
+
+        subgraph UserModule["User & Access Management"]
+            UC11(("Manage Users"))
+            UC12(("Assign Permissions & Roles"))
+        end
+
+        subgraph TransactionModule["Unified Transaction Management"]
+            UC2(("Request Advance"))
+            UC3(("Cancel Pending Request"))
+            UC4(("Add Expense Item to Advance"))
+            UC6(("Resubmit Corrected Expense"))
+            UC7(("Attach Receipt / Note"))
+            UC8(("Request Additional Advance"))
+            UC9(("Submit Out-of-Pocket Claim"))
+            UC10(("View Personal Transactions"))
+            UC14(("Approve / Reject Advance"))
+            UC15(("Disburse Cash Funds"))
+            UC17(("Approve / Reject Expense"))
+            UC19(("Process Reimbursement Payout"))
+            UC20(("Reconcile Advance & Cash Return"))
+        end
+
+        subgraph ReportsModule["Reporting & Analytics"]
+            UC21(("View Executive Dashboards"))
+            UC22(("Export Data to CSV / PDF"))
+        end
+
+        subgraph AuditModule["Audit Trail Engine"]
+            UC23(("View Audit Log Trail"))
+        end
+
+    end
+
+    Employee --> UC1
+    Employee --> UC2
+    Employee --> UC3
+    Employee --> UC4
+    Employee --> UC6
+    Employee --> UC7
+    Employee --> UC8
+    Employee --> UC9
+    Employee --> UC10
+
+    SuperAdmin --> UC1
+    SuperAdmin --> UC11
+    SuperAdmin --> UC12
+    SuperAdmin --> UC14
+    SuperAdmin --> UC15
+    SuperAdmin --> UC17
+    SuperAdmin --> UC19
+    SuperAdmin --> UC20
+    SuperAdmin --> UC21
+    SuperAdmin --> UC22
+    SuperAdmin --> UC23

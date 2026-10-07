@@ -1,0 +1,16 @@
+flowchart LR
+
+    Employee["Employee"]
+    SuperAdmin["Manager / Super Admin"]
+
+    P1(("Petty Cash Management System\n(Transactions, Approvals & Reconciliation)"))
+
+    D1[("Transactions, User, Role & Audit Database")]
+
+    Employee -->|"Advance Requests<br/>Expense Entries<br/>Reimbursement Claims"| P1
+    P1 -->|"Issuance Statuses<br/>Payment Receipts<br/>Notifications"| Employee
+
+    SuperAdmin -->|"Approval / Rejection Decisions<br/>User & Role Mappings<br/>EOD Reconciliation Sign-off<br/>Audit Reports"| P1
+    P1 -->|"Approval Queues<br/>EOD Reconciliation Summary<br/>Audit Trail Data"| SuperAdmin
+
+    P1 <--> D1

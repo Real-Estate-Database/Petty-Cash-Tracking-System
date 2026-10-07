@@ -1,0 +1,68 @@
+flowchart TB
+
+    subgraph Application["ASP.NET Core Application Server"]
+
+        subgraph Security["Security & Identity Module"]
+            Authentication["Authentication (JWT)"]
+            Authorization["Authorization (PB-RBAC)"]
+            TenantService["Tenant Resolution Service\n(ITenantService / Tenant Middleware)"]
+        end
+
+        UserRoleMgmt["User & Role Management\n(Users, Roles & Permissions)"]
+        DashboardComp["Dashboard & Overview Engine"]
+
+        subgraph FinancialCore["Financial Operations (Tenant Isolated)"]
+            TransactionsMgmt["Transactions Management\n(Advances, Additional Advances, Expenses, Reimbursements)"]
+            ApprovalsMgmt["Approvals Management\n(Review, Approve, Reject Queues)"]
+            ReconciliationComp["Reconciliation Engine\n(End-of-Day Vault Balancing & Cash Returns)"]
+        end
+
+        DocumentStorage["Document & Receipt Storage"]
+        Notification["Notification Service"]
+
+        Reporting["Reporting & Analytics"]
+        Audit["Audit Trail Engine"]
+
+    end
+
+    Client["Client Applications\n(Blazor Web & MAUI Hybrid)"]
+
+    Database[("SQL Server 2022\n(Multi-Tenant Shared DB)")]
+
+    FileStore["Receipt File Storage"]
+
+    EmailProvider["Email / SMTP Provider"]
+
+    Client -->|"All HTTPS Requests + Tenant Header"| TenantService
+    TenantService --> Authentication
+    Authentication --> Authorization
+
+    Authorization --> UserRoleMgmt
+    Authorization --> DashboardComp
+    Authorization --> TransactionsMgmt
+    Authorization --> ApprovalsMgmt
+    Authorization --> ReconciliationComp
+    Authorization --> Reporting
+    Authorization --> Audit
+
+    TransactionsMgmt --> DocumentStorage
+    DocumentStorage --> FileStore
+
+    TransactionsMgmt --> Notification
+    ApprovalsMgmt --> Notification
+    ReconciliationComp --> Notification
+    Notification --> EmailProvider
+
+    TransactionsMgmt --> Audit
+    ApprovalsMgmt --> Audit
+    ReconciliationComp --> Audit
+    UserRoleMgmt --> Audit
+    Reporting --> Audit
+
+    UserRoleMgmt --> Database
+    TransactionsMgmt --> Database
+    ApprovalsMgmt --> Database
+    ReconciliationComp --> Database
+    Reporting --> Database
+    Audit --> Database
+    Authentication --> Database

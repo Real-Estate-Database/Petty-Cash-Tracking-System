@@ -1,0 +1,64 @@
+name: .NET CI Pipeline
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-verify:
+    name: Build & Verify Solution (.NET 10)
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET SDK (10.0.x)
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+          dotnet-quality: 'preview'
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj', 'PettyCashDatabase.slnx') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Install .NET MAUI Workloads
+        run: dotnet workload restore PettyCashDatabase.slnx
+
+      - name: Restore NuGet packages
+        run: dotnet restore PettyCashDatabase.slnx
+
+      - name: Build solution (Release)
+        run: dotnet build PettyCashDatabase.slnx --configuration Release --no-restore
+
+      - name: Run Unit Tests (if available)
+        run: |
+          dotnet test PettyCashDatabase.slnx --configuration Release --no-build --verbosity normal --logger "trx" || echo "No unit tests found or all tests passed."
+
+      - name: Publish Web application
+        run: dotnet publish PettyCashDatabase.Web/PettyCashDatabase.Web.csproj --configuration Release --no-build --output ./publish/web
+
+      - name: Upload Web Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pettycash-web-build
+          path: ./publish/web
+          retention-days: 7

@@ -1,0 +1,277 @@
+sequenceDiagram
+    %%{init: {'theme': 'dark'}}%%
+    autonumber
+
+    %% =========================================================================
+    %% MASTER AUTHENTICATION & ACCOUNT LIFECYCLE SEQUENCE DIAGRAM
+    %% System: Petty Cash & Expense Management System (.NET 8 Clean Architecture)
+    %% Clients: .NET MAUI Blazor Hybrid & Blazor Web App (Auto Render Mode)
+    %% Backend: ASP.NET Core Web API, SQL Server 2022, Multi-Tenant Architecture
+    %% =========================================================================
+
+    actor User as User / Employee
+    actor Admin as Super Admin / Admin
+    participant Client as MAUI / Web Client
+    participant Google as Google Identity (OAuth2)
+    participant API as ASP.NET Core API (/api)
+    participant Auth as Authentication Service
+    participant Email as Notification Service (SMTP)
+    participant DB as SQL Server 2022 (PettyCashDb)
+    participant Audit as Audit Service
+
+    %% =========================================================================
+    %% SECTION 1: USER REGISTRATION FLOW
+    %% =========================================================================
+    Note over User,Audit: ──────────────── SECTION 1: USER REGISTRATION ────────────────
+
+    User->>Client: Fill Registration form (Tenant Code, Name, Email, Password)
+    Client->>Client: Validate client-side input rules (password strength, email regex)
+    Client->>API: POST /api/auth/register (TenantCode, FullName, Email, Password, ClientType)
+    API->>Auth: Process registration request
+    Auth->>DB: Query TENANT by TenantCode & verify active status
+    DB-->>Auth: Tenant verified (TenantId)
+    Auth->>DB: Query USER by TenantId & Email for uniqueness
+
+    alt Email Already Registered in Tenant
+        DB-->>Auth: Existing active user record found
+        Auth->>Audit: Log warning: Duplicate registration attempt for email
+        Auth-->>API: Registration conflict (Email exists)
+        API-->>Client: HTTP 409 Conflict ("Email already registered for this organization.")
+        Client-->>User: Display error: "An account with this email already exists."
+    else Email Available (Registration Succeeded)
+        DB-->>Auth: No existing record found (Email unique)
+        Auth->>Auth: Hash password (PBKDF2 / BCrypt with cryptographic salt)
+        Auth->>Auth: Assign default tenant role (e.g., Employee / Requester)
+        Auth->>DB: INSERT INTO USER (TenantId, RoleId, FirstName, LastName, Email, PasswordHash, IsActive)
+        DB-->>Auth: User record created successfully (UserId)
+        Auth->>Audit: Log audit event: User Registration Completed (UserId, TenantId)
+        Auth->>Email: Send welcome & email verification notification
+        Email-->>User: Deliver welcome & account activation email
+        Auth-->>API: User registered successfully
+        API-->>Client: HTTP 201 Created ("Registration successful. Please log in.")
+        Client-->>User: Display success banner & redirect to Login Screen
+    end
+
+    %% =========================================================================
+    %% SECTION 2: LOGIN, AUTHENTICATION & LOCKOUT FLOWS
+    %% =========================================================================
+    Note over User,Audit: ────── SECTION 2: LOGIN, AUTHENTICATION, FAILED ATTEMPTS & LOCKOUT ──────
+
+    User->>Client: Enter credentials (TenantCode, Email, Password, RememberMe checkbox)
+    Client->>API: POST /api/auth/login (TenantCode, Email, Password, RememberMe, ClientType, DeviceId)
+    API->>Auth: Authenticate user credentials
+    Auth->>DB: Query User record by TenantCode & Email (IsActive, IsLockedOut, AccessFailedCount)
+
+    alt Account is Already Locked Out (IsLockedOut = 1)
+        DB-->>Auth: User record found with IsLockedOut = 1
+        Auth->>Audit: Log security alert: Login attempted on locked account (UserId)
+        Auth-->>API: Account locked out
+        API-->>Client: HTTP 423 Locked ("Account locked due to 5 consecutive failed attempts. Contact Super Admin.")
+        Client-->>User: Display Account Lockout screen with Super Admin contact link
+
+    else User Not Found (Wrong Email OR Wrong Email + Password)
+        DB-->>Auth: User record not found (null)
+        Auth->>Auth: Execute constant-time dummy hash verification (prevents timing attacks)
+        Auth->>Audit: Log security warning: Failed login with non-existent email
+        Auth-->>API: Authentication failed (Invalid Credentials)
+        API-->>Client: HTTP 401 Unauthorized ("Invalid email or password.")
+        Client-->>User: Display generic error: "Invalid email or password."
+
+    else User Found, Invalid Password (Wrong Password)
+        DB-->>Auth: User record found (UserId, PasswordHash, AccessFailedCount)
+        Auth->>Auth: Verify password hash -> Hash mismatch!
+
+        alt Failed Attempts < 4 (Consecutive Attempts 1 to 4)
+            Auth->>DB: UPDATE USER SET AccessFailedCount = AccessFailedCount + 1
+            DB-->>Auth: Updated AccessFailedCount (e.g., Attempt 3 of 5)
+            Auth->>Audit: Log warning: Failed login attempt (UserId, Attempt N of 5)
+            Auth-->>API: Authentication failed (Invalid Password)
+            API-->>Client: HTTP 401 Unauthorized ("Invalid email or password. Attempt N of 5 before lockout.")
+            Client-->>User: Display error with remaining attempts counter
+
+        else 5th Consecutive Failed Attempt (Account Lockout Threshold Reached)
+            Auth->>DB: UPDATE USER SET IsLockedOut = 1, AccessFailedCount = 5
+            DB-->>Auth: Account marked locked out
+            Auth->>Audit: Log critical security alert: Account Locked Out - 5 consecutive failures (UserId)
+            Auth->>Email: Send Security Alert to User & Super Admin (Account Locked)
+            Email-->>User: Deliver security alert: "Your account has been locked."
+            Auth-->>API: Account locked out
+            API-->>Client: HTTP 423 Locked ("Account locked after 5 failed attempts. A Super Admin must re-enable it.")
+            Client-->>User: Display locked account modal (Logins blocked until Super Admin re-enables)
+
+            opt Super Admin Manual Unlock Flow
+                Admin->>Client: Super Admin logs into Admin Console
+                Client->>API: POST /api/users/{id}/unlock
+                API->>Auth: Authorize Super Admin & unlock user account
+                Auth->>DB: UPDATE USER SET IsLockedOut = 0, AccessFailedCount = 0
+                DB-->>Auth: User account status restored to Active
+                Auth->>Audit: Log admin event: Account manually unlocked by Super Admin (TargetUserId, AdminUserId)
+                Auth-->>API: User account unlocked successfully
+                API-->>Client: HTTP 200 OK ("Account has been re-enabled.")
+                Client-->>Admin: Display confirmation: User account active
+            end
+        end
+
+    else Credentials Valid (Successful Login)
+        DB-->>Auth: User record found & active
+        Auth->>Auth: Verify password hash -> Hash matches!
+        Auth->>DB: UPDATE USER SET AccessFailedCount = 0 WHERE UserId = @Id
+        Auth->>DB: Query User Role, Tenant details & Permission catalog
+        DB-->>Auth: User Profile, Role, and Permission list
+
+        alt Remember Me Checked (RememberMe = true)
+            Auth->>Auth: Issue extended 30-day Refresh Token for persistent device session
+        else Remember Me Unchecked (RememberMe = false)
+            Auth->>Auth: Issue standard 24-hour session Refresh Token
+        end
+
+        Auth->>Auth: Generate short-lived JWT Access Token (15 mins) with User claims & permissions
+        Auth->>DB: INSERT INTO USER_TOKEN (TokenId, UserId, TenantId, AccessTokenHash, RefreshTokenHash, ClientType, DeviceId, ExpiresAt)
+        DB-->>Auth: Session token persisted
+        Auth->>Audit: Log audit event: User Login Successful (UserId, ClientType, DeviceId)
+        Auth-->>API: Authentication successful (AccessToken, RefreshToken, UserProfile, Permissions)
+        API-->>Client: HTTP 200 OK (AccessToken, RefreshToken, UserProfile, Permissions)
+        Client->>Client: Securely store tokens (MAUI SecureStorage / Web Protected Storage)
+        Client-->>User: Redirect to Authorized Home Dashboard
+    end
+
+    %% =========================================================================
+    %% SECTION 3: ALTERNATIVE AUTHENTICATION (SIGN IN WITH GOOGLE - OAUTH2 / OIDC)
+    %% =========================================================================
+    Note over User,Audit: ────── SECTION 3: ALTERNATIVE AUTHENTICATION (SIGN IN WITH GOOGLE) ──────
+
+    User->>Client: Click "Sign in with Google" button
+    Client->>Google: Launch Google OAuth2 / OIDC authentication flow
+    User->>Google: Authenticate Google account & grant consent
+    Google-->>Client: Return Google ID Token (OIDC JWT)
+    Client->>API: POST /api/auth/google-login (GoogleIdToken, TenantCode, ClientType, DeviceId)
+    API->>Auth: Authenticate Google ID token
+    Auth->>Google: Fetch Google JWKS public keys & validate signature, audience, and expiration
+    Google-->>Auth: Token valid (GoogleSub, Email, Name, Picture)
+    Auth->>DB: Query USER by TenantCode & GoogleSub / Verified Email
+
+    alt User Already Exists in Tenant
+        DB-->>Auth: Existing active User record returned
+    else First-time Google User (Auto-Provisioning)
+        Auth->>DB: INSERT INTO USER (TenantId, RoleId, FirstName, LastName, Email, GoogleSub, IsActive)
+        DB-->>Auth: New user auto-provisioned (UserId)
+        Auth->>Audit: Log audit event: User Auto-Provisioned via Google OAuth2 (UserId)
+    end
+
+    Auth->>Auth: Generate application JWT Access Token (15 mins) & Refresh Token
+    Auth->>DB: INSERT INTO USER_TOKEN session record
+    DB-->>Auth: Session saved
+    Auth->>Audit: Log audit event: User Google Sign-In Successful (UserId)
+    Auth-->>API: Return application tokens & user claims
+    API-->>Client: HTTP 200 OK (AccessToken, RefreshToken, UserProfile, Permissions)
+    Client->>Client: Store tokens in secure client storage
+    Client-->>User: Redirect to Authorized Home Dashboard
+
+    %% =========================================================================
+    %% SECTION 4: ACCOUNT RECOVERY FLOWS (FORGOT PASSWORD & RESET PASSWORD)
+    %% =========================================================================
+    Note over User,Audit: ────── SECTION 4: ACCOUNT RECOVERY (FORGOT PASSWORD & RESET PASSWORD) ──────
+
+    %% 4A: Forgot Password Request
+    User->>Client: Click "Forgot Password" & enter registered email
+    Client->>API: POST /api/auth/forgot-password (Email, TenantCode)
+    API->>Auth: Request password reset link
+    Auth->>DB: Query User by TenantCode & Email
+
+    alt User Exists & Active
+        DB-->>Auth: User record found (UserId, Email)
+        Auth->>Auth: Generate cryptographically secure Reset Token & set 1-hour Expiry
+        Auth->>DB: UPDATE USER SET PasswordResetTokenHash = @Hash, ResetTokenExpiry = @Expiry
+        Auth->>Email: Send Password Reset Link with Token to user email
+        Email-->>User: Deliver email with secure password reset link
+        Auth->>Audit: Log audit event: Password Reset Requested (UserId)
+    else User Not Found (Security Obfuscation)
+        DB-->>Auth: No user record found
+        Auth->>Audit: Log security notice: Password reset requested for non-existent email
+        Note over Auth,API: Generic response returned to prevent account enumeration
+    end
+
+    Auth-->>API: Reset request handled
+    API-->>Client: HTTP 200 OK ("If your email is registered, a password reset link has been dispatched.")
+    Client-->>User: Display notification: "Check your email for the password reset link."
+
+    %% 4B: Reset Password Execution
+    User->>Client: Open email link & enter new password with confirmation
+    Client->>API: POST /api/auth/reset-password (Token, NewPassword)
+    API->>Auth: Validate reset token & update password
+    Auth->>DB: Query user by PasswordResetTokenHash and check TokenExpiry > SYSDATETIME()
+
+    alt Token Invalid or Expired
+        DB-->>Auth: Token record not found or expired
+        Auth->>Audit: Log warning: Failed password reset - invalid/expired token
+        Auth-->>API: Token invalid or expired
+        API-->>Client: HTTP 400 Bad Request ("Password reset link is invalid or has expired.")
+        Client-->>User: Display error message with option to request a new reset link
+    else Token Valid & Active
+        DB-->>Auth: Token valid (UserId)
+        Auth->>Auth: Validate password complexity policy & hash new password (PBKDF2/BCrypt)
+        Auth->>DB: UPDATE USER SET PasswordHash = @NewHash, PasswordResetTokenHash = NULL, AccessFailedCount = 0, IsLockedOut = 0
+        Auth->>DB: UPDATE USER_TOKEN SET IsRevoked = 1, RevokedAt = SYSUTCDATETIME() WHERE UserId = @UserId
+        DB-->>Auth: Password updated & existing sessions invalidated
+        Auth->>Audit: Log audit event: Password Successfully Reset & All Sessions Revoked (UserId)
+        Auth->>Email: Send Security Alert ("Your password was successfully updated")
+        Email-->>User: Deliver confirmation email: Password changed
+        Auth-->>API: Password successfully reset
+        API-->>Client: HTTP 200 OK ("Password updated successfully. Please log in with your new password.")
+        Client-->>User: Display success banner & redirect to Login Screen
+    end
+
+    %% =========================================================================
+    %% SECTION 5: AUTHENTICATION (AuthN) VS AUTHORIZATION (AuthZ)
+    %% =========================================================================
+    Note over User,Audit: ────── SECTION 5: AUTHENTICATION (AuthN) vs AUTHORIZATION (AuthZ) ──────
+
+    User->>Client: Perform protected action (e.g., Click "Approve Advance #101")
+    Client->>API: POST /api/advances/101/approve (Headers: Authorization: Bearer <AccessToken>)
+
+    Note over API: Step 5.1: Authentication Middleware (AuthN) - "WHO ARE YOU?"
+    API->>API: Validate JWT signature, issuer, audience, and expiration date
+
+    alt Token Expired, Tampered, or Missing (AuthN Failure)
+        API->>Audit: Log warning: Unauthenticated API request attempt
+        API-->>Client: HTTP 401 Unauthorized ("Authentication token is invalid or expired.")
+        Client->>Client: Attempt silent token refresh via RefreshToken OR redirect to Login
+        Client-->>User: Display session expired notification & prompt login
+    else Token Authenticated (AuthN Success)
+        API->>API: Extract User Claims (UserId, TenantId, Roles, Permissions)
+
+        Note over API: Step 5.2: Authorization Policy Middleware (AuthZ) - "WHAT CAN YOU DO?"
+        API->>API: Evaluate required permission [Advances.Approve] against User Claims
+
+        alt User Lacks Required Permission & Is Not SuperAdmin (AuthZ Failure)
+            API->>Audit: Log security warning: Forbidden access attempt by UserId on Advances.Approve
+            API-->>Client: HTTP 403 Forbidden ("Access Denied: Missing required permission [Advances.Approve].")
+            Client-->>User: Display error toast: "Access Denied: Insufficient permissions."
+        else User Has Required Permission OR Is SuperAdmin (AuthZ Success)
+            API->>DB: Execute business logic transaction (Approve Advance #101)
+            DB-->>API: Transaction committed successfully
+            API->>Audit: Log business audit: Advance #101 Approved by UserId
+            API-->>Client: HTTP 200 OK ("Advance approved successfully.")
+            Client-->>User: Update UI state to "Approved" with success notification
+        end
+    end
+
+    %% =========================================================================
+    %% SECTION 6: NETWORK EXCEPTION & API TIMEOUT HANDLING
+    %% =========================================================================
+    Note over User,Audit: ────── SECTION 6: RESILIENCE & API TIMEOUT EXCEPTION HANDLING ──────
+
+    User->>Client: Submit request (e.g., Login or submit transaction)
+    Client->>API: Send HTTP Request with CancellationToken (Timeout = 15 seconds)
+
+    Note over API,DB: Severe network latency / database deadlocks cause server delay beyond 15s
+    Note over Client: Client HttpClient timeout timer triggers TaskCanceledException / TimeoutException
+
+    Client->>Client: Global HttpExceptionHandler catches TimeoutException
+    Client->>Client: Preserve form state & input fields (prevents user data loss)
+    Client-->>User: Display warning banner: "Server timed out. Please check your connection." + [Retry] button
+
+    opt User Retries After Timeout
+        User->>Client: Click [Retry] button
+        Client->>API: Re-send HTTP Request with exponential backoff
+    end

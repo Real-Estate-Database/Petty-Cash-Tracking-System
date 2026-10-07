@@ -1,0 +1,256 @@
+sequenceDiagram
+    %%{init: {'theme': 'dark'}}%%
+    autonumber
+
+    %% =========================================================================
+    %% MASTER TRANSACTION LIFECYCLE SEQUENCE DIAGRAM
+    %% System: Petty Cash & Expense Management System (.NET 8 Clean Architecture)
+    %% Unifies: Initial Advances, Additional Advances, Expenses & Receipts,
+    %% Embedded Expense Review, Reimbursement Claims, and EOD Reconciliation
+    %% =========================================================================
+
+    actor Employee as Employee / Requester
+    actor Custodian as Petty Cash Custodian
+    actor Approver as Line Manager / Super Admin
+    participant Client as MAUI / Web Client
+    participant API as Transactions API (/api/transactions)
+    participant TxService as Unified Transactions Service
+    participant File as Receipt Storage Service
+    participant DB as SQL Server 2022 (PettyCashDb)
+    participant Audit as Audit Service
+    participant Notify as Notification Service
+
+    %% =========================================================================
+    %% SECTION 1: INITIAL ADVANCE REQUEST & CASH ISSUANCE
+    %% =========================================================================
+    Note over Employee,Notify: ────── SECTION 1: INITIAL ADVANCE REQUEST & CASH DISBURSEMENT ──────
+
+    Employee->>Client: Fill Advance Request (Amount, Purpose, Destination, Date)
+    Client->>API: POST /api/transactions/advances (Amount, Purpose, Destination)
+    API->>API: Authenticate JWT & authorize permission [Advances.Create]
+    API->>TxService: Create initial advance request
+    TxService->>DB: INSERT INTO ADVANCE_REQUEST (TenantId, EmployeeId, RequestedAmount, Purpose, Status='Pending')
+    DB-->>TxService: Advance record created (AdvanceId = 100)
+    TxService->>Audit: Log audit event: Advance Requested (AdvanceId=100)
+    TxService->>Notify: Send review alert to Approver / Manager
+    Notify-->>Approver: Deliver notification: Pending Advance Request #100
+    TxService-->>API: Advance created successfully
+    API-->>Client: HTTP 201 Created (AdvanceId=100, Status='Pending')
+    Client-->>Employee: Display status: "Pending Approval"
+
+    Approver->>Client: Open Approvals Dashboard & review Advance #100
+
+    alt Advance Request Approved
+        Approver->>Client: Click "Approve" (ApprovedAmount)
+        Client->>API: POST /api/transactions/advances/100/approve (ApprovedAmount)
+        API->>TxService: Process advance approval
+        TxService->>DB: UPDATE ADVANCE_REQUEST SET Status='Approved', ApprovedAmount=@Amt, ApprovedByUserId=@Uid, ApprovedAt=SYSDATETIME()
+        DB-->>TxService: Status updated to Approved
+        TxService->>Notify: Notify Custodian: Ready for Cash Disbursement
+        Notify-->>Custodian: Alert: Advance #100 ready for payout
+        API-->>Client: HTTP 200 OK (Status='Approved')
+
+        Custodian->>Client: Verify physical cash count & disburse cash to Employee
+        Client->>API: POST /api/transactions/advances/100/issue-funds (IssuedAmount)
+        API->>TxService: Record fund issuance
+        TxService->>DB: UPDATE ADVANCE_REQUEST SET Status='FundsIssued', IssuedAmount=@Amt, IssuedByUserId=@Uid, IssuedAt=SYSDATETIME()
+        DB-->>TxService: Advance activated (Status='FundsIssued')
+        TxService->>Audit: Log audit event: Funds Disbursed (AdvanceId=100, Amount)
+        Custodian-->>Employee: Hand over physical cash float
+        API-->>Client: HTTP 200 OK (Status='FundsIssued')
+        Client-->>Employee: Advance active: Ready to record expenses
+    else Advance Request Rejected
+        Approver->>Client: Click "Reject" with RejectionReason
+        Client->>API: POST /api/transactions/advances/100/reject (RejectionReason)
+        API->>TxService: Process advance rejection
+        TxService->>DB: UPDATE ADVANCE_REQUEST SET Status='Rejected', RejectionReason=@Reason
+        DB-->>TxService: Status updated to Rejected
+        TxService->>Notify: Alert Employee: Advance Rejected
+        Notify-->>Employee: Deliver rejection email with explanation
+        API-->>Client: HTTP 200 OK (Status='Rejected')
+        Client-->>Employee: Display rejection banner with option to modify & resubmit
+    end
+
+    %% =========================================================================
+    %% SECTION 2: ADDITIONAL ADVANCE FLOW (SUPPLEMENTARY FUNDING)
+    %% =========================================================================
+    Note over Employee,Notify: ────── SECTION 2: ADDITIONAL ADVANCE (LINKED TO PARENT ADVANCE) ──────
+
+    Note over Employee,Client: Employee field trip extended / unforeseen operational costs occur
+    Employee->>Client: Open Active Advance #100 & click "Request Additional Advance"
+    Client->>API: POST /api/transactions/advances (ParentAdvanceId=100, RequestedAmount=50000, Purpose="Extended trip")
+    API->>TxService: Process supplementary advance request
+    TxService->>DB: Verify Parent Advance #100 exists and Status = 'FundsIssued'
+    DB-->>TxService: Parent advance active
+    TxService->>DB: INSERT INTO ADVANCE_REQUEST (ParentAdvanceId=100, RequestedAmount=50000, Status='Pending')
+    DB-->>TxService: Child Advance created (AdvanceId=101, ParentAdvanceId=100)
+    TxService->>Notify: Send supplementary request alert to Approver
+    Notify-->>Approver: Deliver alert: Additional Advance Request #101 for Parent #100
+
+    alt Additional Advance Approved & Disbursed
+        Approver->>Client: Approve additional advance #101
+        Client->>API: POST /api/transactions/advances/101/approve
+        API->>TxService: Approve child advance
+        TxService->>DB: UPDATE ADVANCE_REQUEST SET Status='Approved' WHERE AdvanceId=101
+        Custodian->>Client: Disburse supplementary physical cash (or mobile money)
+        Client->>API: POST /api/transactions/advances/101/issue-funds
+        API->>TxService: Disburse supplementary funds
+        TxService->>DB: UPDATE ADVANCE_REQUEST SET Status='FundsIssued' WHERE AdvanceId=101
+        TxService->>Audit: Log audit event: Additional Funds Issued (ChildId=101, ParentId=100)
+        Custodian-->>Employee: Hand over additional cash
+        API-->>Client: HTTP 200 OK (Additional Float Active)
+        Client-->>Employee: Display updated combined float balance (Advance #100 + #101)
+    else Additional Advance Denied
+        Approver->>Client: Reject additional advance #101
+        Client->>API: POST /api/transactions/advances/101/reject (Reason)
+        API->>TxService: Reject child advance
+        TxService->>DB: UPDATE ADVANCE_REQUEST SET Status='Rejected' WHERE AdvanceId=101
+        API-->>Client: HTTP 200 OK (Status='Rejected')
+        Client-->>Employee: Notice: Additional advance denied. Out-of-pocket expenses can be claimed via Reimbursement.
+    end
+
+    %% =========================================================================
+    %% SECTION 3: EXPENSE RECORDING, RECEIPT UPLOAD & EMBEDDED REVIEW
+    %% =========================================================================
+    Note over Employee,Notify: ────── SECTION 3: EXPENSE RECORDING, RECEIPT UPLOAD & REVIEW ──────
+
+    Employee->>Client: Record expense item (Amount, Category, Date, Description) & attach receipt photo
+    Client->>API: POST /api/transactions/expenses (Multipart: ExpenseDto + ReceiptFile)
+    API->>TxService: Process expense item submission
+    TxService->>File: Save receipt image file to secure storage disk
+    File-->>TxService: File path (/uploads/receipts/rec_1001.jpg)
+    TxService->>DB: INSERT INTO EXPENSE (AdvanceId=100, CategoryId, Amount, Status='PendingReview')
+    DB-->>TxService: Expense created (ExpenseId=501)
+    TxService->>DB: INSERT INTO RECEIPT (ExpenseId=501, FilePath, ContentType, FileSize)
+    DB-->>TxService: Receipt metadata recorded
+    TxService->>Audit: Log audit event: Expense Recorded (ExpenseId=501, AdvanceId=100)
+    TxService->>Notify: Notify Custodian / Reviewer of pending expense item
+    API-->>Client: HTTP 201 Created (ExpenseId=501, Status='PendingReview')
+    Client-->>Employee: Expense added to active advance breakdown
+
+    Note over Custodian,Approver: Embedded Review Process (Review, Approval & Rejection unified)
+    Custodian->>Client: Review expense item #501 (inspect receipt image and tax compliance)
+
+    alt Expense Item Approved
+        Custodian->>Client: Click "Approve Item"
+        Client->>API: POST /api/transactions/expenses/501/approve
+        API->>TxService: Approve expense item
+        TxService->>DB: UPDATE EXPENSE SET Status='Approved', ReviewedByUserId=@Uid, ReviewedAt=SYSDATETIME()
+        DB-->>TxService: Status updated to Approved
+        TxService->>Audit: Log audit event: Expense #501 Approved
+        API-->>Client: HTTP 200 OK ("Expense approved")
+        Client-->>Custodian: Item tagged "Approved" (included in reconciliation pool)
+    else Expense Item Rejected (Invalid receipt or policy violation)
+        Custodian->>Client: Click "Reject Item" with RejectionReason (e.g. "Unclear receipt photo")
+        Client->>API: POST /api/transactions/expenses/501/reject (RejectionReason)
+        API->>TxService: Reject expense item
+        TxService->>DB: UPDATE EXPENSE SET Status='Rejected', RejectionReason=@Reason
+        DB-->>TxService: Status updated to Rejected
+        TxService->>Notify: Send correction notice to Employee
+        Notify-->>Employee: Alert: Expense #501 rejected (needs clear receipt)
+        API-->>Client: HTTP 200 OK ("Expense rejected")
+        
+        opt Employee Corrects and Resubmits Rejected Expense
+            Employee->>Client: Upload new receipt & click "Resubmit"
+            Client->>API: PUT /api/transactions/expenses/501/resubmit (NewReceiptFile)
+            API->>TxService: Update expense & reset status
+            TxService->>DB: UPDATE EXPENSE SET Status='PendingReview', RejectionReason=NULL
+            TxService->>Notify: Alert Custodian: Expense #501 resubmitted for review
+            API-->>Client: HTTP 200 OK (Status='PendingReview')
+        end
+    end
+
+    %% =========================================================================
+    %% SECTION 4: REIMBURSEMENT CLAIM LIFECYCLE
+    %% =========================================================================
+    Note over Employee,Notify: ────── SECTION 4: REIMBURSEMENT CLAIM LIFECYCLE (OUT-OF-POCKET) ──────
+
+    Note over Employee,Client: Incurred out-of-pocket expenses without advance OR expense exceeded advance
+    Employee->>Client: Submit Reimbursement Claim (Amount, Reason, ExpenseReceipt)
+    Client->>API: POST /api/transactions/reimbursements (Amount, Reason, ExpenseId)
+    API->>TxService: Create reimbursement claim
+    TxService->>DB: INSERT INTO REIMBURSEMENT_CLAIM (EmployeeId, Amount, Reason, Status='Submitted')
+    DB-->>TxService: Claim record created (ClaimId=701)
+    TxService->>Audit: Log audit event: Reimbursement Claim Submitted (ClaimId=701)
+    TxService->>Notify: Alert Approver of pending reimbursement claim
+    API-->>Client: HTTP 201 Created (ClaimId=701, Status='Submitted')
+    Client-->>Employee: Claim submitted: Awaiting approval
+
+    Approver->>Client: Review Reimbursement Claim #701
+
+    alt Reimbursement Claim Approved & Paid
+        Approver->>Client: Click "Approve Claim"
+        Client->>API: POST /api/transactions/reimbursements/701/approve
+        API->>TxService: Mark claim approved
+        TxService->>DB: UPDATE REIMBURSEMENT_CLAIM SET Status='Approved', ApprovedByUserId=@Uid, ApprovedAt=SYSDATETIME()
+        Custodian->>Client: Disburse reimbursement payment to Employee (Cash / Bank Transfer)
+        Client->>API: POST /api/transactions/reimbursements/701/pay
+        API->>TxService: Record payment
+        TxService->>DB: UPDATE REIMBURSEMENT_CLAIM SET Status='Paid', PaidByUserId=@Uid, PaidAt=SYSDATETIME()
+        TxService->>Audit: Log audit event: Reimbursement Claim Paid (ClaimId=701)
+        Custodian-->>Employee: Deliver reimbursement payment
+        API-->>Client: HTTP 200 OK (Status='Paid')
+        Client-->>Employee: Confirmation: Claim #701 paid and settled
+    else Reimbursement Claim Rejected
+        Approver->>Client: Click "Reject Claim" with RejectionReason
+        Client->>API: POST /api/transactions/reimbursements/701/reject (Reason)
+        API->>TxService: Reject claim
+        TxService->>DB: UPDATE REIMBURSEMENT_CLAIM SET Status='Rejected', RejectionReason=@Reason
+        API-->>Client: HTTP 200 OK (Status='Rejected')
+        Client-->>Employee: Notice: Reimbursement claim rejected
+    end
+
+    %% =========================================================================
+    %% SECTION 5: END-OF-DAY (EOD) RECONCILIATION & FINANCIAL SETTLEMENT
+    %% =========================================================================
+    Note over Employee,Notify: ────── SECTION 5: EOD RECONCILIATION & FINANCIAL SETTLEMENT ──────
+
+    Custodian->>Client: Open End-of-Day Reconciliation Workspace
+    Client->>API: GET /api/reconciliations/daily-summary
+    API->>TxService: Compute financial totals for active advances & approved expenses
+    TxService->>DB: Query Total Issued (Parent #100 + Child #101) & Total Approved Expenses
+    DB-->>TxService: TotalIssued = 150000, TotalApprovedSpent = 130000
+    TxService->>TxService: Calculate Variance: TotalIssued (150000) - TotalSpent (130000) = +20000
+    TxService-->>API: Financial Summary (TotalIssued, TotalSpent, NetBalance)
+    API-->>Client: Render EOD Workspace with Pre-calculated Financial Position
+
+    alt Financial Position 1: Surplus (TotalIssued > TotalSpent, e.g. +20000)
+        Note over Employee,Custodian: Employee has unspent cash that must be returned to vault
+        Employee->>Custodian: Return remaining unspent physical cash (20,000)
+        Custodian->>Client: Enter physical cash return count & notes
+        Client->>API: POST /api/reconciliations/settle (AdvanceId=100, CashReturnAmount=20000)
+        API->>TxService: Finalize settlement with cash return (ACID Transaction)
+        TxService->>DB: BEGIN TRANSACTION
+        TxService->>DB: INSERT INTO RECONCILIATION (AdvanceId=100, TotalIssued=150000, TotalSpent=130000, TotalReturned=20000, Status='Settled')
+        DB-->>TxService: Reconciliation record created (ReconciliationId=901)
+        TxService->>DB: INSERT INTO CASH_RETURN (ReconciliationId=901, Amount=20000, ConfirmedByUserId=@Uid)
+        TxService->>DB: UPDATE ADVANCE_REQUEST SET Status='Closed' WHERE AdvanceId IN (100, 101)
+        TxService->>Audit: Log audit event: EOD Reconciliation Settled with Cash Return
+        TxService->>DB: COMMIT TRANSACTION
+        API-->>Client: HTTP 200 OK (Reconciliation Settled & Advances Closed)
+        Client-->>Custodian: Issue Petty Cash Return Voucher (PCRV) & lock transaction ledger
+
+    else Financial Position 2: Shortfall (TotalIssued < TotalSpent, e.g. -15000)
+        Note over Employee,Custodian: Employee overspent approved float out-of-pocket
+        Custodian->>Client: Confirm shortfall & auto-generate Reimbursement Claim
+        Client->>API: POST /api/reconciliations/settle-with-shortfall (AdvanceId=100, ShortfallAmount=15000)
+        API->>TxService: Create Shortfall Claim & close advance (ACID Transaction)
+        TxService->>DB: BEGIN TRANSACTION
+        TxService->>DB: INSERT INTO REIMBURSEMENT_CLAIM (EmployeeId, Amount=15000, Reason='EOD Shortfall Reimbursement')
+        TxService->>DB: INSERT INTO RECONCILIATION (AdvanceId=100, TotalIssued=150000, TotalSpent=165000, TotalReimbursed=15000, Status='Settled')
+        TxService->>DB: UPDATE ADVANCE_REQUEST SET Status='Closed' WHERE AdvanceId IN (100, 101)
+        TxService->>DB: COMMIT TRANSACTION
+        Custodian->>Employee: Disburse shortfall cash reimbursement to employee
+        API-->>Client: HTTP 200 OK (Settled with Reimbursement Payout)
+        Client-->>Custodian: Settlement confirmed: Ledger locked & closed
+
+    else Financial Position 3: Balanced (TotalIssued == TotalSpent, Variance = 0)
+        Custodian->>Client: Click "Sign Off & Finalize Settlement"
+        Client->>API: POST /api/reconciliations/settle (AdvanceId=100, Variance=0)
+        API->>TxService: Close balanced reconciliation (ACID Transaction)
+        TxService->>DB: INSERT INTO RECONCILIATION (AdvanceId=100, Balance=0, Status='Settled')
+        TxService->>DB: UPDATE ADVANCE_REQUEST SET Status='Closed' WHERE AdvanceId IN (100, 101)
+        TxService->>Audit: Log audit event: EOD Reconciliation Balanced & Closed
+        API-->>Client: HTTP 200 OK ("Zero variance settlement closed")
+        Client-->>Custodian: Transaction lifecycle complete: Status Closed
+    end

@@ -1,0 +1,63 @@
+flowchart TD
+
+    Start([Start: Employee Request])
+
+    A["Select Create Advance Request"]
+    B["Fill Amount, Description (Purpose and Destination)"]
+    C["Submit Request"]
+    D{"Input Valid?\n(Amount > 0, Required Fields Filled)"}
+
+    E["Save Advance Request"]
+    F["Set Status = Pending"]
+    G["Notify Manager / Super Admin for Review"]
+
+    Cancel["Employee Cancels Request (if Pending)"]
+    CancelEnd["Set Status = Cancelled"]
+
+    H{"Review Decision\n(Manager / Super Admin)"}
+
+    I["Reject Request"]
+    J["Record Rejection Reason & Set Status = Rejected"]
+
+    K["Approve Request (Set Status = Approved & Store Approved Amount)"]
+
+    M{"Funds Available in Vault?"}
+
+    N["Notify Custodian to Replenish Vault & Queue Payment"]
+    NWait["Wait for Cash Refill"]
+    O["Disburse Cash & Set Status = FundsIssued"]
+
+    P["Employee Receives Cash Funds"]
+    End([End Process])
+
+    Start --> A
+    A --> B
+    B --> C
+    C --> D
+
+    D -- No (Show Validation Error) --> B
+    D -- Yes --> E
+
+    E --> F
+    F --> G
+
+    F -->|"Employee Cancels"| Cancel
+    Cancel --> CancelEnd
+    CancelEnd --> End
+
+    G --> H
+
+    H -- Reject --> I
+    I --> J
+    J --> End
+
+    H -- Approve --> K
+    K --> M
+
+    M -- No (Insufficient Cash) --> N
+    N --> NWait
+    NWait --> M
+
+    M -- Yes (Cash Ready) --> O
+    O --> P
+    P --> End

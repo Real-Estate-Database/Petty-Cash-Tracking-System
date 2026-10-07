@@ -1,0 +1,66 @@
+flowchart LR
+
+    Employee["Employee"]
+    SuperAdmin["Super Admin / Manager"]
+    EmailProvider["Email / Notification Provider"]
+
+    P1(("1. Authentication & Security"))
+    P2(("2. User & Group/Role Mapping"))
+    P3(("3. Transaction Management\n(Advances, Expenses, Claims)"))
+    P4(("4. Approvals Engine"))
+    P5(("5. EOD Reconciliation Engine"))
+    P6(("6. Reporting & Analytics"))
+    P7(("7. Audit Trail Engine"))
+
+    D1[("User, Role & Permission Data")]
+    D2[("Transactions Data\n(Advances, Expenses, Claims)")]
+    D3[("Reconciliation & Cash Return Data")]
+    D4[("Audit Log Data")]
+    D5[("Receipt Image Storage")]
+
+    %% Process 1: Authentication
+    Employee -->|"Credentials"| P1
+    SuperAdmin -->|"Credentials"| P1
+    P1 <--> D1
+    P1 -->|"JWT tokens & sessions"| Employee
+    P1 -->|"JWT tokens & sessions"| SuperAdmin
+
+    %% Process 2: User & Group/Role Mapping
+    SuperAdmin -->|"User provisioning & role/permission mapping"| P2
+    P2 <--> D1
+
+    %% Process 3: Transaction Management
+    Employee -->|"Advance requests & expense line items"| P3
+    Employee -->|"Out-of-pocket reimbursement claims"| P3
+    P3 <--> D2
+    P3 <--> D5
+    P3 -->|"Transaction status alerts"| Employee
+    P3 -->|"Status email notifications"| EmailProvider
+
+    %% Process 4: Approvals Engine
+    P3 -->|"Submitted transactions"| P4
+    SuperAdmin -->|"Approve / Reject decisions & notes"| P4
+    P4 <--> D2
+    P4 -->|"Approval decisions"| P3
+
+    %% Process 5: EOD Reconciliation Engine
+    Employee -->|"Surrendered unspent physical cash"| P5
+    SuperAdmin -->|"Physical vault count & EOD sign-off"| P5
+    P5 <--> D2
+    P5 <--> D3
+    P5 -->|"EOD PCRV Vouchers & Settlement"| SuperAdmin
+
+    %% Process 6: Reporting & Analytics
+    SuperAdmin -->|"Report filter parameters"| P6
+    P6 <--> D2
+    P6 <--> D3
+    P6 -->|"Financial dashboards & CSV/PDF exports"| SuperAdmin
+
+    %% Process 7: Audit Engine
+    P1 -->|"Auth events"| P7
+    P2 -->|"User mapping events"| P7
+    P3 -->|"Transaction events"| P7
+    P4 -->|"Approval events"| P7
+    P5 -->|"Reconciliation events"| P7
+    P7 <--> D4
+    P7 -->|"Immutable system audit logs"| SuperAdmin

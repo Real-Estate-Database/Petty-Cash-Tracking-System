@@ -1,0 +1,179 @@
+classDiagram
+    %%{init: {'theme': 'dark'}}%%
+
+    %% ========================================================
+    %% SERVICE INTERFACES (Aligned with Component Architecture)
+    %% ========================================================
+    class IAuthenticationService {
+        <<interface>>
+        +LoginAsync(string email, string password) Task~string~
+        +RefreshTokenAsync(string token) Task~string~
+        +RevokeTokenAsync(string token) Task
+    }
+
+    class IAuthorizationService {
+        <<interface>>
+        +HasPermissionAsync(int userId, string permission) Task~bool~
+        +GetUserPermissionsAsync(int userId) Task~List~string~~
+    }
+
+    class IOrganizationService {
+        <<interface>>
+        +GetOrganizationByIdAsync(int id) Task
+        +UpdateOrganizationAsync(object org) Task
+    }
+
+    class IUserService {
+        <<interface>>
+        +CreateUserAsync(object user) Task
+        +GetUserByIdAsync(int userId) Task
+        +GetUsersByOrganizationAsync(int orgId) Task
+        +UpdateUserAsync(object user) Task
+    }
+
+    class IRoleService {
+        <<interface>>
+        +CreateRoleAsync(object role) Task
+        +GetRolesByOrganizationAsync(int orgId) Task
+        +GetRoleByIdAsync(int roleId) Task
+    }
+
+    class ITransactionService {
+        <<interface>>
+        +SubmitTransactionAsync(object tx) Task
+        +GetTransactionByIdAsync(int id) Task
+        +GetTransactionsByOrganizationAsync(int orgId) Task
+    }
+
+    class IApprovalService {
+        <<interface>>
+        +ApproveTransactionAsync(int transactionId, decimal amount) Task
+        +RejectTransactionAsync(int transactionId, string reason) Task
+    }
+
+    class IReconciliationService {
+        <<interface>>
+        +CalculateEodSummaryAsync(int orgId, DateTime date) Task
+        +SettleEodReconciliationAsync(int orgId, DateTime date) Task
+    }
+
+    class IDocumentStorageService {
+        <<interface>>
+        +UploadReceiptAsync(int transactionId, object file) Task
+        +GetReceiptByIdAsync(int receiptId) Task
+    }
+
+    class INotificationService {
+        <<interface>>
+        +SendEmailNotificationAsync(string toEmail, string subject, string body) Task
+        +SendTransactionAlertAsync(int transactionId, string alertType) Task
+    }
+
+    class IReportingService {
+        <<interface>>
+        +GenerateFinancialReportAsync(int orgId, DateTime startDate, DateTime endDate) Task
+        +ExportAuditSummaryAsync(int orgId) Task
+    }
+
+    class IDashboardService {
+        <<interface>>
+        +GetOverviewMetricsAsync(int orgId) Task
+        +GetPendingApprovalsCountAsync(int orgId) Task
+    }
+
+    class IAuditService {
+        <<interface>>
+        +LogActivityAsync(int userId, string description) Task
+        +GetLogsAsync(int userId) Task
+    }
+
+    %% ========================================================
+    %% SERVICE IMPLEMENTATIONS & DBCONTEXT
+    %% ========================================================
+    class PettyCashDbContext {
+        +SaveChangesAsync() Task~int~
+    }
+
+    class AuthenticationService {
+        -PettyCashDbContext _db
+    }
+
+    class AuthorizationService {
+        -PettyCashDbContext _db
+    }
+
+    class OrganizationService {
+        -PettyCashDbContext _db
+    }
+
+    class UserService {
+        -PettyCashDbContext _db
+    }
+
+    class RoleService {
+        -PettyCashDbContext _db
+    }
+
+    class TransactionService {
+        -PettyCashDbContext _db
+    }
+
+    class ApprovalService {
+        -PettyCashDbContext _db
+    }
+
+    class ReconciliationService {
+        -PettyCashDbContext _db
+    }
+
+    class DocumentStorageService {
+        -PettyCashDbContext _db
+    }
+
+    class NotificationService {
+        -PettyCashDbContext _db
+    }
+
+    class ReportingService {
+        -PettyCashDbContext _db
+    }
+
+    class DashboardService {
+        -PettyCashDbContext _db
+    }
+
+    class AuditService {
+        -PettyCashDbContext _db
+    }
+
+    %% ========================================================
+    %% REALIZATIONS & RELATIONSHIPS
+    %% ========================================================
+    IAuthenticationService <|.. AuthenticationService
+    IAuthorizationService <|.. AuthorizationService
+    IOrganizationService <|.. OrganizationService
+    IUserService <|.. UserService
+    IRoleService <|.. RoleService
+    ITransactionService <|.. TransactionService
+    IApprovalService <|.. ApprovalService
+    IReconciliationService <|.. ReconciliationService
+    IDocumentStorageService <|.. DocumentStorageService
+    INotificationService <|.. NotificationService
+    IReportingService <|.. ReportingService
+    IDashboardService <|.. DashboardService
+    IAuditService <|.. AuditService
+
+    AuthenticationService --> PettyCashDbContext
+    AuthorizationService --> PettyCashDbContext
+    OrganizationService --> PettyCashDbContext
+    UserService --> PettyCashDbContext
+    RoleService --> PettyCashDbContext
+    TransactionService --> PettyCashDbContext
+    ApprovalService --> PettyCashDbContext
+    ReconciliationService --> PettyCashDbContext
+    DocumentStorageService --> PettyCashDbContext
+    NotificationService --> PettyCashDbContext
+    ReportingService --> PettyCashDbContext
+    DashboardService --> PettyCashDbContext
+    AuditService --> PettyCashDbContext
+

@@ -1,0 +1,30 @@
+sequenceDiagram
+
+    actor Custodian as Manager / Custodian
+    participant Client as MAUI / Web Client
+    participant API as Reconciliation API (/api/reconciliations)
+    participant Service as Reconciliation Service (IReconciliationService)
+    participant DB as SQL Server 2022
+    participant Audit as Audit Service
+
+    Custodian->>Client: Open End-of-Day Reconciliation Workspace
+    Client->>API: GET /api/reconciliations/daily-summary
+    API->>Service: Get daily advances, approved expenses & cash returns
+    Service->>DB: Query active advances, expenses & cash return logs
+    DB-->>Service: Daily financial summary payload
+    Service->>Service: Compute Expected Vault Balance (Opening Float - Advances + Cash Returns)
+    Service-->>API: EOD Reconciliation payload
+    API-->>Client: Render EOD Reconciliation Workspace with pre-calculated metrics
+
+    Custodian->>Client: Enter physical vault cash count & submit EOD settlement
+    Client->>API: POST /api/reconciliations/settle-daily
+    API->>Service: Finalize EOD Batch Settlement (ACID DB Transaction)
+    Service->>DB: Begin DB Transaction
+    Service->>DB: Insert RECONCILIATION record & CASH_RETURN logs
+    Service->>DB: Update status of daily advances to SETTLED / CLOSED
+    Service->>Audit: Record immutable EOD closure & audit log event
+    Service->>DB: Commit DB Transaction
+    DB-->>Service: Transaction committed successfully
+
+    Service-->>API: EOD Reconciliation finalized
+    API-->>Client: Display Daily Petty Cash Return Voucher (PCRV) & settlement confirmation

@@ -1,0 +1,37 @@
+flowchart TD
+
+    Start([Start: Out-of-Pocket Expense])
+
+    A["Employee incurs out-of-pocket expense for company"]
+    B["Employee creates & submits reimbursement claim\n(Attaches receipt & enters expense details)"]
+
+    C["Super Admin / Manager reviews reimbursement claim"]
+
+    D{"Approve Reimbursement Claim?"}
+
+    E["Record Rejection Reason & Set Status = Rejected"]
+    F["Notify Employee of Rejection & Feedback"]
+    G["Employee reviews rejection notes & corrects claim details / uploads missing receipts"]
+    H["Employee resubmits updated reimbursement claim"]
+
+    I["Approve Claim & Set Status = Approved"]
+    J["Custodian / Finance Payouts Reimbursement Funds"]
+    K["Record Reimbursement Settlement & Log Audit Event"]
+
+    End([End Process])
+
+    Start --> A
+    A --> B
+    B --> C
+    C --> D
+
+    D -- "No (Reject)" --> E
+    E --> F
+    F --> G
+    G --> H
+    H --> C
+
+    D -- "Yes (Approve)" --> I
+    I --> J
+    J --> K
+    K --> End

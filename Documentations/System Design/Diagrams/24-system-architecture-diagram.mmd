@@ -1,0 +1,75 @@
+graph LR
+    %%{init: {'theme': 'dark'}}%%
+    %% ===============================================================================
+    %% PETTY CASH SYSTEM: SOLUTION FOLDER STRUCTURE TREE DIAGRAM
+    %% Visual Solution Explorer representation of all 4 projects and their folders
+    %% ===============================================================================
+
+    SLN["💼 PettyCash.sln"]
+
+    %% ===============================================================================
+    %% 1. PETTYCASH.SHARED (Razor Class Library)
+    %% ===============================================================================
+    SLN --> SHARED["📦 PettyCash.Shared/"]
+    
+    SHARED --> S_COMP["📁 Components/"]
+    S_COMP --> S_COMMON["📁 Common/"]
+    S_COMP --> S_LAYOUT["📁 Layout/"]
+    S_COMP --> S_PAGES["📁 Pages/"]
+
+    SHARED --> S_DTOS["📁 DTOs/"]
+    SHARED --> S_INTERFACES["📁 Interfaces/"]
+    SHARED --> S_SERVICES["📁 Services/"]
+    SHARED --> S_STATE["📁 State/"]
+    SHARED --> S_VALIDATORS["📁 Validators/"]
+    SHARED --> S_WWWROOT["📁 wwwroot/"]
+
+    %% ===============================================================================
+    %% 2. PETTYCASH.WEB (ASP.NET Core Server Host)
+    %% ===============================================================================
+    SLN --> WEB["⚙️ PettyCash.Web/"]
+    
+    WEB --> W_AUTH["📁 Authentication/"]
+    WEB --> W_COMP["📁 Components/"]
+    WEB --> W_CONFIG["📁 Configurations/"]
+    WEB --> W_CONTROLLERS["📁 Controllers/"]
+    
+    WEB --> W_DATA["📁 Data/"]
+    W_DATA --> W_CONTEXT["📁 Context/"]
+    W_DATA --> W_MIGRATIONS["📁 Migrations/"]
+    W_DATA --> W_MODELS["📁 Models/"]
+    
+    WEB --> W_MIDDLEWARE["📁 Middlewares/"]
+    WEB --> W_SERVICES["📁 Services/"]
+    WEB --> W_WWWROOT["📁 wwwroot/"]
+
+    %% ===============================================================================
+    %% 3. PETTYCASH.WEB.CLIENT (Blazor WebAssembly Client)
+    %% ===============================================================================
+    SLN --> CLIENT["🚀 PettyCash.Web.Client/"]
+    
+    CLIENT --> C_AUTH["📁 Authentication/"]
+    CLIENT --> C_SERVICES["📁 Services/"]
+    CLIENT --> C_WWWROOT["📁 wwwroot/"]
+
+    %% ===============================================================================
+    %% 4. PETTYCASH.MAUI (.NET MAUI Blazor Hybrid)
+    %% ===============================================================================
+    SLN --> MAUI["📱 PettyCash.Maui/"]
+    
+    MAUI --> M_AUTH["📁 Authentication/"]
+    
+    MAUI --> M_PLATFORMS["📁 Platforms/"]
+    M_PLATFORMS --> M_ANDROID["📁 Android/"]
+    M_PLATFORMS --> M_IOS["📁 iOS/"]
+    M_PLATFORMS --> M_WINDOWS["📁 Windows/"]
+    M_PLATFORMS --> M_MAC["📁 MacCatalyst/"]
+    
+    MAUI --> M_RESOURCES["📁 Resources/"]
+    M_RESOURCES --> M_APPICON["📁 AppIcon/"]
+    M_RESOURCES --> M_FONTS["📁 Fonts/"]
+    M_RESOURCES --> M_SPLASH["📁 Splash/"]
+    M_RESOURCES --> M_RAW["📁 Raw/"]
+    
+    MAUI --> M_SERVICES["📁 Services/"]
+    MAUI --> M_WWWROOT["📁 wwwroot/"]

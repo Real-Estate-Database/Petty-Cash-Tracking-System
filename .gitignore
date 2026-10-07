@@ -1,0 +1,31 @@
+## Visual Studio / IDE temporary files & locks
+.vs/
+*.user
+*.userosscache
+*.sln.docstates
+*.suo
+*.userprefs
+
+## Build outputs
+[Bb]in/
+[Oo]bj/
+out/
+[Dd]ebug/
+[Rr]elease/
+
+## Antigravity / AI local scratch
+.antigravity/
+
+## OS generated files
+.DS_Store
+Thumbs.db
+
+## Environment overrides & Local Secrets (Do NOT commit to Git)
+appsettings.Development.json
+appsettings.Production.json
+appsettings.Staging.json
+appsettings.*.local.json
+appsettings.Local.json
+*.env
+*.env.*
+secrets.json

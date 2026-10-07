@@ -1,0 +1,15 @@
+flowchart TB
+
+    Employee["Field Employee"]
+    SuperAdmin["Manager / Super Admin"]
+
+    subgraph System["Petty Cash & Expense Management System"]
+        Core["Unified Transactions Core Engine\n(Advances, Expenses, Reimbursements, Reconciliations)"]
+        Auth["Auth & User Management"]
+        Reports["Reports & Audit Trail"]
+    end
+
+    Employee -->|"Request Advances, Add Expenses, Claim Reimbursements"| System
+    SuperAdmin -->|"Approve Advances & Expenses, Reconcile, Export Reports"| System
+    System -->|"Notifications, Vouchers & Status Alerts"| Employee
+    System -->|"Financial Analytics, Discrepancy Alerts & Audits"| SuperAdmin

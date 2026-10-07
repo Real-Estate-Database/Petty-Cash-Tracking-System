@@ -1,0 +1,109 @@
+stateDiagram-v2
+    %%{init: {'theme': 'dark'}}%%
+    %% =========================================================================
+    %% PETTY CASH & EXPENSE MANAGEMENT SYSTEM
+    %% UNIFIED TRANSACTION LIFECYCLE STATE DIAGRAM
+    %% Encompasses: Initial Advances, Additional Advances, Expenses, 
+    %% Reimbursement Claims, and EOD Financial Reconciliation
+    %% =========================================================================
+
+    [*] --> UnifiedTransactionManagement
+
+    state "Unified Transaction Lifecycle" as UnifiedTransactionManagement {
+
+        %% -------------------------------------------------------------
+        %% 1. ADVANCE REQUEST & ISSUANCE LIFECYCLE
+        %% -------------------------------------------------------------
+        state "1. Advance & Additional Advance Lifecycle" as AdvanceLifecycle {
+            [*] --> AdvanceDraft: Employee initiates request
+
+            AdvanceDraft --> AdvancePending: Submit for Approval
+            AdvancePending --> AdvanceCancelled: Employee cancels before review
+
+            AdvancePending --> AdvanceApproved: Approver / Admin Approves
+            AdvancePending --> AdvanceRejected: Approver Rejects
+
+            AdvanceRejected --> AdvanceDraft: Correct details & resubmit
+
+            AdvanceApproved --> FundsIssued: Custodian disburses physical cash
+            FundsIssued --> ActiveSpendingPool: Float active for project/trip
+
+            %% Additional Advance branch
+            state "Additional Advance Sub-Cycle (Linked to Parent)" as AdditionalAdvanceFlow {
+                [*] --> AddAdvDraft: Funds depleted before trip completion
+                AddAdvDraft --> AddAdvPending: Submit with ParentAdvanceId
+                AddAdvPending --> AddAdvApproved: Manager approves supplementary funds
+                AddAdvPending --> AddAdvRejected: Additional budget denied
+                AddAdvRejected --> AddAdvDraft: Modify amount & resubmit
+                AddAdvApproved --> AddAdvFundsIssued: Supplementary cash disbursed
+                AddAdvFundsIssued --> ActiveSpendingPool: Increments total issued float
+            }
+        }
+
+        %% -------------------------------------------------------------
+        %% 2. EXPENSE RECORDING & REVIEW LIFECYCLE
+        %% -------------------------------------------------------------
+        state "2. Expense Recording & Review Lifecycle" as ExpenseLifecycle {
+            [*] --> ExpenseDraft: Employee adds item against active advance
+
+            ExpenseDraft --> ExpensePendingReview: Submit item with receipt photo
+            
+            ExpensePendingReview --> ExpenseApproved: Custodian / Manager verifies receipt & amount
+            ExpensePendingReview --> ExpenseRejected: Disallowed item or invalid receipt
+
+            ExpenseRejected --> ExpenseDraft: Employee corrects item / uploads new receipt
+            ExpenseApproved --> ExpenseLockedForReconciliation: Stored for EOD settlement pool
+        }
+
+        %% -------------------------------------------------------------
+        %% 3. REIMBURSEMENT CLAIM LIFECYCLE
+        %% -------------------------------------------------------------
+        state "3. Reimbursement Claim Lifecycle (Out-of-Pocket / Shortfall)" as ReimbursementLifecycle {
+            [*] --> ClaimDraft: Out-of-pocket spend or expense exceeds advance
+            ClaimDraft --> ClaimSubmitted: Submit claim with proof of payment
+
+            ClaimSubmitted --> ClaimApproved: Manager / Admin approves claim
+            ClaimSubmitted --> ClaimRejected: Rejected due to policy violation
+
+            ClaimRejected --> ClaimDraft: Employee rectifies dispute
+            ClaimApproved --> ClaimPaid: Cash / Transfer disbursed to employee
+            ClaimPaid --> ClaimSettled: Reimbursed obligation cleared
+        }
+
+        %% -------------------------------------------------------------
+        %% 4. RECONCILIATION & SETTLEMENT LIFECYCLE
+        %% -------------------------------------------------------------
+        state "4. Reconciliation & Settlement Lifecycle" as ReconciliationLifecycle {
+            ActiveSpendingPool --> ReconciliationReview: Spending concluded / EOD count
+            ExpenseLockedForReconciliation --> ReconciliationReview
+
+            state "Determine Financial Position" as EvalPosition {
+                [*] --> CalculateVariance: Total Issued vs Approved Expenses
+                
+                state VarianceChoice <<choice>>
+                CalculateVariance --> VarianceChoice
+
+                VarianceChoice --> PositionBalanced: Variance == 0 (Exact spend)
+                VarianceChoice --> PositionSurplus: Variance > 0 (Unspent cash remaining)
+                VarianceChoice --> PositionShortfall: Variance < 0 (Spent more than issued)
+            }
+
+            ReconciliationReview --> EvalPosition
+
+            %% Surplus path: Cash Return
+            PositionSurplus --> CashReturnPending: Generate Cash Return voucher
+            CashReturnPending --> CashReturned: Employee returns unspent physical cash to vault
+            CashReturned --> BatchSettled: Return confirmed by Custodian
+
+            %% Shortfall path: Reimbursement trigger
+            PositionShortfall --> TriggerReimbursementClaim: Auto-generate Reimbursement Claim
+            TriggerReimbursementClaim --> ClaimDraft
+            ClaimSettled --> BatchSettled
+
+            %% Balanced path
+            PositionBalanced --> BatchSettled: Zero discrepancy confirmed
+
+            BatchSettled --> ReconciliationClosed: Custodian signs off & locks daily ledger
+            ReconciliationClosed --> [*]
+        }
+    }

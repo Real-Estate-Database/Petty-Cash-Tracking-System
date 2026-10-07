@@ -1,0 +1,50 @@
+flowchart TD
+
+    Start([Start: End-of-Day / Period Reconciliation Process])
+
+    A["Custodian opens Daily Reconciliation Workspace at Close-of-Business"]
+    B["System aggregates all daily active advances, approved expenses, and cash returns"]
+    C["Custodian performs physical cash vault count"]
+
+    D["Calculate Net Expected Vault Balance:\n(Opening Float - Daily Advances Issued + Cash Returned)"]
+
+    E{"Vault Balance Outcome & Discrepancy Check"}
+
+    F["Unspent Cash Remaining (Surplus Cash Turned In)\n(Physical Cash > Expected Balance)"]
+    G["Employee surrenders unspent cash to Custodian"]
+    H["Custodian logs cash return amount & attaches deposit slip"]
+
+    I["Out-of-Pocket Deficit (Shortfall Balance)\n(Approved Expenses > Issued Advances)"]
+    J["System triggers out-of-pocket reimbursement claim"]
+    K["Custodian / Finance processes reimbursement payout to employee"]
+
+    L["Exact Balance Match ($0 Difference)\n(Physical Vault Cash = Expected Balance)"]
+
+    M["Execute EOD Batch Settlement (ACID DB Transaction)"]
+    N["Update Status of Daily Advances & Reconciliations to SETTLED / CLOSED"]
+    O["Generate Daily Petty Cash Return Voucher (PCRV) & Log Immutable Audit Event"]
+
+    End([End Reconciliation Process])
+
+    Start --> A
+    A --> B
+    B --> C
+    C --> D
+    D --> E
+
+    E -- "Surplus Unspent Cash" --> F
+    F --> G
+    G --> H
+    H --> M
+
+    E -- "Out-of-Pocket Deficit" --> I
+    I --> J
+    J --> K
+    K --> M
+
+    E -- "Exact Match ($0 Difference)" --> L
+    L --> M
+
+    M --> N
+    N --> O
+    O --> End

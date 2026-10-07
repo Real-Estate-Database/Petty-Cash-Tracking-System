@@ -1,0 +1,22 @@
+flowchart TD
+
+    Start([Start: Additional Advance Request]) --> A["Open Unified Transaction Dashboard"]
+
+    A --> B["Select Active Parent Advance Request\n(Status = FundsIssued or PartiallyReconciled)"]
+    B --> C["Enter Additional Amount Requested & Justification"]
+    C --> D["Submit Additional Advance Request"]
+
+    D --> E{"Input Valid?\n(Amount > 0 & Active Parent Advance Selected)"}
+
+    E -- No (Show Validation Error) --> C
+
+    E -- Yes --> F["Save Additional Advance (Set Status = Pending & ParentAdvanceId = ActiveAdvanceId)"]
+
+    F --> G{"Review Decision\n(Manager / Super Admin)"}
+
+    G -- Reject --> H["Record Rejection Reason & Set Status = Rejected"]
+    H --> End1([End Process])
+
+    G -- Approve --> I["Approve Additional Advance (Set Status = Approved)"]
+    I --> J["Custodian Issues Additional Cash & Updates Total Advance Balance"]
+    J --> K["Record Additional Funds Issued & Log Audit Event"] --> End2([End Process])

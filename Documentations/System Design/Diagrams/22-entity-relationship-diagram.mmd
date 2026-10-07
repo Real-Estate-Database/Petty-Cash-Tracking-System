@@ -1,0 +1,194 @@
+erDiagram
+    %%{init: {'theme': 'dark'}}%%
+
+    COUNTRIES {
+        int ID PK "IDENTITY(1,1)"
+        nvarchar Code "nvarchar(255)"
+        nvarchar Country "nvarchar(255)"
+        bit Enabled "bit"
+    }
+
+    REGIONS {
+        int RegionID PK "IDENTITY(1,1)"
+        nvarchar RegionName "nvarchar(50)"
+        int Country FK "FK -> Countries(ID)"
+        nvarchar State "nvarchar(255)"
+    }
+
+    DISTRICTS {
+        int DistrictID PK "IDENTITY(1,1)"
+        nvarchar District "nvarchar(50)"
+        int Country FK "FK -> Countries(ID)"
+        nvarchar State "nvarchar(255)"
+        int Region FK "FK -> Regions(RegionID)"
+        nvarchar TempDistrict "nvarchar(255)"
+        int Position "Default 0"
+    }
+
+    ORGANIZATIONS {
+        int OrganizationId PK "IDENTITY(1,1)"
+        nvarchar OrganizationName "nvarchar(255)"
+        bit Disabled "Default 0"
+        bit Deleted "Default 0"
+        nvarchar Logo "nvarchar(1000)"
+        nvarchar Address "nvarchar(500)"
+        int CountryId FK "FK -> Countries(ID)"
+        int RegionId FK "FK -> Regions(RegionID)"
+        int DistrictId FK "FK -> Districts(DistrictID)"
+        nvarchar Email "nvarchar(255)"
+        nvarchar Telephone "nvarchar(50)"
+        datetime CreatedAt "GETUTCDATE()"
+        datetime UpdatedAt "GETUTCDATE()"
+    }
+
+    ROLES {
+        int RoleId PK "IDENTITY(1,1)"
+        int OrganizationId FK "FK -> Organizations"
+        nvarchar RoleName "nvarchar(100)"
+        nvarchar Description "nvarchar(500)"
+        bit IsSystemRole "Default 0"
+        bit Disabled "Default 0"
+        datetime EntryDate "GETUTCDATE()"
+        bit Removed "Default 0"
+    }
+
+    USERS {
+        int UserId PK "IDENTITY(1,1)"
+        int OrganizationId FK "FK -> Organizations"
+        int RoleId FK "FK -> Roles"
+        nvarchar FirstName "nvarchar(50)"
+        nvarchar LastName "nvarchar(50)"
+        nvarchar Email "nvarchar(255)"
+        nvarchar PasswordHash "nvarchar(255)"
+        nvarchar TelephoneNumber "nvarchar(50)"
+        bit IsActive "Default 1"
+        bit Disabled "Default 0"
+        bit Deleted "Default 0"
+        nvarchar Image "nvarchar(1000)"
+        datetime LastLoginDate "datetime"
+        int CountryId FK "FK -> Countries(ID)"
+        int RegionId FK "FK -> Regions(RegionID)"
+        int DistrictId FK "FK -> Districts(DistrictID)"
+        datetime EntryDate "GETDATE()"
+        smallint TimeZone "smallint"
+    }
+
+    AUDIT_TRAIL {
+        int AuditTrailId PK "IDENTITY(1,1)"
+        int UserId FK "FK -> Users(UserId)"
+        nvarchar AccessTokenHash "nvarchar(500)"
+        nvarchar RefreshTokenHash "nvarchar(500)"
+        nvarchar ClientType "nvarchar(100)"
+        nvarchar DeviceIdentifier "nvarchar(255)"
+        nvarchar IpAddress "nvarchar(50)"
+        nvarchar UserAgent "nvarchar(500)"
+        int CountryId FK "FK -> Countries(ID)"
+        datetime EntryDate "GETUTCDATE()"
+        datetime ExpiryDate "datetime"
+        bit IsRevoked "Default 0"
+        datetime RevokedDate "datetime"
+        nvarchar Description "nvarchar(255)"
+    }
+
+    PERMISSIONS {
+        int PermissionId PK "IDENTITY(1,1)"
+        nvarchar PermissionName "nvarchar(100)"
+        nvarchar Description "nvarchar(500)"
+    }
+
+    USER_PERMISSIONS {
+        int UserPermissionId PK "IDENTITY(1,1)"
+        int UserId FK "FK -> Users(UserId)"
+        int PermissionId FK "FK -> Permissions"
+        datetime EntryDate "GETUTCDATE()"
+    }
+
+    TRANSACTION_TYPES {
+        int TransactionTypeId PK "IDENTITY(1,1)"
+        nvarchar TransactionTypeName "nvarchar(100)"
+        nvarchar Description "nvarchar(500)"
+        datetime EntryDate "GETUTCDATE()"
+    }
+
+    ADVANCE_CATEGORIES {
+        int CategoryId PK "IDENTITY(1,1)"
+        int OrganizationId FK "FK -> Organizations"
+        nvarchar Name "nvarchar(100)"
+        nvarchar Description "nvarchar(500)"
+        bit Disabled "Default 0"
+        datetime EntryDate "GETUTCDATE()"
+        datetime LastUpdated "GETUTCDATE()"
+    }
+
+    TRANSACTIONS {
+        int TransactionId PK "IDENTITY(1,1)"
+        int OrganizationId FK "FK -> Organizations"
+        int ReferenceNumber UK "Unique Nonclustered"
+        int TransactionTypeId FK "FK -> TransactionTypes"
+        int CategoryId FK "FK -> AdvanceCategories"
+        int ParentTransactionId FK "FK -> Transactions"
+        int UserId FK "Initiator"
+        int ApprovedByUserId FK "Approver"
+        int IssuedByUserId FK "Disburser"
+        int ReconciledByUserId FK "Reconciler"
+        decimal Amount "decimal(18,2)"
+        nvarchar Description "nvarchar(2000)"
+        nvarchar Status "nvarchar(50)"
+        nvarchar RejectionReason "nvarchar(255)"
+        nvarchar Notes "nvarchar(2000)"
+        datetime TransactionDate "datetime"
+        datetime ApprovedDate "datetime"
+        datetime ReconciliationDate "datetime"
+        datetime LastUpdatedDate "SYSUTCDATETIME()"
+        datetime EntryDate "GETDATE()"
+    }
+
+    RECEIPTS {
+        int ReceiptId PK "IDENTITY(1000,1)"
+        int UserId FK "FK -> Users(UserId)"
+        int TransactionId FK "FK -> Transactions"
+        nvarchar ReceiptNumber "nvarchar(100)"
+        nvarchar FileName "nvarchar(255)"
+        nvarchar ContentType "nvarchar(100)"
+        int FileSize "int"
+        datetime EntryDate "GETUTCDATE()"
+        nvarchar AmountInWords "nvarchar(200)"
+    }
+
+    %% Relationships
+    COUNTRIES ||--o{ REGIONS : "Country -> ID"
+    COUNTRIES ||--o{ DISTRICTS : "Country -> ID"
+    REGIONS ||--o{ DISTRICTS : "Region -> RegionID"
+
+    COUNTRIES ||--o{ ORGANIZATIONS : "CountryId -> ID"
+    REGIONS ||--o{ ORGANIZATIONS : "RegionId -> RegionID"
+    DISTRICTS ||--o{ ORGANIZATIONS : "DistrictId -> DistrictID"
+
+    COUNTRIES ||--o{ USERS : "CountryId -> ID"
+    REGIONS ||--o{ USERS : "RegionId -> RegionID"
+    DISTRICTS ||--o{ USERS : "DistrictId -> DistrictID"
+
+    COUNTRIES ||--o{ AUDIT_TRAIL : "CountryId -> ID"
+    USERS ||--o{ AUDIT_TRAIL : "UserId -> UserId"
+
+    ORGANIZATIONS ||--o{ ROLES : "OrganizationId -> OrganizationId"
+    ORGANIZATIONS ||--o{ USERS : "OrganizationId -> OrganizationId"
+    ORGANIZATIONS ||--o{ ADVANCE_CATEGORIES : "OrganizationId -> OrganizationId"
+    ORGANIZATIONS ||--o{ TRANSACTIONS : "OrganizationId -> OrganizationId"
+
+    ROLES ||--o{ USERS : "RoleId -> RoleId"
+
+    USERS ||--o{ USER_PERMISSIONS : "UserId -> UserId"
+    PERMISSIONS ||--o{ USER_PERMISSIONS : "PermissionId -> PermissionId"
+
+    TRANSACTION_TYPES ||--o{ TRANSACTIONS : "TransactionTypeId -> TransactionTypeId"
+    ADVANCE_CATEGORIES ||--o{ TRANSACTIONS : "CategoryId -> CategoryId"
+    TRANSACTIONS ||--o{ TRANSACTIONS : "ParentTransactionId -> TransactionId"
+
+    USERS ||--o{ TRANSACTIONS : "UserId (Requester)"
+    USERS ||--o{ TRANSACTIONS : "ApprovedByUserId"
+    USERS ||--o{ TRANSACTIONS : "IssuedByUserId"
+    USERS ||--o{ TRANSACTIONS : "ReconciledByUserId"
+
+    USERS ||--o{ RECEIPTS : "UserId -> UserId"
+    TRANSACTIONS ||--o{ RECEIPTS : "TransactionId -> TransactionId"

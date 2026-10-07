@@ -1,0 +1,55 @@
+flowchart TD
+
+    Start([Start: Record Expense])
+
+    A["Open Unified Transaction Dashboard"]
+    B["Select Active Advance Request"]
+    C["Add Expense Item to Advance\n(Amount, Date, Category, Description, Receipt Image or Note)"]
+    D["Submit Expense Item"]
+
+    E{"Input Valid?\n(Amount > 0, Category & Justification Entered)"}
+
+    F["Save Expense Item"]
+    G["Set Status = Pending Review"]
+    H["Notify Manager / Super Admin for Review"]
+
+    I{"Review Decision\n(Manager / Super Admin)"}
+
+    J["Reject Expense"]
+    K["Record Rejection Reason & Set Status = Rejected"]
+
+    Resubmit{"Resubmit / Correct Item?"}
+    ResubmitYes["Employee Corrects Expense Details"]
+    ResubmitNo["Rejection Finalized"]
+
+    L["Approve Expense (Set Status = Approved)"]
+    M["Include Approved Expense in Advance Reconciliation"]
+
+    End([End Process])
+
+    Start --> A
+    A --> B
+    B --> C
+    C --> D
+    D --> E
+
+    E -- No (Show Validation Error) --> C
+    E -- Yes --> F
+
+    F --> G
+    G --> H
+    H --> I
+
+    I -- Reject --> J
+    J --> K
+    K --> Resubmit
+
+    Resubmit -- Yes --> ResubmitYes
+    ResubmitYes --> C
+
+    Resubmit -- No --> ResubmitNo
+    ResubmitNo --> End
+
+    I -- Approve --> L
+    L --> M
+    M --> End

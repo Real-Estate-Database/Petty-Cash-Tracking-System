@@ -1,0 +1,68 @@
+flowchart TB
+    %%{init: {'theme': 'dark'}}%%
+
+    %% ========================================================
+    %% PART 1: ADMINISTRATIVE CONFIGURATION (PBAC SETUP & TEMPLATES)
+    %% ========================================================
+    subgraph Setup["1. Administrative Setup (PBAC & UI Templates)"]
+        direction TB
+
+        SuperAdmin["Super Admin (Governance Root)"]
+
+        subgraph Catalog["Permission Catalog (System Defined)"]
+            P1["Advances.Create"]
+            P2["Advances.Approve"]
+            P3["Advances.IssueFunds"]
+            P4["Expenses.Record"]
+            P5["Expenses.Review"]
+            P6["Reconciliations.Settle"]
+            P7["Reports.View"]
+        end
+
+        CustomRoles["Roles (UI Templates)\n(e.g., Manager, Custodian, Employee)"]
+        RolePermissions["Role-Permission Templates\n(RolePermission Link Table)"]
+
+        UserPermissions["UserPermissions Table\n(PBAC Runtime Source of Truth)"]
+
+        Employees["Users / Employees"]
+
+        SuperAdmin -->|"1. Manages Role Templates"| CustomRoles
+        Catalog --> RolePermissions
+        CustomRoles --> RolePermissions
+        
+        SuperAdmin -->|"2. Assigns Role Template (Seeds Default Grants)"| Employees
+        RolePermissions -.->|"Populates Initial Grants"| UserPermissions
+
+        SuperAdmin -->|"3. Directly Grants / Overrides Permissions"| UserPermissions
+        Employees -->|"Holds Granted Permissions via"| UserPermissions
+    end
+
+    %% ========================================================
+    %% PART 2: RUNTIME AUTHORIZATION PIPELINE (WHEN ACTION OCCURS)
+    %% ========================================================
+    subgraph Runtime["2. Runtime Authorization Pipeline (Request Execution)"]
+        direction TB
+
+        Request["User Request / Action\n(e.g., Click 'Approve Advance')"]
+
+        Identity["Login & Claim Generation\n(Queries UserPermissions -> Issues JWT Claims)"]
+
+        SuperAdminCheck{"Is User\nSuper Admin?"}
+
+        PermissionCheck{"Does User Have\nRequired Granted Permission\n(e.g., 'Advances.Approve') in JWT Claims?"}
+
+        Allow["Allow Request (200 OK)\nExecute Business Logic"]
+        Deny["Deny Request (403 Forbidden)\nAudit Unauthorized Attempt"]
+
+        Request --> Identity
+        Identity --> SuperAdminCheck
+
+        SuperAdminCheck -->|"YES (Root Bypass)"| Allow
+        SuperAdminCheck -->|"NO (Standard User)"| PermissionCheck
+
+        PermissionCheck -->|"YES (Permission Granted)"| Allow
+        PermissionCheck -->|"NO (Permission Missing/Revoked)"| Deny
+    end
+
+    %% Connection between Setup and Runtime
+    UserPermissions -.->|"Queried at Login for JWT Claims"| Identity

@@ -1,0 +1,51 @@
+<Solution>
+  <Folder Name="/Documentations/" />
+  <Folder Name="/Documentations/Diagrams/">
+    <File Path="Documentations/System Design/Diagrams/1-system-context.mmd" />
+    <File Path="Documentations/System Design/Diagrams/10-DFD-level-01.mmd" />
+    <File Path="Documentations/System Design/Diagrams/11-DFD-level-02.mmd" />
+    <File Path="Documentations/System Design/Diagrams/12-api-architecture-diagram.mmd" />
+    <File Path="Documentations/System Design/Diagrams/14-submit-advance-sequence-diagram.mmd" />
+    <File Path="Documentations/System Design/Diagrams/15-expense-submission-sequence-diagram.mmd" />
+    <File Path="Documentations/System Design/Diagrams/16-reconciliation-sequence-diagram.mmd" />
+    <File Path="Documentations/System Design/Diagrams/17-transaction-state-diagram.mmd" />
+    <File Path="Documentations/System Design/Diagrams/19-reconciliation-state-diagram.mmd" />
+    <File Path="Documentations/System Design/Diagrams/2-container-diagram.mmd" />
+    <File Path="Documentations/System Design/Diagrams/20-deployment-diagram.mmd" />
+    <File Path="Documentations/System Design/Diagrams/21-authorization-model-diagram.mmd" />
+    <File Path="Documentations/System Design/Diagrams/22-entity-relationship-diagram.mmd" />
+    <File Path="Documentations/System Design/Diagrams/23-class-diagram.mmd" />
+    <File Path="Documentations/System Design/Diagrams/24-system-architecture-diagram.mmd" />
+    <File Path="Documentations/System Design/Diagrams/3-component-diagram.mmd" />
+    <File Path="Documentations/System Design/Diagrams/4-use-case-diagram.mmd" />
+    <File Path="Documentations/System Design/Diagrams/5-advance-request-activity-diagram.mmd" />
+    <File Path="Documentations/System Design/Diagrams/6-expense-recording-activity-diagram.mmd" />
+    <File Path="Documentations/System Design/Diagrams/7-additional-advance-activity-diagram.mmd" />
+    <File Path="Documentations/System Design/Diagrams/8-reimbursement-activity-diagram.mmd" />
+    <File Path="Documentations/System Design/Diagrams/9-reconciliation-activity-diagram.mmd" />
+    <File Path="Documentations/System Design/Diagrams/AuthenticationMasterSequenceDiagram.mmd" />
+    <File Path="Documentations/System Design/Diagrams/TransactionMasterSequenceDiagram.mmd" />
+  </Folder>
+  <Folder Name="/Documentations/Planning/">
+    <File Path="Documentations/Planning/ProjectPlanning.html" />
+  </Folder>
+  <Folder Name="/Documentations/Requirements/">
+    <File Path="Documentations/Requirements/RequirementsAnalysis.html" />
+  </Folder>
+  <Folder Name="/Documentations/System Design/">
+    <File Path="Documentations/System Design/schema.sql" />
+    <File Path="Documentations/System Design/SystemDesign.html" />
+  </Folder>
+  <Folder Name="/.github/workflows/">
+    <File Path=".github/workflows/ci.yml" />
+  </Folder>
+  <Folder Name="/Solution Items/">
+    <File Path=".gitignore" />
+    <File Path="README.md" />
+    <File Path="SeedGeographicData.sql" />
+  </Folder>
+  <Project Path="PettyCashDatabase.Shared/PettyCashDatabase.Shared.csproj" />
+  <Project Path="PettyCashDatabase.Web.Client/PettyCashDatabase.Web.Client.csproj" />
+  <Project Path="PettyCashDatabase.Web/PettyCashDatabase.Web.csproj" />
+  <Project Path="PettyCashDatabase/PettyCashDatabase.csproj" />
+</Solution>
