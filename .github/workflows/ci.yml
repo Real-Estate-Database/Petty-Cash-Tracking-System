@@ -1,3 +1,9 @@
+# =============================================================================
+# PettyCash Web CI Pipeline
+# Builds and verifies the Web application projects only.
+# MAUI mobile builds are excluded until mobile development begins.
+# =============================================================================
+
 name: .NET CI Pipeline
 
 on:
@@ -16,15 +22,13 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build-and-verify:
-    name: Build & Verify Solution (.NET 10)
-    runs-on: windows-latest
+  build-web:
+    name: Build & Verify Web (.NET 10)
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Setup .NET SDK (10.0.x)
         uses: actions/setup-dotnet@v4
@@ -36,22 +40,19 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.nuget/packages
-          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj', 'PettyCashDatabase.slnx') }}
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
           restore-keys: |
             ${{ runner.os }}-nuget-
 
-      - name: Install .NET MAUI Workloads
-        run: dotnet workload restore PettyCashDatabase.slnx
+      - name: Restore NuGet packages (Web projects only)
+        run: dotnet restore PettyCashDatabase.Web/PettyCashDatabase.Web.csproj
 
-      - name: Restore NuGet packages
-        run: dotnet restore PettyCashDatabase.slnx
-
-      - name: Build solution (Release)
-        run: dotnet build PettyCashDatabase.slnx --configuration Release --no-restore
+      - name: Build Web application (Release)
+        run: dotnet build PettyCashDatabase.Web/PettyCashDatabase.Web.csproj --configuration Release --no-restore
 
       - name: Run Unit Tests (if available)
         run: |
-          dotnet test PettyCashDatabase.slnx --configuration Release --no-build --verbosity normal --logger "trx" || echo "No unit tests found or all tests passed."
+          dotnet test PettyCashDatabase.Web/PettyCashDatabase.Web.csproj --configuration Release --no-build --verbosity normal --logger "trx" || echo "No test projects found."
 
       - name: Publish Web application
         run: dotnet publish PettyCashDatabase.Web/PettyCashDatabase.Web.csproj --configuration Release --no-build --output ./publish/web
