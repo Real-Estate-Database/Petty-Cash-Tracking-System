@@ -1,0 +1,456 @@
+@page "/register-tenant"
+@* Avoid static form posts and run lookup requests inside the server circuit. *@
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
+@layout PettyCashDatabase.Shared.Layout.AuthLayout
+@using System.ComponentModel.DataAnnotations
+@using System.Net.Http
+@using System.Text.Json
+@using PettyCashDatabase.Shared.Auth
+@using PettyCashDatabase.Shared.Components.Auth
+@using PettyCashDatabase.Shared.DTOs.Auth
+@using PettyCashDatabase.Shared.Interfaces
+@inject IAuthService AuthService
+@inject ILocationLookupService LocationLookupService
+@inject NavigationManager Navigation
+
+<PageTitle>Register Organization — PettyCash</PageTitle>
+
+<div class="auth-shell">
+    @* ── Left side: Form ──────────────────────────────────── *@
+    <section class="auth-form-side">
+        <div class="auth-form-wrapper" style="max-width:540px">
+            <div class="auth-logo">
+                <div class="auth-logo-icon">PC</div>
+                <span class="auth-logo-text">PettyCash</span>
+            </div>
+
+            <h1 class="auth-heading">Register Organization</h1>
+            <p class="auth-subtitle">
+                Onboard your organization and create the first administrator account.
+            </p>
+
+            <nav class="auth-tabs" aria-label="Account access">
+                <a href="/login">Sign In</a>
+                <a class="active" aria-current="page" href="/register-tenant">Sign Up</a>
+            </nav>
+
+            <div class="step-indicator">
+                <div class="step @(_step == 1 ? "active" : null)">1. Organization</div>
+                <div class="step @(_step == 2 ? "active" : null)">2. Admin</div>
+            </div>
+
+            <div class="auth-form">
+                <EditForm EditContext="_editContext" FormName="tenant-registration">
+                    <DataAnnotationsValidator />
+
+                    @if (_step == 1)
+                    {
+                        <div class="mb-3">
+                            <label class="form-label">Organization Name *</label>
+                            <InputText class="form-control" maxlength="255" placeholder="Enter organization name" @bind-Value="_model.OrganizationName" autofocus />
+                            <ValidationMessage For="() => _model.OrganizationName" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Address</label>
+                            <InputTextArea class="form-control" maxlength="500" placeholder="Organization address" @bind-Value="_model.Address" rows="2" />
+                            <ValidationMessage For="() => _model.Address" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Country *</label>
+                            <InputSelect class="form-select" @bind-Value="_model.OrganizationCountryId" @bind-Value:after="OnCountryChangedAsync">
+                                <option value="0">Select country</option>
+                                @foreach (var c in _countries)
+                                {
+                                    <option value="@c.Id">@c.Name</option>
+                                }
+                            </InputSelect>
+                            <ValidationMessage For="() => _model.OrganizationCountryId" />
+                        </div>
+
+                        @if (IsUgandaSelected)
+                        {
+                            <div class="row g-2">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Region</label>
+                                    <InputSelect class="form-select" @bind-Value="_model.OrganizationRegionId" @bind-Value:after="LoadOrgDistrictsAsync">
+                                        <option value="">Select region</option>
+                                        @foreach (var r in _orgRegions)
+                                        {
+                                            <option value="@r.RegionId">@r.Name</option>
+                                        }
+                                    </InputSelect>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">District *</label>
+                                    <InputSelect class="form-select" @bind-Value="_model.OrganizationDistrictId">
+                                        <option value="">Select district</option>
+                                        @foreach (var d in _orgDistricts)
+                                        {
+                                            <option value="@d.DistrictId">@d.Name</option>
+                                        }
+                                    </InputSelect>
+                                    <ValidationMessage For="() => _model.OrganizationDistrictId" />
+                                </div>
+                            </div>
+                        }
+
+                        <div class="row g-2">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Email *</label>
+                                <InputText class="form-control" maxlength="255" placeholder="org@example.com" @bind-Value="_model.OrganizationEmail" />
+                                <ValidationMessage For="() => _model.OrganizationEmail" />
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Telephone *</label>
+                                <InternationalPhoneInput @bind-Value="_model.OrganizationTelephone"
+                                                         CountryIsoCode="@SelectedOrganizationCountryCode"
+                                                         CountryName="@SelectedOrganizationCountryName"
+                                                         LockCountry="true"
+                                                         Disabled="@(SelectedOrganizationCountry is null)"
+                                                         Placeholder="700 000 000" />
+                                <ValidationMessage For="() => _model.OrganizationTelephone" />
+                            </div>
+                        </div>
+
+                        <button class="btn btn-accent w-100" type="button" @onclick="GoNextAsync">Continue to Admin Setup</button>
+                    }
+                    else
+                    {
+                        <div class="row g-2">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">First Name *</label>
+                                <InputText class="form-control" maxlength="50" placeholder="First name" @bind-Value="_model.FirstName" autofocus />
+                                <ValidationMessage For="() => _model.FirstName" />
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Last Name *</label>
+                                <InputText class="form-control" maxlength="50" placeholder="Last name" @bind-Value="_model.LastName" />
+                                <ValidationMessage For="() => _model.LastName" />
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Email *</label>
+                            <InputText class="form-control" maxlength="255" placeholder="admin@example.com" @bind-Value="_model.Email" />
+                            <ValidationMessage For="() => _model.Email" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Password *</label>
+                            <input class="form-control" maxlength="255" type="password"
+                                   placeholder="Create a strong password"
+                                   value="@_model.Password" @oninput="OnPasswordInput" />
+                            <ValidationMessage For="() => _model.Password" />
+                            <PasswordStrengthMeter Password="@_model.Password" Email="@_model.Email" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Confirm Password *</label>
+                            <InputText class="form-control" maxlength="255" type="password"
+                                       placeholder="Repeat your password"
+                                       @bind-Value="_model.ConfirmPassword" />
+                            <ValidationMessage For="() => _model.ConfirmPassword" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Telephone *</label>
+                            <InternationalPhoneInput @bind-Value="_model.TelephoneNumber"
+                                                     CountryIsoCode="@SelectedOrganizationCountryCode"
+                                                     CountryName="@SelectedOrganizationCountryName"
+                                                     LockCountry="true"
+                                                     Disabled="@(SelectedOrganizationCountry is null)"
+                                                     Placeholder="700 000 000" />
+                            <ValidationMessage For="() => _model.TelephoneNumber" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Timezone</label>
+                            <InputSelect class="form-select" @bind-Value="_model.TimeZoneId">
+                                @foreach (var tz in TimeZoneCatalog.All)
+                                {
+                                    <option value="@tz.Id">@tz.FullLabel</option>
+                                }
+                            </InputSelect>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-outline-secondary flex-fill" type="button" @onclick="() => _step = 1">Back</button>
+                            <button class="btn btn-accent flex-fill" type="button" @onclick="SubmitAsync" disabled="@_busy">
+                                @(_busy ? "Submitting..." : "Register Organization")
+                            </button>
+                        </div>
+                    }
+                </EditForm>
+
+                @if (!string.IsNullOrEmpty(_error))
+                {
+                    <div class="alert alert-danger mt-3">@_error</div>
+                }
+
+                <div class="auth-links mt-3">
+                    <a href="/login">Already registered? Sign in</a>
+                </div>
+            </div>
+
+            <div class="auth-footer">
+                Copyright &copy; @DateTime.Now.Year PettyCash. All Rights Reserved.
+            </div>
+        </div>
+    </section>
+
+    @* ── Right side: Brand visual ─────────────────────────── *@
+    <section class="auth-brand-side">
+        <div class="auth-brand-visual">
+            <div class="brand-card brand-card-1">
+                <div class="brand-card-label">Organizations Active</div>
+                <div class="brand-card-value">1,240+</div>
+                <div class="brand-card-accent">Trusted worldwide</div>
+            </div>
+            <div class="brand-card brand-card-2">
+                <div class="brand-card-label">Transactions Processed</div>
+                <div class="brand-card-value">$2.4M</div>
+                <div class="brand-card-accent">↑ This quarter</div>
+            </div>
+            <div class="brand-card brand-card-3">
+                <div class="brand-card-label">Average Savings</div>
+                <div class="brand-card-value">34%</div>
+                <div class="brand-card-accent">✓ On operational costs</div>
+            </div>
+        </div>
+
+        <div class="auth-brand-content">
+            <div class="auth-brand-badge">PC</div>
+            <h2 class="auth-brand-title">
+                Get Started with<br />
+                <span>Enterprise-Grade Cash Management</span>
+            </h2>
+            <p class="auth-brand-desc">
+                Set up your organization in minutes. Multi-tenant architecture ensures
+                complete data isolation and security for every team.
+            </p>
+        </div>
+    </section>
+</div>
+
+@code {
+    private readonly TenantOnboardingDto _model = new() { TimeZoneId = TimeZoneCatalog.Default.Id, TimeZone = 3 };
+    private int _step = 1;
+    private bool _busy;
+    private string? _error;
+    private EditContext _editContext = default!;
+
+    private IReadOnlyList<CountryLookupDto> _countries = [];
+    private IReadOnlyList<RegionLookupDto> _orgRegions = [];
+    private IReadOnlyList<DistrictLookupDto> _orgDistricts = [];
+
+    private CountryLookupDto? SelectedOrganizationCountry =>
+        _countries.FirstOrDefault(c => c.Id == _model.OrganizationCountryId);
+
+    private string? SelectedOrganizationCountryCode => SelectedOrganizationCountry?.Code;
+
+    private string? SelectedOrganizationCountryName => SelectedOrganizationCountry?.Name;
+
+    private bool IsUgandaSelected =>
+        _countries.FirstOrDefault(c => c.Id == _model.OrganizationCountryId) is { } c &&
+        (string.Equals(c.Name, "Uganda", StringComparison.OrdinalIgnoreCase) ||
+         string.Equals(c.Code, "UGA", StringComparison.OrdinalIgnoreCase) ||
+         c.Id == 228);
+
+    protected override async Task OnInitializedAsync()
+    {
+        _editContext = new EditContext(_model);
+        _countries = await LoadCountriesAsync();
+    }
+
+    private async Task OnCountryChangedAsync()
+    {
+        _error = null;
+        _orgRegions = [];
+        _orgDistricts = [];
+        _model.OrganizationRegionId = null;
+        _model.OrganizationDistrictId = null;
+        _model.OrganizationTelephone = string.Empty;
+        _model.TelephoneNumber = string.Empty;
+
+        if (IsUgandaSelected)
+        {
+            _orgRegions = await LoadRegionsAsync(_model.OrganizationCountryId);
+            _orgDistricts = await LoadDistrictsAsync();
+        }
+    }
+
+    private async Task LoadOrgDistrictsAsync()
+    {
+        _model.OrganizationDistrictId = null;
+        if (_model.OrganizationRegionId is int regionId && regionId > 0)
+        {
+            _orgDistricts = await LoadDistrictsAsync(regionId);
+        }
+        else
+        {
+            _orgDistricts = await LoadDistrictsAsync();
+        }
+    }
+
+    private async Task GoNextAsync()
+    {
+        var ctx = new ValidationContext(_model);
+        var results = new List<ValidationResult>();
+        var step1Members = new[]
+        {
+            nameof(TenantOnboardingDto.OrganizationName),
+            nameof(TenantOnboardingDto.Address),
+            nameof(TenantOnboardingDto.OrganizationCountryId),
+            nameof(TenantOnboardingDto.OrganizationRegionId),
+            nameof(TenantOnboardingDto.OrganizationDistrictId),
+            nameof(TenantOnboardingDto.OrganizationEmail),
+            nameof(TenantOnboardingDto.OrganizationTelephone)
+        };
+
+        Validator.TryValidateObject(_model, ctx, results, validateAllProperties: true);
+        results = results.Where(r => r.MemberNames.Any(m => step1Members.Contains(m)) || !r.MemberNames.Any()).ToList();
+
+        if (_model.OrganizationCountryId <= 0)
+            results.Add(new ValidationResult("Country is required.", [nameof(TenantOnboardingDto.OrganizationCountryId)]));
+
+        if (IsUgandaSelected && (_model.OrganizationDistrictId is null or <= 0))
+            results.Add(new ValidationResult("District is required for organizations in Uganda.", [nameof(TenantOnboardingDto.OrganizationDistrictId)]));
+
+        if (!IsUgandaSelected)
+        {
+            results = results.Where(r => !r.MemberNames.Contains(nameof(TenantOnboardingDto.OrganizationDistrictId))
+                                      && !r.MemberNames.Contains(nameof(TenantOnboardingDto.OrganizationRegionId))).ToList();
+        }
+
+        // Ignore admin-field errors when leaving step 1.
+        var adminOnly = new HashSet<string>
+        {
+            nameof(TenantOnboardingDto.FirstName),
+            nameof(TenantOnboardingDto.LastName),
+            nameof(TenantOnboardingDto.Email),
+            nameof(TenantOnboardingDto.Password),
+            nameof(TenantOnboardingDto.ConfirmPassword),
+            nameof(TenantOnboardingDto.TelephoneNumber)
+        };
+        results = results.Where(r => !r.MemberNames.All(adminOnly.Contains)).ToList();
+
+        if (results.Count > 0)
+        {
+            _error = string.Join(" ", results.Select(r => r.ErrorMessage));
+            return;
+        }
+
+        _error = null;
+        _step = 2;
+        await Task.CompletedTask;
+    }
+
+    private async Task SubmitAsync()
+    {
+        if (IsUgandaSelected && (_model.OrganizationDistrictId is null or <= 0))
+        {
+            _error = "District is required for organizations in Uganda.";
+            return;
+        }
+
+        if (!IsUgandaSelected)
+        {
+            _model.OrganizationRegionId = null;
+            _model.OrganizationDistrictId = null;
+        }
+
+        if (!_editContext.Validate())
+        {
+            _error = "Please complete all required administrator fields.";
+            return;
+        }
+
+        _busy = true;
+        _error = null;
+        try
+        {
+            await AuthService.RegisterTenantAsync(_model);
+            Navigation.NavigateTo("/login");
+        }
+        catch (HttpRequestException exception)
+        {
+            _error = ReadRegistrationError(exception);
+        }
+        catch (InvalidOperationException exception)
+        {
+            _error = exception.Message;
+        }
+        catch (Exception)
+        {
+            _error = "Unable to register organization with the provided details.";
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+
+    private void OnPasswordInput(ChangeEventArgs args)
+    {
+        _model.Password = args.Value?.ToString() ?? string.Empty;
+        _editContext.NotifyFieldChanged(new FieldIdentifier(_model, nameof(_model.Password)));
+    }
+
+    private static string ReadRegistrationError(HttpRequestException exception)
+    {
+        if (!string.IsNullOrWhiteSpace(exception.Message))
+        {
+            try
+            {
+                using var document = JsonDocument.Parse(exception.Message);
+                if (document.RootElement.TryGetProperty("detail", out var detail)
+                    && !string.IsNullOrWhiteSpace(detail.GetString()))
+                    return detail.GetString()!;
+            }
+            catch (JsonException)
+            {
+                // The API may return a plain-text error instead of ProblemDetails.
+            }
+        }
+
+        return "Unable to register organization with the provided details.";
+    }
+
+    private async Task<IReadOnlyList<CountryLookupDto>> LoadCountriesAsync()
+    {
+        try
+        {
+            return await LocationLookupService.GetCountriesAsync();
+        }
+        catch (Exception)
+        {
+            _error = "Location data could not be loaded. Check the connection and try again.";
+            return [];
+        }
+    }
+
+    private async Task<IReadOnlyList<RegionLookupDto>> LoadRegionsAsync(int countryId)
+    {
+        try
+        {
+            return await LocationLookupService.GetRegionsAsync(countryId);
+        }
+        catch (Exception)
+        {
+            _error = "Location data could not be loaded. Check the connection and try again.";
+            return [];
+        }
+    }
+
+    private async Task<IReadOnlyList<DistrictLookupDto>> LoadDistrictsAsync(int? regionId = null)
+    {
+        try
+        {
+            return await LocationLookupService.GetDistrictsAsync(
+                countryId: _model.OrganizationCountryId > 0 ? _model.OrganizationCountryId : null,
+                regionId: regionId);
+        }
+        catch (Exception)
+        {
+            _error = "Location data could not be loaded. Check the connection and try again.";
+            return [];
+        }
+    }
+}

@@ -29,3 +29,8 @@ appsettings.Local.json
 *.env
 *.env.*
 secrets.json
+
+## Local database
+*.mdf
+*.ldf
+THE ENTERPRISE STANDARD WAY OF PASSWORD SECURITY.txt

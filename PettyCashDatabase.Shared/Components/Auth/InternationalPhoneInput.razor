@@ -1,0 +1,113 @@
+@using System.Linq.Expressions
+@using Microsoft.AspNetCore.Components.Forms
+@using PettyCashDatabase.Shared.Auth
+
+<div class="international-phone-group input-group">
+    <select class="form-select country-code-select" style="max-width: 140px; flex-shrink: 0;"
+            value="@_selectedDialCode" @onchange="OnDialCodeChanged"
+            disabled="@(Disabled || IsCountryLocked)">
+        @if (ForcedCountry is { } forcedCountry)
+        {
+            <option value="@forcedCountry.DialCode">
+                @(string.IsNullOrWhiteSpace(forcedCountry.FlagEmoji) ? "" : forcedCountry.FlagEmoji + " ")@forcedCountry.DialCode
+            </option>
+        }
+        else
+        {
+            @foreach (var c in CountryPhoneCatalog.All)
+            {
+                <option value="@c.DialCode">@c.FlagEmoji @c.DialCode</option>
+            }
+        }
+    </select>
+    <input type="tel" class="form-control" maxlength="30"
+           placeholder="@Placeholder"
+           value="@_localNumber"
+           @oninput="OnLocalNumberInput"
+           disabled="@Disabled" />
+</div>
+
+@code {
+    [Parameter] public string Value { get; set; } = string.Empty;
+    [Parameter] public EventCallback<string> ValueChanged { get; set; }
+    [Parameter] public Expression<Func<string>>? ValueExpression { get; set; }
+    [Parameter] public string? CountryIsoCode { get; set; }
+    [Parameter] public string? CountryName { get; set; }
+    [Parameter] public bool LockCountry { get; set; }
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public string Placeholder { get; set; } = "700 000 000";
+    [CascadingParameter] private EditContext? EditContext { get; set; }
+
+    private string _selectedDialCode = CountryPhoneCatalog.Default.DialCode;
+    private string _localNumber = string.Empty;
+    private CountryDialCode? ForcedCountry => CountryPhoneCatalog.Find(CountryIsoCode, CountryName);
+    private bool IsCountryLocked => LockCountry && ForcedCountry != null;
+
+    protected override void OnParametersSet()
+    {
+        if (ForcedCountry is { } forcedCountry)
+        {
+            _selectedDialCode = forcedCountry.DialCode;
+            _localNumber = RemoveDialCode(Value, forcedCountry.DialCode);
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(Value))
+            return;
+
+        var matching = CountryPhoneCatalog.All
+            .OrderByDescending(c => c.DialCode.Length)
+            .FirstOrDefault(c => Value.StartsWith(c.DialCode, StringComparison.OrdinalIgnoreCase));
+
+        if (matching != null)
+        {
+            _selectedDialCode = matching.DialCode;
+            _localNumber = Value[matching.DialCode.Length..].TrimStart();
+        }
+        else
+        {
+            _localNumber = Value;
+        }
+    }
+
+    private static string RemoveDialCode(string value, string dialCode)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return string.Empty;
+
+        var compact = value.Trim();
+        if (compact.StartsWith(dialCode, StringComparison.OrdinalIgnoreCase))
+            return compact[dialCode.Length..].TrimStart();
+
+        return compact;
+    }
+
+    private async Task OnDialCodeChanged(ChangeEventArgs e)
+    {
+        _selectedDialCode = e.Value?.ToString() ?? CountryPhoneCatalog.Default.DialCode;
+        await EmitFullNumberAsync();
+    }
+
+    private async Task OnLocalNumberInput(ChangeEventArgs e)
+    {
+        _localNumber = e.Value?.ToString() ?? string.Empty;
+        await EmitFullNumberAsync();
+    }
+
+    private async Task EmitFullNumberAsync()
+    {
+        var cleaned = _localNumber.TrimStart('0').Trim();
+        var full = string.IsNullOrWhiteSpace(cleaned)
+            ? string.Empty
+            : $"{_selectedDialCode} {cleaned}";
+
+        Value = full;
+        await ValueChanged.InvokeAsync(full);
+
+        if (EditContext != null && ValueExpression != null)
+        {
+            var fieldIdentifier = FieldIdentifier.Create(ValueExpression);
+            EditContext.NotifyFieldChanged(fieldIdentifier);
+        }
+    }
+}

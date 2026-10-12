@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace PettyCashDatabase.Web.Data.Models;
@@ -35,17 +35,29 @@ public partial class User
 
     public int? RegionId { get; set; }
 
-    public int DistrictId { get; set; }
+    public int? DistrictId { get; set; }
 
     public DateTime EntryDate { get; set; }
 
     public short? TimeZone { get; set; }
 
+    public string? TimeZoneId { get; set; }
+
+    public int FailedLoginCount { get; set; }
+
+    public bool IsLocked { get; set; }
+
+    public DateTime? LockedDate { get; set; }
+
+    public string? RowSignature { get; set; }
+
+    public bool IsOrgAdmin { get; set; }
+
     public virtual ICollection<AuditTrail> AuditTrails { get; set; } = new List<AuditTrail>();
 
     public virtual Country? Country { get; set; }
 
-    public virtual District District { get; set; } = null!;
+    public virtual District? District { get; set; }
 
     public virtual Organization Organization { get; set; } = null!;
 
@@ -64,4 +76,6 @@ public partial class User
     public virtual ICollection<Transaction> TransactionUsers { get; set; } = new List<Transaction>();
 
     public virtual ICollection<UserPermission> UserPermissions { get; set; } = new List<UserPermission>();
+
+    public virtual ICollection<PasswordResetToken> PasswordResetTokens { get; set; } = new List<PasswordResetToken>();
 }

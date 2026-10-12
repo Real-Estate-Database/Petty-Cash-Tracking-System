@@ -1,12 +1,18 @@
 ﻿@page "/weather"
+@attribute [Microsoft.AspNetCore.Authorization.Authorize(Policy = PettyCashDatabase.Shared.Auth.Permissions.WeatherView)]
+@inject IHttpClientFactory HttpClientFactory
 
 <PageTitle>Weather</PageTitle>
 
 <h1>Weather</h1>
 
-<p>This component demonstrates showing data.</p>
+<p>This component demonstrates showing data from the protected API.</p>
 
-@if (forecasts == null)
+@if (!string.IsNullOrEmpty(_error))
+{
+    <div class="alert alert-danger">@_error</div>
+}
+else if (forecasts == null)
 {
     <p><em>Loading...</em></p>
 }
@@ -37,23 +43,22 @@ else
 
 @code {
     private WeatherForecast[]? forecasts;
+    private string? _error;
 
     protected override async Task OnInitializedAsync()
     {
-        // Simulate asynchronous loading to demonstrate a loading indicator
-        await Task.Delay(500);
-
-        var startDate = DateOnly.FromDateTime(DateTime.Now);
-        var summaries = new[] { "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching" };
-        forecasts = Enumerable.Range(1, 5).Select(index => new WeatherForecast
+        try
         {
-            Date = startDate.AddDays(index),
-            TemperatureC = Random.Shared.Next(-20, 55),
-            Summary = summaries[Random.Shared.Next(summaries.Length)]
-        }).ToArray();
+            var client = HttpClientFactory.CreateClient("Api");
+            forecasts = await client.GetFromJsonAsync<WeatherForecast[]>("api/weather");
+        }
+        catch (Exception)
+        {
+            _error = "Unable to load weather data.";
+        }
     }
 
-    private class WeatherForecast
+    private sealed class WeatherForecast
     {
         public DateOnly Date { get; set; }
         public int TemperatureC { get; set; }

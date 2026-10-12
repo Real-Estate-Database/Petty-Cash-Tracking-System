@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -6,18 +6,53 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <base href="/" />
     <ResourcePreloader />
-    <link rel="stylesheet" href="_content/PettyCashDatabase.Shared/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="_content/PettyCashDatabase.Shared/app.css" />
-    <link rel="stylesheet" href="PettyCashDatabase.Web.styles.css" />
+    <link rel="stylesheet" href="@Assets["_content/PettyCashDatabase.Shared/lib/bootstrap/dist/css/bootstrap.min.css"]" />
+    <link rel="stylesheet" href="@Assets["_content/PettyCashDatabase.Shared/app.css"]" />
+    <link rel="stylesheet" href="@Assets["_content/PettyCashDatabase.Shared/auth.css"]" />
+    <link rel="stylesheet" href="@Assets["PettyCashDatabase.Web.styles.css"]" />
     <ImportMap />
     <link rel="icon" type="image/png" href="_content/PettyCashDatabase.Shared/favicon.png" />
-    <HeadOutlet @rendermode="InteractiveAuto" />
+    <HeadOutlet @rendermode="@(new InteractiveServerRenderMode(prerender: false))" />
 </head>
 
 <body>
-    <Routes @rendermode="InteractiveAuto" />
+    <Routes @rendermode="@(new InteractiveServerRenderMode(prerender: false))" />
     <ReconnectModal />
     <script src="@Assets["_framework/blazor.web.js"]"></script>
+    <script>
+        window.blazorStorage = {
+            get: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+            set: function (k, v) { try { localStorage.setItem(k, v); } catch (e) { } },
+            remove: function (k) { try { localStorage.removeItem(k); } catch (e) { } }
+        };
+
+        window.activityTracker = {
+            timer: null,
+            dotNetHelper: null,
+            timeoutMs: 30 * 60 * 1000,
+            init: function (helper, timeoutMinutes) {
+                this.dotNetHelper = helper;
+                this.timeoutMs = (timeoutMinutes || 30) * 60 * 1000;
+                const reset = () => this.resetTimer();
+                ['mousemove', 'keydown', 'mousedown', 'touchstart', 'scroll', 'click'].forEach(evt => {
+                    window.addEventListener(evt, reset, { passive: true });
+                });
+                this.resetTimer();
+            },
+            resetTimer: function () {
+                if (this.timer) clearTimeout(this.timer);
+                this.timer = setTimeout(() => {
+                    if (this.dotNetHelper) {
+                        this.dotNetHelper.invokeMethodAsync('OnInactivityTimeout');
+                    }
+                }, this.timeoutMs);
+            },
+            stop: function () {
+                if (this.timer) clearTimeout(this.timer);
+                this.timer = null;
+            }
+        };
+    </script>
 </body>
 
 </html>
