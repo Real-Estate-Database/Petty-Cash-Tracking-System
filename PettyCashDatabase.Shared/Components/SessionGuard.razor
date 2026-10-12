@@ -1,0 +1,67 @@
+@using Microsoft.AspNetCore.Components.Authorization
+@using PettyCashDatabase.Shared.Authentication
+@using Microsoft.JSInterop
+@inject IJSRuntime JS
+@inject AuthenticationStateProvider AuthStateProvider
+@implements IAsyncDisposable
+
+<LoginModal @ref="_modal" ForceLock="true" OnLoginSuccess="OnResumed" />
+
+@code {
+    private LoginModal? _modal;
+    private DotNetObjectReference<SessionGuard>? _selfRef;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+
+        // Only start the tracker when the user is actually authenticated
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        if (authState.User.Identity?.IsAuthenticated != true) return;
+
+        _selfRef = DotNetObjectReference.Create(this);
+
+        try
+        {
+            await JS.InvokeVoidAsync("activityTracker.init", _selfRef, 30);
+        }
+        catch
+        {
+            // JS not yet ready — silently skip; the tracker is not critical
+        }
+    }
+
+    /// <summary>
+    /// Called by the JS activityTracker after 30 minutes of inactivity.
+    /// </summary>
+    [JSInvokable]
+    public void OnInactivityTimeout()
+    {
+        _modal?.Show();
+        InvokeAsync(StateHasChanged);
+    }
+
+    /// <summary>
+    /// Called by <see cref="LoginModal"/> after the user successfully re-authenticates.
+    /// Resets the inactivity timer so the 30-minute clock starts fresh.
+    /// </summary>
+    private async Task OnResumed()
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("activityTracker.resetTimer");
+        }
+        catch { /* best effort */ }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("activityTracker.stop");
+        }
+        catch { /* ignore if JS context is gone */ }
+
+        _selfRef?.Dispose();
+    }
+}

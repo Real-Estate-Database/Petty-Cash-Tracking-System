@@ -1,0 +1,142 @@
+@using System.Net
+@using Microsoft.AspNetCore.Components.Authorization
+@using PettyCashDatabase.Shared.Authentication
+@using PettyCashDatabase.Shared.DTOs.Auth
+@using PettyCashDatabase.Shared.Interfaces
+@inject IAuthService AuthService
+@inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager Navigation
+
+<EditForm Model="_model" OnValidSubmit="HandleLoginAsync" FormName="login-form">
+    <DataAnnotationsValidator />
+
+    @if (!string.IsNullOrEmpty(_error))
+    {
+        <div class="alert @(_locked ? "alert-warning" : "alert-danger")" role="alert">@_error</div>
+    }
+
+    <div class="mb-3">
+        <label class="form-label" for="login-identifier">Email or Telephone Number *</label>
+        <InputText id="login-identifier" class="form-control" maxlength="255"
+                   placeholder="Enter your email or phone number"
+                   @bind-Value="_model.Identifier" autofocus />
+        <ValidationMessage For="() => _model.Identifier" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label" for="login-password">Password *</label>
+        <div class="input-group">
+            <InputText id="login-password" class="form-control" maxlength="255"
+                       type="@(_showPassword ? "text" : "password")"
+                       placeholder="Enter your password"
+                       @bind-Value="_model.Password" />
+            <button type="button" class="btn btn-outline-secondary" @onclick="() => _showPassword = !_showPassword"
+                    tabindex="-1">
+                @(_showPassword ? "🙈" : "👁")
+            </button>
+        </div>
+        <ValidationMessage For="() => _model.Password" />
+    </div>
+
+    <button class="btn btn-accent w-100" type="submit" disabled="@_busy">
+        @(_busy ? "Signing in..." : "Sign In")
+    </button>
+
+    @if (!IsModal)
+    {
+        <div class="auth-links mt-3 d-flex justify-content-between">
+            <a href="/forgot-password">Forgot password?</a>
+            <a href="/register-tenant">Register organization</a>
+        </div>
+    }
+    else
+    {
+        <div class="auth-links mt-3 text-center">
+            <button type="button" class="btn btn-link text-muted small p-0 text-decoration-none" @onclick="SignOutAsync">
+                Not your account? Sign out completely
+            </button>
+        </div>
+    }
+</EditForm>
+
+@code {
+    [Parameter] public bool IsModal { get; set; }
+    [Parameter] public EventCallback OnLoginSuccess { get; set; }
+    [Parameter] public string? ReturnUrl { get; set; }
+
+    private readonly LoginRequestDto _model = new();
+    private bool _busy;
+    private bool _showPassword;
+    private bool _locked;
+    private string? _error;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (IsModal && string.IsNullOrWhiteSpace(_model.Identifier))
+        {
+            try
+            {
+                var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+                var email = authState.User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value
+                         ?? authState.User.FindFirst("email")?.Value
+                         ?? authState.User.Identity?.Name;
+                if (!string.IsNullOrWhiteSpace(email))
+                {
+                    _model.Identifier = email;
+                }
+            }
+            catch
+            {
+            }
+        }
+    }
+
+    private async Task HandleLoginAsync()
+    {
+        _busy = true;
+        _error = null;
+        _locked = false;
+        try
+        {
+            var result = await AuthService.LoginAsync(_model);
+            if (AuthStateProvider is CustomAuthenticationStateProvider provider)
+                await provider.SignInAsync(result.AccessToken, result.RefreshToken, result.ExpiresAt);
+
+            if (OnLoginSuccess.HasDelegate)
+            {
+                await OnLoginSuccess.InvokeAsync();
+            }
+            else if (!IsModal)
+            {
+                var target = string.IsNullOrWhiteSpace(ReturnUrl) ? "/" : ReturnUrl;
+                Navigation.NavigateTo(target);
+            }
+        }
+        catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.Locked)
+        {
+            _locked = true;
+            _error = "Account locked. Contact your organization administrator.";
+        }
+        catch (HttpRequestException)
+        {
+            _error = "Invalid email/telephone or password.";
+        }
+        catch (Exception)
+        {
+            _error = "Unable to sign in. Please try again.";
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+
+    private async Task SignOutAsync()
+    {
+        if (AuthStateProvider is CustomAuthenticationStateProvider provider)
+        {
+            await provider.SignOutAsync();
+        }
+        Navigation.NavigateTo("/login", forceLoad: true);
+    }
+}

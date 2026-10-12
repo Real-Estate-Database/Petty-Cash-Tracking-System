@@ -25,6 +25,8 @@ public partial class AuditTrail
 
     public DateTime EntryDate { get; set; }
 
+    public string? TimeZoneId { get; set; }
+
     public DateTime ExpiryDate { get; set; }
 
     public bool IsRevoked { get; set; }

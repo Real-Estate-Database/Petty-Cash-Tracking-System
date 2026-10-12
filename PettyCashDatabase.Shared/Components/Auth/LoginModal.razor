@@ -1,0 +1,64 @@
+@if (_visible)
+{
+    <div class="modal fade show d-block" tabindex="-1" role="dialog" aria-modal="true"
+         style="background:rgba(6, 42, 32, 0.85); backdrop-filter: blur(8px); z-index: 10000;">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content shadow-lg border-0" style="border-radius: 12px; overflow: hidden;">
+                <div class="modal-header text-white" style="background:#0B3D2E;">
+                    <h5 class="modal-title d-flex align-items-center gap-2">
+                        @if (ForceLock)
+                        {
+                            <span>🔒 Session Locked</span>
+                        }
+                        else
+                        {
+                            <span>Sign in</span>
+                        }
+                    </h5>
+                    @if (!ForceLock)
+                    {
+                        <button type="button" class="btn-close btn-close-white" aria-label="Close" @onclick="Hide"></button>
+                    }
+                </div>
+                <div class="modal-body p-4">
+                    @if (ForceLock)
+                    {
+                        <div class="alert alert-warning py-2 px-3 small mb-3" role="alert">
+                            <strong>Inactivity timeout:</strong> Your session was locked after 30 minutes of inactivity. Please sign in to resume your work.
+                        </div>
+                    }
+                    <LoginForm IsModal="true" ReturnUrl="@ReturnUrl" OnLoginSuccess="OnSuccess" />
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public string? ReturnUrl { get; set; }
+    [Parameter] public EventCallback OnLoginSuccess { get; set; }
+    [Parameter] public bool ForceLock { get; set; }
+
+    private bool _visible;
+
+    public void Show()
+    {
+        _visible = true;
+        StateHasChanged();
+    }
+
+    public void Hide()
+    {
+        if (ForceLock) return;
+        _visible = false;
+        StateHasChanged();
+    }
+
+    private async Task OnSuccess()
+    {
+        _visible = false;
+        if (OnLoginSuccess.HasDelegate)
+            await OnLoginSuccess.InvokeAsync();
+        StateHasChanged();
+    }
+}

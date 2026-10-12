@@ -1,0 +1,93 @@
+@page "/login"
+@* Avoid static form posts and run token-storage JS interop inside the server circuit. *@
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
+@layout PettyCashDatabase.Shared.Layout.AuthLayout
+@using PettyCashDatabase.Shared.Components.Auth
+
+<PageTitle>Sign in — PettyCash</PageTitle>
+
+<div class="auth-shell">
+    @* ── Left side: Form ──────────────────────────────────── *@
+    <section class="auth-form-side">
+        <div class="auth-form-wrapper">
+            <div class="auth-logo">
+                <div class="auth-logo-icon">PC</div>
+                <span class="auth-logo-text">PettyCash</span>
+            </div>
+
+            <h1 class="auth-heading">Welcome Back</h1>
+            <p class="auth-subtitle">
+                Start your experience with PettyCash by signing in to your account.
+            </p>
+
+            <nav class="auth-tabs" aria-label="Account access">
+                <a class="active" aria-current="page" href="/login">Sign In</a>
+                <a href="/register-tenant">Sign Up</a>
+            </nav>
+
+            @if (!string.IsNullOrEmpty(_success))
+            {
+                <div class="auth-form">
+                    <div class="alert alert-success" role="status">@_success</div>
+                </div>
+            }
+
+            <div class="auth-form">
+                <LoginForm ReturnUrl="@ReturnUrl" />
+            </div>
+
+            <div class="auth-footer">
+                Copyright &copy; @DateTime.Now.Year PettyCash. All Rights Reserved.
+            </div>
+        </div>
+    </section>
+
+    @* ── Right side: Brand visual ─────────────────────────── *@
+    <section class="auth-brand-side">
+        <div class="auth-brand-visual">
+            <div class="brand-card brand-card-1">
+                <div class="brand-card-label">Total Cash Managed</div>
+                <div class="brand-card-value">$42,850.00</div>
+                <div class="brand-card-accent">↑ 12.5% this month</div>
+            </div>
+            <div class="brand-card brand-card-2">
+                <div class="brand-card-label">Pending Approvals</div>
+                <div class="brand-card-value">8</div>
+                <div class="brand-card-accent">3 urgent</div>
+            </div>
+            <div class="brand-card brand-card-3">
+                <div class="brand-card-label">Reconciled</div>
+                <div class="brand-card-value">96.4%</div>
+                <div class="brand-card-accent">✓ On track</div>
+            </div>
+        </div>
+
+        <div class="auth-brand-content">
+            <div class="auth-brand-badge">PC</div>
+            <h2 class="auth-brand-title">
+                A Unified Hub for Smarter<br />
+                <span>Financial Decision-Making</span>
+            </h2>
+            <p class="auth-brand-desc">
+                PettyCash empowers you with a unified financial command center —
+                delivering deep insights and a 360° view of your entire petty cash operations.
+            </p>
+        </div>
+    </section>
+</div>
+
+@code {
+    [SupplyParameterFromQuery(Name = "returnUrl")]
+    public string? ReturnUrl { get; set; }
+
+    [SupplyParameterFromQuery(Name = "reset")]
+    public string? Reset { get; set; }
+
+    private string? _success;
+
+    protected override void OnParametersSet()
+    {
+        if (string.Equals(Reset, "1", StringComparison.Ordinal) || string.Equals(Reset, "true", StringComparison.OrdinalIgnoreCase))
+            _success = "Password updated. Sign in with your new password.";
+    }
+}

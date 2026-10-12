@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace PettyCashDatabase.Web.Data.Models;
@@ -21,7 +21,7 @@ public partial class Organization
 
     public int? RegionId { get; set; }
 
-    public int DistrictId { get; set; }
+    public int? DistrictId { get; set; }
 
     public string Email { get; set; } = null!;
 
@@ -35,7 +35,7 @@ public partial class Organization
 
     public virtual Country Country { get; set; } = null!;
 
-    public virtual District District { get; set; } = null!;
+    public virtual District? District { get; set; }
 
     public virtual Region? Region { get; set; }
 

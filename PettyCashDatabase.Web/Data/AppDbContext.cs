@@ -1,12 +1,15 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using PettyCashDatabase.Web.Data.Models;
+using PettyCashDatabase.Web.Services;
 
 namespace PettyCashDatabase.Web.Data;
 
 public partial class AppDbContext : DbContext
 {
+    private readonly ITenantContext? _tenantContext;
+
     public AppDbContext()
     {
     }
@@ -14,6 +17,12 @@ public partial class AppDbContext : DbContext
     public AppDbContext(DbContextOptions<AppDbContext> options)
         : base(options)
     {
+    }
+
+    public AppDbContext(DbContextOptions<AppDbContext> options, ITenantContext tenantContext)
+        : base(options)
+    {
+        _tenantContext = tenantContext;
     }
 
     public virtual DbSet<AdvanceCategory> AdvanceCategories { get; set; }
@@ -25,6 +34,8 @@ public partial class AppDbContext : DbContext
     public virtual DbSet<District> Districts { get; set; }
 
     public virtual DbSet<Organization> Organizations { get; set; }
+
+    public virtual DbSet<PasswordResetToken> PasswordResetTokens { get; set; }
 
     public virtual DbSet<Permission> Permissions { get; set; }
 
@@ -63,6 +74,10 @@ public partial class AppDbContext : DbContext
                 .HasForeignKey(AdvanceCategory => AdvanceCategory.OrganizationId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_AdvanceCategories_Organizations");
+
+            builder.HasQueryFilter(e => _tenantContext == null
+                || _tenantContext.OrganizationId == null
+                || e.OrganizationId == _tenantContext.OrganizationId);
         });
 
         modelBuilder.Entity<AuditTrail>(builder =>
@@ -81,6 +96,10 @@ public partial class AppDbContext : DbContext
             builder.Property(AuditTrail => AuditTrail.RefreshTokenHash).HasMaxLength(500);
             builder.Property(AuditTrail => AuditTrail.RevokedDate).HasColumnType("datetime");
             builder.Property(AuditTrail => AuditTrail.UserAgent).HasMaxLength(500);
+            builder.Property(AuditTrail => AuditTrail.TimeZoneId).HasMaxLength(100);
+
+            builder.HasIndex(AuditTrail => AuditTrail.RefreshTokenHash);
+            builder.HasIndex(AuditTrail => new { AuditTrail.UserId, AuditTrail.IsRevoked });
 
             builder.HasOne(AuditTrail => AuditTrail.Country).WithMany(Country => Country.AuditTrails)
                 .HasForeignKey(AuditTrail => AuditTrail.CountryId)
@@ -135,6 +154,9 @@ public partial class AppDbContext : DbContext
                 .HasDefaultValueSql("(getutcdate())", "DF__Organizat__Updat__571DF1D5")
                 .HasColumnType("datetime");
 
+            builder.HasIndex(Organization => Organization.Email).IsUnique();
+            builder.HasIndex(Organization => Organization.Telephone).IsUnique();
+
             builder.HasOne(Organization => Organization.Country).WithMany(Country => Country.Organizations)
                 .HasForeignKey(Organization => Organization.CountryId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
@@ -142,18 +164,45 @@ public partial class AppDbContext : DbContext
 
             builder.HasOne(Organization => Organization.District).WithMany(District => District.Organizations)
                 .HasForeignKey(Organization => Organization.DistrictId)
+                .IsRequired(false)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Organizations_Districts");
 
             builder.HasOne(Organization => Organization.Region).WithMany(Region => Region.Organizations)
                 .HasForeignKey(Organization => Organization.RegionId)
                 .HasConstraintName("FK_Organizations_Regions");
+
+            builder.HasQueryFilter(e => _tenantContext == null
+                || _tenantContext.OrganizationId == null
+                || e.OrganizationId == _tenantContext.OrganizationId);
+        });
+
+        modelBuilder.Entity<PasswordResetToken>(builder =>
+        {
+            builder.HasKey(t => t.PasswordResetTokenId);
+
+            builder.Property(t => t.TokenHash).HasMaxLength(128);
+            builder.Property(t => t.ExpiresAt).HasColumnType("datetime");
+            builder.Property(t => t.UsedAt).HasColumnType("datetime");
+            builder.Property(t => t.CreatedAt)
+                .HasDefaultValueSql("(getutcdate())")
+                .HasColumnType("datetime");
+
+            builder.HasIndex(t => t.TokenHash);
+            builder.HasIndex(t => new { t.UserId, t.CreatedAt });
+
+            builder.HasOne(t => t.User).WithMany(u => u.PasswordResetTokens)
+                .HasForeignKey(t => t.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_PasswordResetTokens_Users");
         });
 
         modelBuilder.Entity<Permission>(builder =>
         {
             builder.Property(Permission => Permission.Description).HasMaxLength(500);
             builder.Property(Permission => Permission.PermissionName).HasMaxLength(100);
+
+            builder.HasIndex(Permission => Permission.PermissionName).IsUnique();
         });
 
         modelBuilder.Entity<Receipt>(builder =>
@@ -200,6 +249,10 @@ public partial class AppDbContext : DbContext
                 .HasForeignKey(Role => Role.OrganizationId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Roles_Organizations");
+
+            builder.HasQueryFilter(e => _tenantContext == null
+                || _tenantContext.OrganizationId == null
+                || e.OrganizationId == _tenantContext.OrganizationId);
         });
 
         modelBuilder.Entity<Transaction>(builder =>
@@ -256,6 +309,10 @@ public partial class AppDbContext : DbContext
                 .HasForeignKey(Transaction => Transaction.UserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Transactions_Users");
+
+            builder.HasQueryFilter(e => _tenantContext == null
+                || _tenantContext.OrganizationId == null
+                || e.OrganizationId == _tenantContext.OrganizationId);
         });
 
         modelBuilder.Entity<TransactionType>(builder =>
@@ -280,6 +337,15 @@ public partial class AppDbContext : DbContext
             builder.Property(User => User.LastName).HasMaxLength(50);
             builder.Property(User => User.PasswordHash).HasMaxLength(255);
             builder.Property(User => User.TelephoneNumber).HasMaxLength(50);
+            builder.Property(User => User.TimeZoneId).HasMaxLength(100);
+            builder.Property(User => User.FailedLoginCount).HasDefaultValue(0);
+            builder.Property(User => User.IsLocked).HasDefaultValue(false);
+            builder.Property(User => User.LockedDate).HasColumnType("datetime");
+            builder.Property(User => User.RowSignature).HasMaxLength(500);
+            builder.Property(User => User.IsOrgAdmin).HasDefaultValue(false);
+
+            builder.HasIndex(User => User.Email).IsUnique();
+            builder.HasIndex(User => User.TelephoneNumber).IsUnique();
 
             builder.HasOne(User => User.Country).WithMany(Country => Country.Users)
                 .HasForeignKey(User => User.CountryId)
@@ -287,6 +353,7 @@ public partial class AppDbContext : DbContext
 
             builder.HasOne(User => User.District).WithMany(District => District.Users)
                 .HasForeignKey(User => User.DistrictId)
+                .IsRequired(false)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Users_Districts");
 
@@ -302,6 +369,10 @@ public partial class AppDbContext : DbContext
             builder.HasOne(User => User.Role).WithMany(User => User.Users)
                 .HasForeignKey(User => User.RoleId)
                 .HasConstraintName("FK_Users_Roles");
+
+            builder.HasQueryFilter(e => _tenantContext == null
+                || _tenantContext.OrganizationId == null
+                || e.OrganizationId == _tenantContext.OrganizationId);
         });
 
         modelBuilder.Entity<UserPermission>(builder =>

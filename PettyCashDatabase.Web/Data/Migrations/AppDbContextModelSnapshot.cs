@@ -114,6 +114,10 @@ namespace PettyCashDatabase.Web.Data.Migrations
                     b.Property<DateTime?>("RevokedDate")
                         .HasColumnType("datetime");
 
+                    b.Property<string>("TimeZoneId")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
                     b.Property<string>("UserAgent")
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
@@ -125,7 +129,9 @@ namespace PettyCashDatabase.Web.Data.Migrations
 
                     b.HasIndex("CountryId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("RefreshTokenHash");
+
+                    b.HasIndex("UserId", "IsRevoked");
 
                     b.ToTable("AuditTrail", (string)null);
                 });
@@ -224,7 +230,7 @@ namespace PettyCashDatabase.Web.Data.Migrations
                     b.Property<bool>("Disabled")
                         .HasColumnType("bit");
 
-                    b.Property<int>("DistrictId")
+                    b.Property<int?>("DistrictId")
                         .HasColumnType("int");
 
                     b.Property<string>("Email")
@@ -260,9 +266,51 @@ namespace PettyCashDatabase.Web.Data.Migrations
 
                     b.HasIndex("DistrictId");
 
+                    b.HasIndex("Email")
+                        .IsUnique();
+
                     b.HasIndex("RegionId");
 
+                    b.HasIndex("Telephone")
+                        .IsUnique();
+
                     b.ToTable("Organizations");
+                });
+
+            modelBuilder.Entity("PettyCashDatabase.Web.Data.Models.PasswordResetToken", b =>
+                {
+                    b.Property<int>("PasswordResetTokenId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PasswordResetTokenId"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime")
+                        .HasDefaultValueSql("(getutcdate())");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("datetime");
+
+                    b.Property<string>("TokenHash")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<DateTime?>("UsedAt")
+                        .HasColumnType("datetime");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("PasswordResetTokenId");
+
+                    b.HasIndex("TokenHash");
+
+                    b.HasIndex("UserId", "CreatedAt");
+
+                    b.ToTable("PasswordResetTokens");
                 });
 
             modelBuilder.Entity("PettyCashDatabase.Web.Data.Models.Permission", b =>
@@ -284,6 +332,9 @@ namespace PettyCashDatabase.Web.Data.Migrations
                         .HasColumnType("nvarchar(100)");
 
                     b.HasKey("PermissionId");
+
+                    b.HasIndex("PermissionName")
+                        .IsUnique();
 
                     b.ToTable("Permissions");
                 });
@@ -552,7 +603,7 @@ namespace PettyCashDatabase.Web.Data.Migrations
                     b.Property<bool>("Disabled")
                         .HasColumnType("bit");
 
-                    b.Property<int>("DistrictId")
+                    b.Property<int?>("DistrictId")
                         .HasColumnType("int");
 
                     b.Property<string>("Email")
@@ -564,6 +615,11 @@ namespace PettyCashDatabase.Web.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime")
                         .HasDefaultValueSql("(getdate())");
+
+                    b.Property<int>("FailedLoginCount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
 
                     b.Property<string>("FirstName")
                         .IsRequired()
@@ -579,6 +635,16 @@ namespace PettyCashDatabase.Web.Data.Migrations
                         .HasColumnType("bit")
                         .HasDefaultValue(true);
 
+                    b.Property<bool>("IsLocked")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<bool>("IsOrgAdmin")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
                     b.Property<DateTime?>("LastLoginDate")
                         .HasColumnType("datetime");
 
@@ -586,6 +652,9 @@ namespace PettyCashDatabase.Web.Data.Migrations
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTime?>("LockedDate")
+                        .HasColumnType("datetime");
 
                     b.Property<int>("OrganizationId")
                         .HasColumnType("int");
@@ -601,6 +670,10 @@ namespace PettyCashDatabase.Web.Data.Migrations
                     b.Property<int?>("RoleId")
                         .HasColumnType("int");
 
+                    b.Property<string>("RowSignature")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
                     b.Property<string>("TelephoneNumber")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -609,17 +682,27 @@ namespace PettyCashDatabase.Web.Data.Migrations
                     b.Property<short?>("TimeZone")
                         .HasColumnType("smallint");
 
+                    b.Property<string>("TimeZoneId")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
                     b.HasKey("UserId");
 
                     b.HasIndex("CountryId");
 
                     b.HasIndex("DistrictId");
 
+                    b.HasIndex("Email")
+                        .IsUnique();
+
                     b.HasIndex("OrganizationId");
 
                     b.HasIndex("RegionId");
 
                     b.HasIndex("RoleId");
+
+                    b.HasIndex("TelephoneNumber")
+                        .IsUnique();
 
                     b.ToTable("Users");
                 });
@@ -709,7 +792,6 @@ namespace PettyCashDatabase.Web.Data.Migrations
                     b.HasOne("PettyCashDatabase.Web.Data.Models.District", "District")
                         .WithMany("Organizations")
                         .HasForeignKey("DistrictId")
-                        .IsRequired()
                         .HasConstraintName("FK_Organizations_Districts");
 
                     b.HasOne("PettyCashDatabase.Web.Data.Models.Region", "Region")
@@ -722,6 +804,17 @@ namespace PettyCashDatabase.Web.Data.Migrations
                     b.Navigation("District");
 
                     b.Navigation("Region");
+                });
+
+            modelBuilder.Entity("PettyCashDatabase.Web.Data.Models.PasswordResetToken", b =>
+                {
+                    b.HasOne("PettyCashDatabase.Web.Data.Models.User", "User")
+                        .WithMany("PasswordResetTokens")
+                        .HasForeignKey("UserId")
+                        .IsRequired()
+                        .HasConstraintName("FK_PasswordResetTokens_Users");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("PettyCashDatabase.Web.Data.Models.Receipt", b =>
@@ -837,7 +930,6 @@ namespace PettyCashDatabase.Web.Data.Migrations
                     b.HasOne("PettyCashDatabase.Web.Data.Models.District", "District")
                         .WithMany("Users")
                         .HasForeignKey("DistrictId")
-                        .IsRequired()
                         .HasConstraintName("FK_Users_Districts");
 
                     b.HasOne("PettyCashDatabase.Web.Data.Models.Organization", "Organization")
@@ -956,6 +1048,8 @@ namespace PettyCashDatabase.Web.Data.Migrations
             modelBuilder.Entity("PettyCashDatabase.Web.Data.Models.User", b =>
                 {
                     b.Navigation("AuditTrails");
+
+                    b.Navigation("PasswordResetTokens");
 
                     b.Navigation("Receipts");
 
