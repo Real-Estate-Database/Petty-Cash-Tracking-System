@@ -1,0 +1,43 @@
+@using PettyCashDatabase.Shared.Services
+@implements IDisposable
+@inject INotificationService Notifications
+
+<div class="pc-notification-stack" aria-live="polite" aria-atomic="false">
+    @foreach (var notification in Notifications.Active)
+    {
+        var isError = notification.Kind == AppNotificationKind.Error;
+        <article class="pc-notification pc-notification-@notification.Kind.ToString().ToLowerInvariant()"
+                 role="@(isError ? "alert" : "status")">
+            <div class="pc-notification-icon" aria-hidden="true">
+                @GetIcon(notification.Kind)
+            </div>
+            <div class="pc-notification-content">
+                <strong>@notification.Title</strong>
+                <p>@notification.Message</p>
+            </div>
+            <button type="button"
+                    class="pc-notification-dismiss"
+                    aria-label="Dismiss notification"
+                    @onclick="() => Notifications.Dismiss(notification.Id)">
+                <span aria-hidden="true">×</span>
+            </button>
+        </article>
+    }
+</div>
+
+@code {
+    protected override void OnInitialized() => Notifications.Changed += OnNotificationsChanged;
+
+    private void OnNotificationsChanged(object? sender, EventArgs args) =>
+        _ = InvokeAsync(StateHasChanged);
+
+    private static string GetIcon(AppNotificationKind kind) => kind switch
+    {
+        AppNotificationKind.Success => "✓",
+        AppNotificationKind.Error => "!",
+        AppNotificationKind.Warning => "!",
+        _ => "i"
+    };
+
+    public void Dispose() => Notifications.Changed -= OnNotificationsChanged;
+}

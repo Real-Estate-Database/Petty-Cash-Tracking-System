@@ -10,6 +10,7 @@ var builder = WebAssemblyHostBuilder.CreateDefault(args);
 
 builder.Services.AddSingleton<IFormFactor, FormFactor>();
 builder.Services.AddScoped<ILocationLookupService, ApiLocationLookupService>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
 
 builder.Services.AddAuthorizationCore();
 builder.Services.AddCascadingAuthenticationState();

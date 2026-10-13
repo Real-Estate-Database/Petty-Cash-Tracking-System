@@ -4,6 +4,7 @@
 @using PettyCashDatabase.Shared.DTOs.Auth
 @using PettyCashDatabase.Shared.Interfaces
 @inject IAuthService AuthService
+@inject INotificationService Notifications
 @inject AuthenticationStateProvider AuthStateProvider
 @inject NavigationManager Navigation
 
@@ -102,6 +103,13 @@
             if (AuthStateProvider is CustomAuthenticationStateProvider provider)
                 await provider.SignInAsync(result.AccessToken, result.RefreshToken, result.ExpiresAt);
 
+            await Notifications.ShowAsync(
+                AppNotificationKind.Success,
+                IsModal ? "Verification successful" : "Welcome back",
+                IsModal
+                    ? "Your session has been restored."
+                    : "You are signed in securely. Preparing your workspace.");
+
             if (OnLoginSuccess.HasDelegate)
             {
                 await OnLoginSuccess.InvokeAsync();
@@ -116,14 +124,26 @@
         {
             _locked = true;
             _error = "Account locked. Contact your organization administrator.";
+            await Notifications.ShowAsync(
+                AppNotificationKind.Error,
+                "Account locked",
+                "For your security, sign-in is temporarily unavailable. Contact your administrator.");
         }
         catch (HttpRequestException)
         {
             _error = "Invalid email/telephone or password.";
+            await Notifications.ShowAsync(
+                AppNotificationKind.Error,
+                "Sign-in failed",
+                "The email/telephone or password is not correct.");
         }
         catch (Exception)
         {
             _error = "Unable to sign in. Please try again.";
+            await Notifications.ShowAsync(
+                AppNotificationKind.Error,
+                "Sign-in unavailable",
+                "We could not complete sign-in. Please try again shortly.");
         }
         finally
         {

@@ -21,6 +21,7 @@ public static class MauiProgram
 
         builder.Services.AddSingleton<IFormFactor, FormFactor>();
         builder.Services.AddScoped<ILocationLookupService, ApiLocationLookupService>();
+        builder.Services.AddScoped<INotificationService, NotificationService>();
         builder.Services.AddMauiBlazorWebView();
 
         builder.Services.AddAuthorizationCore();

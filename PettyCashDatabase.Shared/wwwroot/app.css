@@ -58,3 +58,108 @@ h1:focus {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
     text-align: start;
 }
+
+/* Premium application notifications: dark PettyCash green with a restrained
+   yellow accent. The host is shared by auth and dashboard layouts. */
+.pc-notification-stack {
+    position: fixed;
+    top: 1.25rem;
+    right: 1.25rem;
+    z-index: 2000;
+    display: grid;
+    gap: 0.75rem;
+    width: min(25rem, calc(100vw - 2rem));
+    pointer-events: none;
+}
+
+.pc-notification {
+    --pc-notification-accent: #f4b400;
+    position: relative;
+    display: grid;
+    grid-template-columns: 2.35rem 1fr auto;
+    align-items: start;
+    gap: 0.8rem;
+    overflow: hidden;
+    padding: 1rem 0.95rem;
+    color: #eaf5f0;
+    background: linear-gradient(135deg, #063c2d, #09271f);
+    border: 1px solid rgba(244, 180, 0, 0.34);
+    border-radius: 1rem;
+    box-shadow: 0 1.1rem 2.8rem rgba(2, 24, 18, 0.28), 0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+    pointer-events: auto;
+    animation: pc-notification-in 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.pc-notification::before {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 0.22rem;
+    content: "";
+    background: var(--pc-notification-accent);
+}
+
+.pc-notification-success { --pc-notification-accent: #f4b400; }
+.pc-notification-error {
+    --pc-notification-accent: #ff766b;
+    border-color: rgba(255, 118, 107, 0.48);
+}
+.pc-notification-warning { --pc-notification-accent: #ffd166; }
+.pc-notification-info { --pc-notification-accent: #86d9bd; }
+
+.pc-notification-icon {
+    display: grid;
+    width: 2.15rem;
+    height: 2.15rem;
+    place-items: center;
+    color: #09271f;
+    font-size: 1.05rem;
+    font-weight: 800;
+    background: var(--pc-notification-accent);
+    border-radius: 0.72rem;
+    box-shadow: 0 0.35rem 0.8rem rgba(0, 0, 0, 0.16);
+}
+
+.pc-notification-content strong {
+    display: block;
+    margin-top: 0.05rem;
+    color: #fff;
+    font-size: 0.92rem;
+    letter-spacing: 0.01em;
+}
+
+.pc-notification-content p {
+    margin: 0.22rem 0 0;
+    color: rgba(234, 245, 240, 0.78);
+    font-size: 0.8rem;
+    line-height: 1.45;
+}
+
+.pc-notification-dismiss {
+    padding: 0.05rem 0.2rem;
+    color: rgba(234, 245, 240, 0.66);
+    font-size: 1.3rem;
+    line-height: 1;
+    background: transparent;
+    border: 0;
+}
+
+.pc-notification-dismiss:hover,
+.pc-notification-dismiss:focus-visible { color: #fff; }
+
+@keyframes pc-notification-in {
+    from { opacity: 0; transform: translate3d(1.5rem, -0.6rem, 0) scale(0.97); }
+    to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+}
+
+@media (max-width: 575.98px) {
+    .pc-notification-stack {
+        top: 0.75rem;
+        right: 0.75rem;
+        left: 0.75rem;
+        width: auto;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .pc-notification { animation: none; }
+}
