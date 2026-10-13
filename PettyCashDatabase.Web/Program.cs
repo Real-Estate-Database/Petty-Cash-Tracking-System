@@ -39,6 +39,7 @@ builder.Services.AddScoped<ITenantContext, TenantContext>();
 builder.Services.AddScoped<ILocationLookupService, LocationLookupService>();
 builder.Services.AddSingleton<IUserTimeZoneService, UserTimeZoneService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
+builder.Services.AddScoped<ISessionLockState, SessionLockState>();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));

@@ -5,6 +5,7 @@
 @using PettyCashDatabase.Shared.Interfaces
 @inject IAuthService AuthService
 @inject INotificationService Notifications
+@inject ISessionLockState SessionLock
 @inject AuthenticationStateProvider AuthStateProvider
 @inject NavigationManager Navigation
 
@@ -50,7 +51,7 @@
             <a href="/register-tenant">Register organization</a>
         </div>
     }
-    else
+    else if (!Reauthentication)
     {
         <div class="auth-links mt-3 text-center">
             <button type="button" class="btn btn-link text-muted small p-0 text-decoration-none" @onclick="SignOutAsync">
@@ -62,6 +63,7 @@
 
 @code {
     [Parameter] public bool IsModal { get; set; }
+    [Parameter] public bool Reauthentication { get; set; }
     [Parameter] public EventCallback OnLoginSuccess { get; set; }
     [Parameter] public string? ReturnUrl { get; set; }
 
@@ -70,9 +72,18 @@
     private bool _showPassword;
     private bool _locked;
     private string? _error;
+    private int _failedAttempts;
+
+    private int RemainingAttempts => Math.Max(0, LoginSecurityPolicy.MaxFailedAttempts - _failedAttempts);
 
     protected override async Task OnInitializedAsync()
     {
+        if (Reauthentication)
+        {
+            await SessionLock.InitializeAsync();
+            _failedAttempts = SessionLock.FailedAttempts;
+        }
+
         if (IsModal && string.IsNullOrWhiteSpace(_model.Identifier))
         {
             try
@@ -120,14 +131,20 @@
                 Navigation.NavigateTo(target);
             }
         }
+        catch (HttpRequestException ex) when (Reauthentication
+                                             && (ex.StatusCode == HttpStatusCode.Unauthorized
+                                                 || ex.StatusCode == HttpStatusCode.Locked))
+        {
+            await HandleReauthenticationFailureAsync();
+        }
         catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.Locked)
         {
             _locked = true;
-            _error = "Account locked. Contact your organization administrator.";
+            _error = "Account temporarily locked. Try again in 15 minutes.";
             await Notifications.ShowAsync(
                 AppNotificationKind.Error,
                 "Account locked",
-                "For your security, sign-in is temporarily unavailable. Contact your administrator.");
+                "For your security, sign-in is temporarily unavailable. Try again in 15 minutes.");
         }
         catch (HttpRequestException)
         {
@@ -149,6 +166,36 @@
         {
             _busy = false;
         }
+    }
+
+    private async Task HandleReauthenticationFailureAsync()
+    {
+        _locked = false;
+        _error = "Invalid credentials.";
+        _failedAttempts = await SessionLock.RecordFailedAttemptAsync();
+
+        if (_failedAttempts >= LoginSecurityPolicy.MaxFailedAttempts)
+        {
+            await Notifications.ShowAsync(
+                AppNotificationKind.Error,
+                "Session verification failed",
+                "Invalid credentials. The maximum number of attempts was reached.");
+
+            var returnUrl = string.IsNullOrWhiteSpace(SessionLock.ReturnUrl)
+                ? "/"
+                : SessionLock.ReturnUrl;
+            Navigation.NavigateTo(
+                $"/login?returnUrl={Uri.EscapeDataString(returnUrl)}",
+                forceLoad: true);
+            return;
+        }
+
+        var attemptLabel = RemainingAttempts == 1 ? "attempt" : "attempts";
+        _error = $"Invalid credentials. {RemainingAttempts} {attemptLabel} remaining before temporary lockout.";
+        await Notifications.ShowAsync(
+            AppNotificationKind.Error,
+            "Invalid credentials",
+            _error);
     }
 
     private async Task SignOutAsync()

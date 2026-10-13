@@ -31,6 +31,7 @@ public sealed record ClientRequestInfo(
 
 public sealed class AuthService : IServerAuthService
 {
+    private const int MaxLoginAttempts = LoginSecurityPolicy.MaxFailedAttempts;
     private readonly AppDbContext _db;
     private readonly PasswordHasher _passwordHasher;
     private readonly JwtTokenGenerator _tokenGenerator;
@@ -83,13 +84,28 @@ public sealed class AuthService : IServerAuthService
         if (user is null)
         {
             _passwordHasher.DummyVerify(request.Password);
+            await Task.Delay(LoginSecurityPolicy.GetProgressiveDelay(1), cancellationToken);
             throw new UnauthorizedAccessException("Invalid email/telephone or password.");
+        }
+
+        var nowUtc = DateTime.UtcNow;
+        if (user.LockoutUntil is { } lockoutUntil && lockoutUntil > nowUtc)
+        {
+            // Do not verify the password while the account is locked. This is
+            // deliberately a fast 423 response and does not reveal account data.
+            throw new AccountLockedException();
+        }
+
+        if (user.LockoutUntil is not null && user.LockoutUntil <= nowUtc)
+        {
+            user.FailedLoginCount = 0;
+            user.LockoutUntil = null;
         }
 
         var userNow = _timeZoneService.GetCurrentTime(user.TimeZoneId, user.TimeZone ?? 3);
 
         if (user.IsLocked)
-            throw new AccountLockedException();
+            throw new AccountLockedException("Account locked. Contact your organization administrator.");
 
         if (!_passwordHasher.VerifyRowSignature(user.UserId, user.Email, user.PasswordHash, user.RowSignature))
         {
@@ -103,10 +119,10 @@ public sealed class AuthService : IServerAuthService
 
         if (!_passwordHasher.VerifyPassword(request.Password, user.UserId, user.PasswordHash))
         {
-            user.FailedLoginCount++;
-            if (user.FailedLoginCount >= 5)
+            var failedAttempt = ++user.FailedLoginCount;
+            if (failedAttempt >= MaxLoginAttempts)
             {
-                user.IsLocked = true;
+                user.LockoutUntil = nowUtc.Add(LoginSecurityPolicy.LockoutDuration);
                 user.LockedDate = userNow;
                 await WriteEventAsync(user.UserId, AuditEvents.Locked, client, cancellationToken);
                 await RevokeAllLiveSessionsAsync(user.UserId, cancellationToken);
@@ -117,8 +133,9 @@ public sealed class AuthService : IServerAuthService
             }
 
             await _db.SaveChangesAsync(cancellationToken);
+            await Task.Delay(LoginSecurityPolicy.GetProgressiveDelay(failedAttempt), cancellationToken);
 
-            if (user.IsLocked)
+            if (user.LockoutUntil is not null)
                 throw new AccountLockedException();
 
             throw new UnauthorizedAccessException("Invalid email/telephone or password.");
@@ -129,6 +146,8 @@ public sealed class AuthService : IServerAuthService
             throw new UnauthorizedAccessException("Invalid email/telephone or password.");
 
         user.FailedLoginCount = 0;
+        user.LockoutUntil = null;
+        user.LockedDate = null;
         user.LastLoginDate = userNow;
         return await IssueTokensAsync(user, AuditEvents.Login, client, cancellationToken);
     }
@@ -389,7 +408,7 @@ public sealed class AuthService : IServerAuthService
     }
 
     // Break-glass: if the sole org admin is locked, unlock via SQL:
-    // UPDATE Users SET IsLocked=0, FailedLoginCount=0, LockedDate=NULL WHERE UserId=@id AND IsOrgAdmin=1;
+    // UPDATE Users SET IsLocked=0, FailedLoginCount=0, LockedDate=NULL, LockoutUntil=NULL WHERE UserId=@id AND IsOrgAdmin=1;
     public async Task UnlockUserAsync(int targetUserId, int actingAdminUserId, ClientRequestInfo client, CancellationToken cancellationToken = default)
     {
         var admin = await _db.Users.FirstOrDefaultAsync(u => u.UserId == actingAdminUserId, cancellationToken)
@@ -404,6 +423,7 @@ public sealed class AuthService : IServerAuthService
         target.IsLocked = false;
         target.FailedLoginCount = 0;
         target.LockedDate = null;
+        target.LockoutUntil = null;
 
         await WriteEventAsync(
             target.UserId,

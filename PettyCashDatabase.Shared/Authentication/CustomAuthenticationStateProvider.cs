@@ -3,6 +3,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Components.Authorization;
 using PettyCashDatabase.Shared.Auth;
 using PettyCashDatabase.Shared.Interfaces;
+using PettyCashDatabase.Shared.Services;
 
 namespace PettyCashDatabase.Shared.Authentication;
 
@@ -10,18 +11,34 @@ public sealed class CustomAuthenticationStateProvider : AuthenticationStateProvi
 {
     private readonly ITokenStorage _tokenStorage;
     private readonly IAuthService _authService;
+    private readonly ISessionLockState _sessionLock;
     private readonly JwtSecurityTokenHandler _handler = new();
     private CancellationTokenSource? _refreshCts;
 
-    public CustomAuthenticationStateProvider(ITokenStorage tokenStorage, IAuthService authService)
+    public CustomAuthenticationStateProvider(
+        ITokenStorage tokenStorage,
+        IAuthService authService,
+        ISessionLockState sessionLock)
     {
         _tokenStorage = tokenStorage;
         _authService = authService;
+        _sessionLock = sessionLock;
     }
 
     public override async Task<AuthenticationState> GetAuthenticationStateAsync()
     {
+        await _sessionLock.InitializeAsync();
         var (access, refresh, expires) = await _tokenStorage.GetAsync();
+
+        if (_sessionLock.IsLocked)
+        {
+            // A lock marker survives reloads, but the actual JWTs do not.
+            // Never keep usable credentials while the re-authentication wall is up.
+            if (!string.IsNullOrWhiteSpace(access) || !string.IsNullOrWhiteSpace(refresh))
+                await _tokenStorage.ClearAsync();
+
+            return LockedAuthenticationState();
+        }
 
         if (string.IsNullOrWhiteSpace(access) || IsExpired(access))
         {
@@ -51,9 +68,28 @@ public sealed class CustomAuthenticationStateProvider : AuthenticationStateProvi
 
     public async Task SignInAsync(string accessToken, string refreshToken, DateTime expiresAt)
     {
+        await _sessionLock.ClearAsync();
         await _tokenStorage.SaveAsync(accessToken, refreshToken, expiresAt);
         ScheduleProactiveRefresh(expiresAt);
         NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
+    }
+
+    /// <summary>
+    /// Immediately removes local credentials and turns the current circuit into
+    /// a locked shell. The old refresh token is revoked in the background.
+    /// </summary>
+    public async Task LockForInactivityAsync(string returnUrl)
+    {
+        _refreshCts?.Cancel();
+        var (_, refresh, _) = await _tokenStorage.GetAsync();
+
+        // Clear local credentials before doing any network work.
+        await _tokenStorage.ClearAsync();
+        await _sessionLock.BeginAsync(returnUrl);
+        NotifyAuthenticationStateChanged(Task.FromResult(LockedAuthenticationState()));
+
+        if (!string.IsNullOrWhiteSpace(refresh))
+            _ = RevokeRefreshTokenAsync(refresh);
     }
 
     public async Task SignOutAsync()
@@ -81,6 +117,21 @@ public sealed class CustomAuthenticationStateProvider : AuthenticationStateProvi
         var token = _handler.ReadJwtToken(accessToken);
         var identity = new ClaimsIdentity(token.Claims, authenticationType: "jwt");
         return new ClaimsPrincipal(identity);
+    }
+
+    private static AuthenticationState LockedAuthenticationState() =>
+        new(new ClaimsPrincipal(new ClaimsIdentity("session-lock")));
+
+    private async Task RevokeRefreshTokenAsync(string refreshToken)
+    {
+        try
+        {
+            await _authService.LogoutAsync(refreshToken);
+        }
+        catch
+        {
+            // Local credentials are already gone; server revocation is best effort.
+        }
     }
 
     private static bool IsExpired(string accessToken)

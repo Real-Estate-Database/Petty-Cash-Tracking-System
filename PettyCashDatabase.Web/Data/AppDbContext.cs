@@ -341,6 +341,7 @@ public partial class AppDbContext : DbContext
             builder.Property(User => User.FailedLoginCount).HasDefaultValue(0);
             builder.Property(User => User.IsLocked).HasDefaultValue(false);
             builder.Property(User => User.LockedDate).HasColumnType("datetime");
+            builder.Property(User => User.LockoutUntil).HasColumnType("datetime");
             builder.Property(User => User.RowSignature).HasMaxLength(500);
             builder.Property(User => User.IsOrgAdmin).HasDefaultValue(false);
 

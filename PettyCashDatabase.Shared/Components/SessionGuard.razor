@@ -3,9 +3,12 @@
 @using Microsoft.JSInterop
 @inject IJSRuntime JS
 @inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager Navigation
+@inject ISessionLockState SessionLock
 @implements IAsyncDisposable
 
-<LoginModal @ref="_modal" ForceLock="true" OnLoginSuccess="OnResumed" />
+<LoginModal @ref="_modal" ForceLock="true" Reauthentication="true"
+            ReturnUrl="@SessionLock.ReturnUrl" OnLoginSuccess="OnResumed" />
 
 @code {
     private LoginModal? _modal;
@@ -14,6 +17,14 @@
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (!firstRender) return;
+
+        await SessionLock.InitializeAsync();
+
+        if (SessionLock.IsLocked)
+        {
+            _modal?.Show();
+            return;
+        }
 
         // Only start the tracker when the user is actually authenticated
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
@@ -35,10 +46,14 @@
     /// Called by the JS activityTracker after 30 minutes of inactivity.
     /// </summary>
     [JSInvokable]
-    public void OnInactivityTimeout()
+    public async Task OnInactivityTimeout()
     {
+        var returnUrl = "/" + Navigation.ToBaseRelativePath(Navigation.Uri).TrimStart('/');
+        if (AuthStateProvider is CustomAuthenticationStateProvider provider)
+            await provider.LockForInactivityAsync(returnUrl);
+
         _modal?.Show();
-        InvokeAsync(StateHasChanged);
+        await InvokeAsync(StateHasChanged);
     }
 
     /// <summary>
