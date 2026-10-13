@@ -1,11 +1,11 @@
 @if (_visible)
 {
-    <div class="modal fade show d-block" tabindex="-1" role="dialog" aria-modal="true"
-         style="background:rgba(6, 42, 32, 0.85); backdrop-filter: blur(8px); z-index: 10000;">
+    <div class="pc-session-lock-backdrop" tabindex="-1" role="dialog" aria-modal="true"
+         aria-labelledby="session-lock-title">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content shadow-lg border-0" style="border-radius: 12px; overflow: hidden;">
+            <div class="modal-content pc-session-lock-dialog shadow-lg border-0">
                 <div class="modal-header text-white" style="background:#0B3D2E;">
-                    <h5 class="modal-title d-flex align-items-center gap-2">
+                    <h5 id="session-lock-title" class="modal-title d-flex align-items-center gap-2">
                         @if (ForceLock)
                         {
                             <span>🔒 Session Locked</span>
@@ -27,7 +27,8 @@
                             <strong>Inactivity timeout:</strong> Your session was locked after 30 minutes of inactivity. Please sign in to resume your work.
                         </div>
                     }
-                    <LoginForm IsModal="true" ReturnUrl="@ReturnUrl" OnLoginSuccess="OnSuccess" />
+                    <LoginForm IsModal="true" Reauthentication="@Reauthentication"
+                               ReturnUrl="@ReturnUrl" OnLoginSuccess="OnSuccess" />
                 </div>
             </div>
         </div>
@@ -38,6 +39,7 @@
     [Parameter] public string? ReturnUrl { get; set; }
     [Parameter] public EventCallback OnLoginSuccess { get; set; }
     [Parameter] public bool ForceLock { get; set; }
+    [Parameter] public bool Reauthentication { get; set; }
 
     private bool _visible;
 

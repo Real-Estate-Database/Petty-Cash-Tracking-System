@@ -49,6 +49,8 @@ public partial class User
 
     public DateTime? LockedDate { get; set; }
 
+    public DateTime? LockoutUntil { get; set; }
+
     public string? RowSignature { get; set; }
 
     public bool IsOrgAdmin { get; set; }

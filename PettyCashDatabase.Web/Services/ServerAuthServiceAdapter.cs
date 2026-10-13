@@ -1,6 +1,8 @@
 using PettyCashDatabase.Shared.DTOs.Auth;
 using PettyCashDatabase.Shared.Interfaces;
+using System.Net;
 using Microsoft.EntityFrameworkCore;
+using PettyCashDatabase.Web.Middlewares;
 
 namespace PettyCashDatabase.Web.Services;
 
@@ -21,10 +23,26 @@ public sealed class ServerAuthServiceAdapter : IAuthService
         _httpContextAccessor = httpContextAccessor;
     }
 
-    public Task<AuthResponseDto> LoginAsync(
+    public async Task<AuthResponseDto> LoginAsync(
         LoginRequestDto request,
-        CancellationToken cancellationToken = default) =>
-        _serverAuth.LoginAsync(request, GetClientInfo(), cancellationToken);
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            return await _serverAuth.LoginAsync(request, GetClientInfo(), cancellationToken);
+        }
+        catch (AccountLockedException exception)
+        {
+            // Interactive Server calls the service directly rather than going
+            // through the HTTP middleware, so preserve the same 423 contract
+            // that the WebAssembly/API client receives.
+            throw new HttpRequestException(exception.Message, exception, HttpStatusCode.Locked);
+        }
+        catch (UnauthorizedAccessException exception)
+        {
+            throw new HttpRequestException(exception.Message, exception, HttpStatusCode.Unauthorized);
+        }
+    }
 
     public async Task RegisterTenantAsync(
         TenantOnboardingDto request,

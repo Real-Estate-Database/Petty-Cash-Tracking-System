@@ -656,6 +656,9 @@ namespace PettyCashDatabase.Web.Data.Migrations
                     b.Property<DateTime?>("LockedDate")
                         .HasColumnType("datetime");
 
+                    b.Property<DateTime?>("LockoutUntil")
+                        .HasColumnType("datetime");
+
                     b.Property<int>("OrganizationId")
                         .HasColumnType("int");
 

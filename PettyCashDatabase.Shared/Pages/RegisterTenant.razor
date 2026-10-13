@@ -11,6 +11,7 @@
 @using PettyCashDatabase.Shared.Interfaces
 @inject IAuthService AuthService
 @inject ILocationLookupService LocationLookupService
+@inject INotificationService Notifications
 @inject NavigationManager Navigation
 
 <PageTitle>Register Organization — PettyCash</PageTitle>
@@ -334,12 +335,19 @@
         if (results.Count > 0)
         {
             _error = string.Join(" ", results.Select(r => r.ErrorMessage));
+            await Notifications.ShowAsync(
+                AppNotificationKind.Warning,
+                "Organization details need attention",
+                _error);
             return;
         }
 
         _error = null;
         _step = 2;
-        await Task.CompletedTask;
+        await Notifications.ShowAsync(
+            AppNotificationKind.Success,
+            "Organization details saved",
+            "Now complete the administrator setup.");
     }
 
     private async Task SubmitAsync()
@@ -347,6 +355,7 @@
         if (IsUgandaSelected && (_model.OrganizationDistrictId is null or <= 0))
         {
             _error = "District is required for organizations in Uganda.";
+            await Notifications.ShowAsync(AppNotificationKind.Warning, "District required", _error);
             return;
         }
 
@@ -359,6 +368,7 @@
         if (!_editContext.Validate())
         {
             _error = "Please complete all required administrator fields.";
+            await Notifications.ShowAsync(AppNotificationKind.Warning, "Administrator details need attention", _error);
             return;
         }
 
@@ -367,19 +377,26 @@
         try
         {
             await AuthService.RegisterTenantAsync(_model);
+            await Notifications.ShowAsync(
+                AppNotificationKind.Success,
+                "Organization created",
+                "Your administrator account is ready. Redirecting you to sign in.");
             Navigation.NavigateTo("/login");
         }
         catch (HttpRequestException exception)
         {
             _error = ReadRegistrationError(exception);
+            await Notifications.ShowAsync(AppNotificationKind.Error, "Registration failed", _error);
         }
         catch (InvalidOperationException exception)
         {
             _error = exception.Message;
+            await Notifications.ShowAsync(AppNotificationKind.Error, "Registration failed", _error);
         }
         catch (Exception)
         {
             _error = "Unable to register organization with the provided details.";
+            await Notifications.ShowAsync(AppNotificationKind.Error, "Registration failed", _error);
         }
         finally
         {
@@ -422,6 +439,7 @@
         catch (Exception)
         {
             _error = "Location data could not be loaded. Check the connection and try again.";
+            await Notifications.ShowAsync(AppNotificationKind.Error, "Location data unavailable", _error);
             return [];
         }
     }
@@ -435,6 +453,7 @@
         catch (Exception)
         {
             _error = "Location data could not be loaded. Check the connection and try again.";
+            await Notifications.ShowAsync(AppNotificationKind.Error, "Location data unavailable", _error);
             return [];
         }
     }
@@ -450,6 +469,7 @@
         catch (Exception)
         {
             _error = "Location data could not be loaded. Check the connection and try again.";
+            await Notifications.ShowAsync(AppNotificationKind.Error, "Location data unavailable", _error);
             return [];
         }
     }

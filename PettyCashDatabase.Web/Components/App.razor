@@ -19,6 +19,7 @@
     <Routes @rendermode="@(new InteractiveServerRenderMode(prerender: false))" />
     <ReconnectModal />
     <script src="@Assets["_framework/blazor.web.js"]"></script>
+    <script src="@Assets["_content/PettyCashDatabase.Shared/notifications.js"]"></script>
     <script>
         window.blazorStorage = {
             get: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } },

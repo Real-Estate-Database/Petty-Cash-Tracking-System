@@ -49,8 +49,8 @@ public sealed class GlobalExceptionMiddleware
             _ => (HttpStatusCode.InternalServerError, "An error occurred")
         };
 
-        // Locked accounts use a dedicated exception type mapped in AuthService via results;
-        // keep generic mapping here.
+        // Keep the temporary lockout contract consistent for both API requests
+        // and Interactive Server calls that are translated by the server adapter.
         if (ex is AccountLockedException)
         {
             status = HttpStatusCode.Locked;
@@ -81,8 +81,8 @@ public sealed class GlobalExceptionMiddleware
 
 public sealed class AccountLockedException : Exception
 {
-    public AccountLockedException()
-        : base("Account locked. Contact your organization administrator.")
+    public AccountLockedException(string message = "Account temporarily locked. Try again in 15 minutes.")
+        : base(message)
     {
     }
 }
