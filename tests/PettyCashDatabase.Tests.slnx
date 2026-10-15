@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="PettyCashDatabase.Shared.Tests/PettyCashDatabase.Shared.Tests.csproj" />
+  <Project Path="PettyCashDatabase.Web.Tests/PettyCashDatabase.Web.Tests.csproj" />
+  <Project Path="PettyCashDatabase.Web.Client.Tests/PettyCashDatabase.Web.Client.Tests.csproj" />
+</Solution>

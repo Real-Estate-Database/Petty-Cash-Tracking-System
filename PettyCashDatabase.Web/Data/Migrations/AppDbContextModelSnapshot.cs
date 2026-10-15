@@ -285,12 +285,10 @@ namespace PettyCashDatabase.Web.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PasswordResetTokenId"));
 
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime")
-                        .HasDefaultValueSql("(getutcdate())");
+                    b.Property<DateTime>("EntryDate")
+                        .HasColumnType("datetime");
 
-                    b.Property<DateTime>("ExpiresAt")
+                    b.Property<DateTime>("ExpiredDate")
                         .HasColumnType("datetime");
 
                     b.Property<string>("TokenHash")
@@ -298,7 +296,7 @@ namespace PettyCashDatabase.Web.Data.Migrations
                         .HasMaxLength(128)
                         .HasColumnType("nvarchar(128)");
 
-                    b.Property<DateTime?>("UsedAt")
+                    b.Property<DateTime?>("UsedDate")
                         .HasColumnType("datetime");
 
                     b.Property<int>("UserId")
@@ -308,7 +306,7 @@ namespace PettyCashDatabase.Web.Data.Migrations
 
                     b.HasIndex("TokenHash");
 
-                    b.HasIndex("UserId", "CreatedAt");
+                    b.HasIndex("UserId", "EntryDate");
 
                     b.ToTable("PasswordResetTokens");
                 });

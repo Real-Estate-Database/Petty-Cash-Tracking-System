@@ -48,4 +48,9 @@
   <Project Path="PettyCashDatabase.Web.Client/PettyCashDatabase.Web.Client.csproj" />
   <Project Path="PettyCashDatabase.Web/PettyCashDatabase.Web.csproj" />
   <Project Path="PettyCashDatabase/PettyCashDatabase.csproj" />
+  <Folder Name="/Tests/">
+    <Project Path="Tests/PettyCashDatabase.Shared.Tests/PettyCashDatabase.Shared.Tests.csproj" />
+    <Project Path="Tests/PettyCashDatabase.Web.Tests/PettyCashDatabase.Web.Tests.csproj" />
+    <Project Path="Tests/PettyCashDatabase.Web.Client.Tests/PettyCashDatabase.Web.Client.Tests.csproj" />
+  </Folder>
 </Solution>

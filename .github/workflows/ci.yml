@@ -44,15 +44,27 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-nuget-
 
-      - name: Restore NuGet packages (Web projects only)
-        run: dotnet restore PettyCashDatabase.Web/PettyCashDatabase.Web.csproj
+      - name: Restore NuGet packages (Web and test projects only)
+        run: |
+          dotnet restore PettyCashDatabase.Web/PettyCashDatabase.Web.csproj
+          dotnet restore Tests/PettyCashDatabase.Shared.Tests/PettyCashDatabase.Shared.Tests.csproj
+          dotnet restore Tests/PettyCashDatabase.Web.Tests/PettyCashDatabase.Web.Tests.csproj
+          dotnet restore Tests/PettyCashDatabase.Web.Client.Tests/PettyCashDatabase.Web.Client.Tests.csproj
 
       - name: Build Web application (Release)
         run: dotnet build PettyCashDatabase.Web/PettyCashDatabase.Web.csproj --configuration Release --no-restore
 
-      - name: Run Unit Tests (if available)
+      - name: Run Shared tests
         run: |
-          dotnet test PettyCashDatabase.Web/PettyCashDatabase.Web.csproj --configuration Release --no-build --verbosity normal --logger "trx" || echo "No test projects found."
+          dotnet test Tests/PettyCashDatabase.Shared.Tests/PettyCashDatabase.Shared.Tests.csproj --configuration Release --no-restore --verbosity normal --logger "trx"
+
+      - name: Run Web tests
+        run: |
+          dotnet test Tests/PettyCashDatabase.Web.Tests/PettyCashDatabase.Web.Tests.csproj --configuration Release --no-restore --verbosity normal --logger "trx"
+
+      - name: Run Web.Client tests
+        run: |
+          dotnet test Tests/PettyCashDatabase.Web.Client.Tests/PettyCashDatabase.Web.Client.Tests.csproj --configuration Release --no-restore --verbosity normal --logger "trx"
 
       - name: Publish Web application
         run: dotnet publish PettyCashDatabase.Web/PettyCashDatabase.Web.csproj --configuration Release --no-build --output ./publish/web

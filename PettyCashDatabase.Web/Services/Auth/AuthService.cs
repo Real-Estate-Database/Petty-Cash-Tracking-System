@@ -1,4 +1,5 @@
 using System.Security.Cryptography;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using PettyCashDatabase.Shared.Auth;
@@ -50,6 +51,7 @@ public sealed class AuthService : IServerAuthService
     private readonly IUserTimeZoneService _timeZoneService;
     private readonly AppOptions _appOptions;
     private readonly JwtOptions _jwtOptions;
+    private readonly ILogger<AuthService> _logger;
 
     public AuthService(
         AppDbContext db,
@@ -59,7 +61,8 @@ public sealed class AuthService : IServerAuthService
         IEmailService emailService,
         IUserTimeZoneService timeZoneService,
         IOptions<AppOptions> appOptions,
-        IOptions<JwtOptions> jwtOptions)
+        IOptions<JwtOptions> jwtOptions,
+        ILogger<AuthService> logger)
     {
         _db = db;
         _passwordHasher = passwordHasher;
@@ -69,6 +72,7 @@ public sealed class AuthService : IServerAuthService
         _timeZoneService = timeZoneService;
         _appOptions = appOptions.Value;
         _jwtOptions = jwtOptions.Value;
+        _logger = logger;
     }
 
     /// <summary>
@@ -381,7 +385,10 @@ public sealed class AuthService : IServerAuthService
         // 1. Validate password policy
         var email = ContactNormalizer.NormalizeEmail(request.Email);
         if (!PasswordPolicy.IsValid(request.NewPassword, email))
+        {
+            _logger.LogWarning("Password reset rejected because the password policy failed for {Email}.", email);
             throw new InvalidOperationException("Password does not meet policy requirements.");
+        }
 
         var tokenHash = PasswordHasher.Sha256Hex(request.Token);
 
@@ -390,18 +397,36 @@ public sealed class AuthService : IServerAuthService
             .FromSqlInterpolated($@"
                 SELECT TOP 1 * FROM [PasswordResetTokens]
                 WHERE [TokenHash] = {tokenHash}
-                ORDER BY [CreatedAt] DESC;
+                ORDER BY [EntryDate] DESC
             ")
             .Include(t => t.User)
             .FirstOrDefaultAsync(cancellationToken);
 
-        if (reset is null || reset.UsedAt is not null || reset.User.Email != email)
+        if (reset is null)
+        {
+            _logger.LogWarning("Password reset rejected because no token matched hash prefix {TokenHashPrefix} for {Email}.", tokenHash[..8], email);
             throw new InvalidOperationException("Invalid or expired reset token.");
+        }
+
+        if (reset.UsedDate is not null)
+        {
+            _logger.LogWarning("Password reset rejected because token {PasswordResetTokenId} was already used at {UsedDate}.", reset.PasswordResetTokenId, reset.UsedDate);
+            throw new InvalidOperationException("Invalid or expired reset token.");
+        }
+
+        if (!string.Equals(reset.User.Email, email, StringComparison.OrdinalIgnoreCase))
+        {
+            _logger.LogWarning("Password reset rejected because the token email did not match the request email.");
+            throw new InvalidOperationException("Invalid or expired reset token.");
+        }
 
         var user = reset.User;
-        var userNow = _timeZoneService.GetCurrentTime(user.TimeZoneId, user.TimeZone ?? 3);
-        if (reset.ExpiresAt < userNow)
+        var localNow = _timeZoneService.GetCurrentTime(user.TimeZoneId, user.TimeZone ?? 3);
+        if (reset.ExpiredDate <= localNow)
+        {
+            _logger.LogWarning("Password reset rejected because token {PasswordResetTokenId} expired at {ExpiredDate}; current user-local time is {LocalNow}.", reset.PasswordResetTokenId, reset.ExpiredDate, localNow);
             throw new InvalidOperationException("Invalid or expired reset token.");
+        }
 
         // 3. Compute new password hash and row signature
         var newHash = _passwordHasher.HashPassword(request.NewPassword, user.UserId);
@@ -416,7 +441,7 @@ public sealed class AuthService : IServerAuthService
 
         await _db.Database.ExecuteSqlInterpolatedAsync($@"
             UPDATE [PasswordResetTokens]
-            SET [UsedAt] = {userNow}
+            SET [UsedDate] = {localNow}
             WHERE [PasswordResetTokenId] = {reset.PasswordResetTokenId};
         ", cancellationToken);
 
@@ -569,15 +594,15 @@ public sealed class AuthService : IServerAuthService
         if (user is null)
             return;
 
-        var userNow = _timeZoneService.GetCurrentTime(user.TimeZoneId, user.TimeZone ?? 3);
-        var since = userNow.AddHours(-1);
+        var localNow = _timeZoneService.GetCurrentTime(user.TimeZoneId, user.TimeZone ?? 3);
+        var since = localNow.AddHours(-1);
 
         // 2. Enforce rate limit via raw SQL SELECT COUNT
         if (enforceHourlyLimit)
         {
             var recentCount = await _db.Database.SqlQuery<int>($@"
                 SELECT COUNT(1) AS Value FROM [PasswordResetTokens]
-                WHERE [UserId] = {user.UserId} AND [CreatedAt] >= {since};
+                WHERE [UserId] = {user.UserId} AND [EntryDate] >= {since};
             ").SingleAsync(cancellationToken);
 
             if (recentCount >= 3)
@@ -587,21 +612,21 @@ public sealed class AuthService : IServerAuthService
         // 3. Invalidate previous unused reset tokens via raw SQL UPDATE
         await _db.Database.ExecuteSqlInterpolatedAsync($@"
             UPDATE [PasswordResetTokens]
-            SET [UsedAt] = {userNow}
-            WHERE [UserId] = {user.UserId} AND [UsedAt] IS NULL;
+            SET [UsedDate] = {localNow}
+            WHERE [UserId] = {user.UserId} AND [UsedDate] IS NULL;
         ", cancellationToken);
 
         // 4. Generate cryptographically secure reset token
-        var raw = Convert.ToBase64String(RandomNumberGenerator.GetBytes(32));
+        var raw = WebEncoders.Base64UrlEncode(RandomNumberGenerator.GetBytes(32));
         var hash = PasswordHasher.Sha256Hex(raw);
-        var expiresAt = userNow.AddMinutes(30);
+        var expiredDate = localNow.AddMinutes(30);
 
         // 5. Insert new password reset token via raw SQL INSERT
         await _db.Database.ExecuteSqlInterpolatedAsync($@"
             INSERT INTO [PasswordResetTokens]
-            ([UserId], [TokenHash], [ExpiresAt], [CreatedAt])
+            ([UserId], [TokenHash], [ExpiredDate], [EntryDate])
             VALUES
-            ({user.UserId}, {hash}, {expiresAt}, {userNow});
+            ({user.UserId}, {hash}, {expiredDate}, {localNow});
         ", cancellationToken);
 
         // 6. Record audit event and dispatch email

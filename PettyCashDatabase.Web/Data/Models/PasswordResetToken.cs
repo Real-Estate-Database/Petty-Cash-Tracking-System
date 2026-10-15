@@ -8,11 +8,11 @@ public partial class PasswordResetToken
 
     public string TokenHash { get; set; } = null!;
 
-    public DateTime ExpiresAt { get; set; }
+    public DateTime ExpiredDate { get; set; }
 
-    public DateTime? UsedAt { get; set; }
+    public DateTime? UsedDate { get; set; }
 
-    public DateTime CreatedAt { get; set; }
+    public DateTime EntryDate { get; set; }
 
     public virtual User User { get; set; } = null!;
 }

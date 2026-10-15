@@ -73,7 +73,17 @@ builder.Services.AddSingleton<PasswordHasher>();
 builder.Services.AddScoped<JwtTokenGenerator>();
 builder.Services.AddScoped<CustomClaimsFactory>();
 builder.Services.AddScoped<IServerAuthService, AuthService>();
-builder.Services.AddScoped<IEmailService, EmailService>();
+
+// 1. Email Service Registration: Use zero-config ConsoleEmailService in Development, real SMTP EmailService in Production
+if (builder.Environment.IsDevelopment())
+{
+    builder.Services.AddScoped<IEmailService, ConsoleEmailService>();
+}
+else
+{
+    builder.Services.AddScoped<IEmailService, EmailService>();
+}
+
 builder.Services.AddHostedService<PermissionSyncService>();
 
 builder.Services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
