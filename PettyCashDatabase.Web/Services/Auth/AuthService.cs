@@ -142,7 +142,8 @@ public sealed class AuthService : IServerAuthService
             throw new AccountLockedException("Account locked. Contact your organization administrator.");
 
         // 6. Verify cryptographic tamper-evident row signature
-        if (!_passwordHasher.VerifyRowSignature(user.UserId, user.Email, user.PasswordHash, user.RowSignature))
+        var rowSignatureValid = _passwordHasher.VerifyRowSignature(user.UserId, user.Email, user.PasswordHash, user.RowSignature);
+        if (!rowSignatureValid)
         {
             // Lock tampered account via raw SQL UPDATE
             await _db.Database.ExecuteSqlInterpolatedAsync($@"
@@ -157,8 +158,15 @@ public sealed class AuthService : IServerAuthService
         }
 
         // 7. Verify password hash using PBKDF2
-        if (!_passwordHasher.VerifyPassword(request.Password, user.UserId, user.PasswordHash))
+        var passwordValid = _passwordHasher.VerifyPassword(request.Password, user.UserId, user.PasswordHash);
+        if (!passwordValid)
         {
+            _logger.LogWarning(
+                "Login password verification failed for user {UserId} and identifier {Identifier}. Submitted password length: {PasswordLength}.",
+                user.UserId,
+                ContactNormalizer.LooksLikeEmail(identifier) ? ContactNormalizer.NormalizeEmail(identifier) : "telephone",
+                request.Password.Length);
+
             var failedAttempt = ++user.FailedLoginCount;
             if (failedAttempt >= MaxLoginAttempts)
             {
