@@ -14,13 +14,16 @@ public sealed class ServerAuthServiceAdapter : IAuthService
 {
     private readonly IServerAuthService _serverAuth;
     private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly IHostEnvironment _environment;
 
     public ServerAuthServiceAdapter(
         IServerAuthService serverAuth,
-        IHttpContextAccessor httpContextAccessor)
+        IHttpContextAccessor httpContextAccessor,
+        IHostEnvironment environment)
     {
         _serverAuth = serverAuth;
         _httpContextAccessor = httpContextAccessor;
+        _environment = environment;
     }
 
     public async Task<AuthResponseDto> LoginAsync(
@@ -54,10 +57,11 @@ public sealed class ServerAuthServiceAdapter : IAuthService
         }
         catch (DbUpdateException exception)
         {
-            throw new InvalidOperationException(
-                "Registration could not be completed because PettyCashDB rejected the database update. " +
-                "Apply the pending database migrations and verify the database connection.",
-                exception);
+            var detail = _environment.IsDevelopment()
+                ? $"Database update rejected: {exception.GetBaseException().Message}"
+                : "Registration could not be completed because PettyCashDB rejected the database update. Apply the pending database migrations and verify the database connection.";
+
+            throw new InvalidOperationException(detail, exception);
         }
     }
 

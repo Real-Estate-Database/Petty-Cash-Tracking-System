@@ -182,14 +182,12 @@ public partial class AppDbContext : DbContext
             builder.HasKey(t => t.PasswordResetTokenId);
 
             builder.Property(t => t.TokenHash).HasMaxLength(128);
-            builder.Property(t => t.ExpiresAt).HasColumnType("datetime");
-            builder.Property(t => t.UsedAt).HasColumnType("datetime");
-            builder.Property(t => t.CreatedAt)
-                .HasDefaultValueSql("(getutcdate())")
-                .HasColumnType("datetime");
+            builder.Property(t => t.ExpiredDate).HasColumnType("datetime");
+            builder.Property(t => t.UsedDate).HasColumnType("datetime");
+            builder.Property(t => t.EntryDate).HasColumnType("datetime");
 
             builder.HasIndex(t => t.TokenHash);
-            builder.HasIndex(t => new { t.UserId, t.CreatedAt });
+            builder.HasIndex(t => new { t.UserId, t.EntryDate });
 
             builder.HasOne(t => t.User).WithMany(u => u.PasswordResetTokens)
                 .HasForeignKey(t => t.UserId)
